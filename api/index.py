@@ -123,7 +123,7 @@ async def get_history():
             existing_hashes = {tx['hash'] for tx in wallet_data['h']}
             nh = []
             
-            for ref in j.get('recent_transactions', [])[:10]:  # Limit to 10 for performance
+            for ref in j.get('recent_transactions', [])[:10]:
                 tx_hash = ref['hash']
                 if tx_hash in existing_hashes:
                     continue
@@ -199,9 +199,20 @@ async def send_transaction(tx):
 
 # API Routes
 @app.route('/')
+def index():
+    return '''<!DOCTYPE html>
+<html>
+<head><title>Octra Wallet API</title></head>
+<body>
+    <h1>Octra Wallet API</h1>
+    <p>API is running. Access the wallet interface at the main domain.</p>
+</body>
+</html>'''
+
 @app.route('/api')
+@app.route('/api/')
 def api_root():
-    return jsonify({'message': 'Octra Wallet API', 'status': 'running'})
+    return jsonify({'message': 'Octra Wallet API', 'status': 'running', 'version': '1.0'})
 
 @app.route('/api/wallet/login', methods=['POST'])
 def wallet_login():
@@ -371,11 +382,15 @@ def export_wallet():
 # Error handlers
 @app.errorhandler(404)
 def not_found(error):
-    return jsonify({'error': 'API endpoint không tìm thấy'}), 404
+    return jsonify({'error': 'API endpoint không tìm thấy', 'path': request.path}), 404
 
 @app.errorhandler(500)
 def internal_error(error):
     return jsonify({'error': 'Lỗi server nội bộ'}), 500
 
+# For Vercel
+def handler(request):
+    return app(request.environ, lambda *args: None)
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5000)
