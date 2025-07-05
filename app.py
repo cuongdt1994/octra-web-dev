@@ -57,40 +57,41 @@ class WalletManager:
             return False
     
     def _generate_address(self) -> str:
-    # Decode base64 public key to get raw bytes
-    pub_bytes = base64.b64decode(self.public_key)
+        # Decode base64 public key to get raw bytes
+        pub_bytes = base64.b64decode(self.public_key)
     
     # SHA256 hash the public key bytes
-    hash_obj = hashlib.sha256(pub_bytes)
+        hash_obj = hashlib.sha256(pub_bytes)
     
     # Take first 25 bytes as address payload
-    address_bytes = hash_obj.digest()[:25]
+        address_bytes = hash_obj.digest()[:25]
     
     # Calculate 4-byte checksum by hashing the payload
-    checksum = hashlib.sha256(address_bytes).digest()[:4]
+        checksum = hashlib.sha256(address_bytes).digest()[:4]
     
     # Concatenate payload + checksum (29 bytes total)
-    full_address = address_bytes + checksum
+        full_address = address_bytes + checksum
     
     # Base58 encode and prepend "oct" prefix
-    return "oct" + self._base58_encode(full_address)
+        return "oct" + self._base58_encode(full_address)
 
-def _base58_encode(self, data: bytes) -> str:
-    alphabet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
-    num = int.from_bytes(data, 'big')
-    encoded = ""
-    while num > 0:
-        num, remainder = divmod(num, 58)
-        encoded = alphabet[remainder] + encoded
+    def _base58_encode(self, data: bytes) -> str:
+        alphabet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
+        num = int.from_bytes(data, 'big')
+        encoded = ""
+        while num > 0:
+            num, remainder = divmod(num, 58)
+            encoded = alphabet[remainder] + encoded
     
     # Handle leading zeros properly
-    for byte in data:
-        if byte == 0:
-            encoded = alphabet[0] + encoded
-        else:
-            break
+        for byte in data:
+            if byte == 0:
+                encoded = alphabet[0] + encoded
+            else:
+                break
     
-    return encoded
+        return encoded
+
     
     def is_initialized(self) -> bool:
         return self.private_key is not None and self.address is not None
