@@ -8,24 +8,16 @@
   ],
   "routes": [
     {
-      "src": "/static/css/(.*)",
-      "headers": {
-        "Cache-Control": "public, max-age=31536000, immutable",
-        "Content-Type": "text/css"
-      },
-      "dest": "/static/css/$1"
+      "src": "/css/(.*)",
+      "dest": "/public/css/$1"
     },
     {
-      "src": "/static/js/(.*)",
-      "headers": {
-        "Cache-Control": "public, max-age=31536000, immutable",
-        "Content-Type": "application/javascript"
-      },
-      "dest": "/static/js/$1"
+      "src": "/js/(.*)",
+      "dest": "/public/js/$1"
     },
     {
-      "src": "/static/(.*)",
-      "dest": "/static/$1"
+      "src": "/favicon.ico",
+      "dest": "/public/favicon.ico"
     },
     {
       "src": "/api/(.*)",

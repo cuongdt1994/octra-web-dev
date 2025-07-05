@@ -1,17 +1,12 @@
-from fastapi import FastAPI, Request, HTTPException, Depends
-from fastapi.staticfiles import StaticFiles
+from fastapi import FastAPI, Request, HTTPException
+from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import os
-from dotenv import load_dotenv
+from pathlib import Path
 from api.wallet import WalletManager
 from api.transactions import TransactionManager
 from api.utils import validate_address, validate_amount
-import asyncio
-import json
-
-load_dotenv()
 
 app = FastAPI(title="Octra Wallet Web", version="1.0.0")
 
@@ -24,8 +19,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Static files and templates
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# Templates
 templates = Jinja2Templates(directory="templates")
 
 # Global wallet manager
@@ -37,13 +31,32 @@ def get_wallet_manager():
         wallet_manager = WalletManager()
     return wallet_manager
 
+# Static file routes - QUAN TRỌNG
+@app.get("/css/{file_path:path}")
+async def serve_css(file_path: str):
+    file_location = f"public/css/{file_path}"
+    if os.path.exists(file_location):
+        return FileResponse(file_location, media_type="text/css")
+    raise HTTPException(status_code=404, detail="CSS file not found")
+
+@app.get("/js/{file_path:path}")
+async def serve_js(file_path: str):
+    file_location = f"public/js/{file_path}"
+    if os.path.exists(file_location):
+        return FileResponse(file_location, media_type="application/javascript")
+    raise HTTPException(status_code=404, detail="JS file not found")
+
+@app.get("/favicon.ico")
+async def favicon():
+    return FileResponse("public/favicon.ico")
+
+# Main routes
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 @app.post("/api/init-wallet")
 async def init_wallet(data: dict):
-    """Initialize wallet with private key"""
     try:
         private_key = data.get("private_key")
         rpc_url = data.get("rpc_url", "https://octra.network")
@@ -67,7 +80,6 @@ async def init_wallet(data: dict):
 
 @app.get("/api/wallet-info")
 async def get_wallet_info():
-    """Get wallet information"""
     try:
         wallet = get_wallet_manager()
         if not wallet.is_initialized():
@@ -88,7 +100,6 @@ async def get_wallet_info():
 
 @app.get("/api/transactions")
 async def get_transactions():
-    """Get transaction history"""
     try:
         wallet = get_wallet_manager()
         if not wallet.is_initialized():
@@ -101,7 +112,6 @@ async def get_transactions():
 
 @app.post("/api/send-transaction")
 async def send_transaction(data: dict):
-    """Send a single transaction"""
     try:
         wallet = get_wallet_manager()
         if not wallet.is_initialized():
@@ -126,7 +136,6 @@ async def send_transaction(data: dict):
 
 @app.post("/api/send-multi-transaction")
 async def send_multi_transaction(data: dict):
-    """Send multiple transactions"""
     try:
         wallet = get_wallet_manager()
         if not wallet.is_initialized():
@@ -137,7 +146,6 @@ async def send_multi_transaction(data: dict):
         if not recipients:
             raise HTTPException(status_code=400, detail="No recipients provided")
         
-        # Validate all recipients
         for recipient in recipients:
             if not validate_address(recipient.get("address")):
                 raise HTTPException(status_code=400, detail=f"Invalid address: {recipient.get('address')}")
@@ -153,7 +161,6 @@ async def send_multi_transaction(data: dict):
 
 @app.post("/api/refresh")
 async def refresh_wallet():
-    """Refresh wallet data"""
     try:
         wallet = get_wallet_manager()
         if not wallet.is_initialized():
@@ -166,7 +173,6 @@ async def refresh_wallet():
 
 @app.get("/api/export-wallet")
 async def export_wallet():
-    """Export wallet data"""
     try:
         wallet = get_wallet_manager()
         if not wallet.is_initialized():
