@@ -76,12 +76,18 @@ class WalletManager:
         return "oct" + self._base58_encode(full_address)
 
     def _base58_encode(self, data: bytes) -> str:
-        alphabet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
+        alphabet = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
         num = int.from_bytes(data, 'big')
-        encoded = ""
+        encoded = ''
         while num > 0:
             num, remainder = divmod(num, 58)
             encoded = alphabet[remainder] + encoded
+<<<<<<< Updated upstream
+=======
+<<<<<<< HEAD
+        encoded = encoded.rjust(44, alphabet[0])
+=======
+>>>>>>> Stashed changes
     
     # Handle leading zeros properly
         for byte in data:
@@ -90,6 +96,10 @@ class WalletManager:
             else:
                 break
     
+<<<<<<< Updated upstream
+=======
+>>>>>>> 1f1ae1687a50d749bf7e6e2e81dd650580b06202
+>>>>>>> Stashed changes
         return encoded
 
     
