@@ -3,350 +3,1016 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ví Octra</title>
+    <title>Octra Wallet - Ví Điện Tử Hiện Đại</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .container {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-        .login-form, .wallet-info {
-            display: none;
-        }
-        .login-form.active, .wallet-info.active {
-            display: block;
-        }
-        input, button, select {
-            width: 100%;
-            padding: 10px;
-            margin: 5px 0;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+        * {
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
         }
-        button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            cursor: pointer;
+
+        :root {
+            --primary-color: #667eea;
+            --primary-dark: #5a6fd8;
+            --secondary-color: #764ba2;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --warning-color: #f59e0b;
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --border-color: #475569;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --gradient-primary: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            --gradient-success: linear-gradient(135deg, #10b981, #059669);
+            --gradient-error: linear-gradient(135deg, #ef4444, #dc2626);
         }
-        button:hover {
-            background-color: #0056b3;
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
         }
-        .auto-send-btn {
-            background-color: #28a745;
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
         }
-        .auto-send-btn:hover {
-            background-color: #1e7e34;
+
+        /* Header */
+        .header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
         }
-        .auto-send-btn:disabled {
-            background-color: #6c757d;
-            cursor: not-allowed;
-        }
-        .error {
-            color: red;
-            margin: 10px 0;
-        }
-        .success {
-            color: green;
-            margin: 10px 0;
-        }
-        .info-row {
+
+        .header-content {
             display: flex;
             justify-content: space-between;
-            margin: 10px 0;
-            padding: 10px;
-            background-color: #f8f9fa;
-            border-radius: 5px;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
         }
-        .transaction {
-            border: 1px solid #ddd;
-            padding: 10px;
-            margin: 5px 0;
-            border-radius: 5px;
-            background-color: #f9f9f9;
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
         }
-        .transaction.in {
-            border-left: 4px solid #28a745;
+
+        .logo i {
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-        .transaction.out {
-            border-left: 4px solid #dc3545;
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--bg-card);
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
         }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success-color);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Login Form */
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: calc(100vh - 80px);
+            padding: 20px;
+        }
+
+        .login-card {
+            background: var(--bg-secondary);
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .login-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .login-header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            min-height: 48px;
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px -5px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .btn-success {
+            background: var(--gradient-success);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--gradient-error);
+            color: white;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* Dashboard */
+        .dashboard {
+            display: none;
+            padding: 20px 0;
+        }
+
+        .dashboard.active {
+            display: block;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .dashboard-title {
+            flex: 1;
+        }
+
+        .dashboard-title h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .dashboard-title p {
+            color: var(--text-muted);
+        }
+
+        .dashboard-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        /* Cards */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .card {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .card-title {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--gradient-primary);
+            color: white;
+        }
+
+        .card-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+
+        .card-subtitle {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        /* Balance Card Special */
+        .balance-card {
+            background: var(--gradient-primary);
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .balance-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        .balance-card .card-title,
+        .balance-card .card-subtitle {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .balance-card .card-value {
+            color: white;
+        }
+
+        /* Transaction Section */
+        .transaction-section {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--border-color);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .transaction-list {
+            space-y: 12px;
+        }
+
+        .transaction-item {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .transaction-item:hover {
+            background: var(--border-color);
+            transform: translateX(4px);
+        }
+
+        .transaction-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            font-size: 1.1rem;
+        }
+
+        .transaction-icon.incoming {
+            background: var(--gradient-success);
+            color: white;
+        }
+
+        .transaction-icon.outgoing {
+            background: var(--gradient-error);
+            color: white;
+        }
+
+        .transaction-details {
+            flex: 1;
+        }
+
+        .transaction-address {
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .transaction-time {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .transaction-amount {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .transaction-amount.incoming {
+            color: var(--success-color);
+        }
+
+        .transaction-amount.outgoing {
+            color: var(--error-color);
+        }
+
+        /* Send Transaction Form */
+        .send-form {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 24px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        /* Auto Send Feature */
+        .auto-send-section {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 24px;
+        }
+
+        .auto-send-controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .status-indicator.running {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-color);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .status-indicator.stopped {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error-color);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        /* Modal */
         .modal {
             display: none;
             position: fixed;
-            z-index: 1000;
-            left: 0;
             top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.5);
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            backdrop-filter: blur(4px);
         }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
         .modal-content {
-            background-color: white;
-            margin: 15% auto;
-            padding: 20px;
-            border-radius: 10px;
-            width: 80%;
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 32px;
+            width: 90%;
             max-width: 500px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
         }
-        .auto-send-status {
-            margin: 10px 0;
-            padding: 10px;
-            border-radius: 5px;
-            background-color: #e9ecef;
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
         }
-        .auto-send-log {
-            max-height: 200px;
-            overflow-y: auto;
-            background-color: #f8f9fa;
-            padding: 10px;
-            border-radius: 5px;
-            font-family: monospace;
-            font-size: 12px;
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
         }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            border: 1px solid;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: rgba(16, 185, 129, 0.2);
+            color: var(--success-color);
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.2);
+            color: var(--error-color);
+        }
+
+        .alert-warning {
+            background: rgba(245, 158, 11, 0.1);
+            border-color: rgba(245, 158, 11, 0.2);
+            color: var(--warning-color);
+        }
+
+        /* Loading */
+        .loading {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--border-color);
+            border-top: 2px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 16px;
+            }
+
+            .header-content {
+                padding: 0 16px;
+            }
+
+            .login-card {
+                padding: 24px;
+            }
+
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .dashboard-actions {
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+            .auto-send-controls {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .modal-content {
+                padding: 24px;
+                margin: 16px;
+            }
+        }
+
+        /* Utility Classes */
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .mb-0 { margin-bottom: 0; }
+        .mb-1 { margin-bottom: 8px; }
+        .mb-2 { margin-bottom: 16px; }
+        .mb-3 { margin-bottom: 24px; }
+        .mt-2 { margin-top: 16px; }
+        .hidden { display: none; }
+        .flex { display: flex; }
+        .items-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .gap-2 { gap: 8px; }
+        .gap-3 { gap: 16px; }
+        .w-full { width: 100%; }
     </style>
 </head>
 <body>
-    <h1>Ví Octra Web</h1>
-    
-    <!-- Form đăng nhập -->
-    <div class="container login-form active" id="loginForm">
-        <h2>Đăng nhập Ví Octra</h2>
-        <input type="text" id="privateKey" placeholder="Private Key:" />
-        <input type="text" id="address" placeholder="Địa chỉ ví:" />
-        <input type="text" id="rpcUrl" placeholder="RPC URL:" value="https://octra.network" />
-        <button onclick="login()">Đăng nhập</button>
-        <div id="loginError" class="error"></div>
-    </div>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-wallet"></i>
+                <span>Octra Wallet</span>
+            </div>
+            <div class="status-badge">
+                <div class="status-dot"></div>
+                <span id="networkStatus">Testnet</span>
+            </div>
+        </div>
+    </header>
 
-    <!-- Thông tin ví -->
-    <div class="container wallet-info" id="walletInfo">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <h2>Ví Octra Web</h2>
-            <div>
-                <span style="background-color: #28a745; color: white; padding: 5px 10px; border-radius: 15px; font-size: 12px;">
-                    Môi trường Testnet
-                </span>
-                <button onclick="logout()" style="width: auto; margin-left: 10px;">Đăng xuất</button>
+    <div class="container">
+        <!-- Login Form -->
+        <div id="loginContainer" class="login-container">
+            <div class="login-card">
+                <div class="login-header">
+                    <h1>Chào mừng trở lại</h1>
+                    <p>Đăng nhập vào ví Octra của bạn để tiếp tục</p>
+                </div>
+
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label class="form-label" for="privateKey">
+                            <i class="fas fa-key"></i> Private Key
+                        </label>
+                        <input type="password" id="privateKey" class="form-input" 
+                               placeholder="Nhập private key của bạn" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="address">
+                            <i class="fas fa-wallet"></i> Địa chỉ ví
+                        </label>
+                        <input type="text" id="address" class="form-input" 
+                               placeholder="oct..." required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="rpcUrl">
+                            <i class="fas fa-server"></i> RPC URL
+                        </label>
+                        <input type="url" id="rpcUrl" class="form-input" 
+                               value="https://octra.network" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <span>Đăng nhập</span>
+                    </button>
+                </form>
+
+                <div id="loginAlert" class="hidden"></div>
             </div>
         </div>
 
-        <div class="info-row">
-            <strong>Địa chỉ</strong>
-            <span id="walletAddress">Đang tải...</span>
-        </div>
-        <div class="info-row">
-            <strong>Số dư</strong>
-            <span id="walletBalance">Đang tải...</span>
-        </div>
-        <div class="info-row">
-            <strong>Nonce</strong>
-            <span id="walletNonce">Đang tải...</span>
-        </div>
-        <div class="info-row">
-            <strong>Giao dịch chờ</strong>
-            <span id="stagingCount">Đang tải...</span>
-        </div>
-
-        <div style="margin: 20px 0;">
-            <button onclick="showSendModal()">Gửi giao dịch</button>
-            <button onclick="refreshBalance()">Làm mới số dư</button>
-            <button onclick="showExportModal()">Xuất khóa</button>
-            <button onclick="clearHistory()">Xóa lịch sử</button>
-        </div>
-
-        <!-- Chức năng gửi tự động -->
-        <div class="container">
-            <h3>Gửi Giao Dịch Tự Động</h3>
-            <div class="auto-send-status" id="autoSendStatus">
-                <strong>Trạng thái:</strong> <span id="autoSendStatusText">Đã dừng</span>
+        <!-- Dashboard -->
+        <div id="dashboard" class="dashboard">
+            <div class="dashboard-header">
+                <div class="dashboard-title">
+                    <h1>Bảng điều khiển</h1>
+                    <p>Quản lý tài sản và giao dịch của bạn</p>
+                </div>
+                <div class="dashboard-actions">
+                    <button class="btn btn-secondary" onclick="refreshWallet()">
+                        <i class="fas fa-sync-alt"></i> Làm mới
+                    </button>
+                    <button class="btn btn-secondary" onclick="showExportModal()">
+                        <i class="fas fa-download"></i> Xuất khóa
+                    </button>
+                    <button class="btn btn-danger" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                    </button>
+                </div>
             </div>
-            <div style="margin: 10px 0;">
-                <label>Khoảng thời gian (giây):</label>
-                <input type="number" id="autoSendInterval" value="5" min="1" max="60" style="width: 100px;">
-            </div>
-            <button id="autoSendBtn" class="auto-send-btn" onclick="toggleAutoSend()">
-                Bắt đầu gửi tự động
-            </button>
-            <div class="auto-send-log" id="autoSendLog"></div>
-        </div>
 
-        <h3>Giao dịch gần đây</h3>
-        <div id="transactionHistory">Đang tải giao dịch...</div>
+            <!-- Wallet Stats Cards -->
+            <div class="cards-grid">
+                <div class="card balance-card">
+                    <div class="card-header">
+                        <div class="card-title">Số dư tài khoản</div>
+                        <div class="card-icon">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                    </div>
+                    <div class="card-value" id="walletBalance">0.000000</div>
+                    <div class="card-subtitle">OCT</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Địa chỉ ví</div>
+                        <div class="card-icon">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                    </div>
+                    <div class="card-value" id="walletAddress" style="font-size: 1.2rem; word-break: break-all;">
+                        Đang tải...
+                    </div>
+                    <div class="card-subtitle">Nhấn để sao chép</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Nonce</div>
+                        <div class="card-icon">
+                            <i class="fas fa-hashtag"></i>
+                        </div>
+                    </div>
+                    <div class="card-value" id="walletNonce">0</div>
+                    <div class="card-subtitle">Số thứ tự giao dịch</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Giao dịch chờ</div>
+                        <div class="card-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                    </div>
+                    <div class="card-value" id="pendingTx">0</div>
+                    <div class="card-subtitle">Đang xử lý</div>
+                </div>
+            </div>
+
+            <!-- Send Transaction Form -->
+            <div class="send-form">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-paper-plane"></i> Gửi giao dịch
+                    </h2>
+                </div>
+
+                <form id="sendForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="sendTo">Địa chỉ người nhận</label>
+                            <input type="text" id="sendTo" class="form-input" 
+                                   placeholder="oct..." required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="sendAmount">Số lượng (OCT)</label>
+                            <input type="number" id="sendAmount" class="form-input" 
+                                   placeholder="0.000000" step="0.000001" min="0.000001" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="sendMessage">Tin nhắn (tùy chọn)</label>
+                        <input type="text" id="sendMessage" class="form-input" 
+                               placeholder="Nhập tin nhắn..." maxlength="200">
+                    </div>
+
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-paper-plane"></i>
+                        <span>Gửi giao dịch</span>
+                    </button>
+                </form>
+
+                <div id="sendAlert" class="hidden"></div>
+            </div>
+
+            <!-- Auto Send Feature -->
+            <div class="auto-send-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-robot"></i> Gửi giao dịch tự động
+                    </h2>
+                    <div class="status-indicator stopped" id="autoSendStatus">
+                        <i class="fas fa-stop-circle"></i>
+                        <span>Đã dừng</span>
+                    </div>
+                </div>
+
+                <div class="auto-send-controls">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label class="form-label" for="autoInterval">Khoảng thời gian (giây)</label>
+                        <input type="number" id="autoInterval" class="form-input" 
+                               value="10" min="5" max="3600" style="width: 120px;">
+                    </div>
+
+                    <button id="autoSendBtn" class="btn btn-success" onclick="toggleAutoSend()">
+                        <i class="fas fa-play"></i>
+                        <span>Bắt đầu gửi tự động</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Transaction History -->
+            <div class="transaction-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-history"></i> Lịch sử giao dịch
+                    </h2>
+                    <button class="btn btn-secondary" onclick="refreshHistory()">
+                        <i class="fas fa-sync-alt"></i> Làm mới
+                    </button>
+                </div>
+
+                <div id="transactionList" class="transaction-list">
+                    <div class="text-center" style="padding: 40px; color: var(--text-muted);">
+                        <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 16px;"></i>
+                        <p>Đang tải lịch sử giao dịch...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Modal gửi giao dịch -->
-    <div id="sendModal" class="modal">
-        <div class="modal-content">
-            <h3>Gửi giao dịch</h3>
-            <input type="text" id="sendAddress" placeholder="Địa chỉ nhận:" />
-            <input type="number" id="sendAmount" placeholder="Số lượng (OCT):" step="0.000001" />
-            <input type="text" id="sendMessage" placeholder="Tin nhắn (Tùy chọn):" />
-            <button onclick="sendTransaction()">Gửi giao dịch</button>
-            <button onclick="closeSendModal()">Hủy</button>
-            <div id="sendError" class="error"></div>
-        </div>
-    </div>
-
-    <!-- Modal xuất khóa -->
+    <!-- Export Modal -->
     <div id="exportModal" class="modal">
         <div class="modal-content">
-            <h3>Xuất khóa ví</h3>
-            <p><strong>Private Key (Giữ bí mật!):</strong></p>
-            <textarea id="exportPrivateKey" readonly style="width: 100%; height: 60px;"></textarea>
-            <p><strong>Public Key:</strong></p>
-            <textarea id="exportPublicKey" readonly style="width: 100%; height: 60px;"></textarea>
-            <button onclick="copyPrivateKey()">Sao chép Private Key</button>
-            <button onclick="copyPublicKey()">Sao chép Public Key</button>
-            <button onclick="closeExportModal()">Đóng</button>
+            <div class="modal-header">
+                <h2 class="modal-title">
+                    <i class="fas fa-download"></i> Xuất khóa ví
+                </h2>
+                <button class="modal-close" onclick="hideExportModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>Giữ bí mật thông tin này! Không chia sẻ với bất kỳ ai.</span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Private Key</label>
+                <div style="position: relative;">
+                    <input type="password" id="exportPrivateKey" class="form-input" readonly>
+                    <button type="button" class="btn btn-secondary" 
+                            style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); padding: 8px 12px; min-height: auto;"
+                            onclick="togglePasswordVisibility('exportPrivateKey')">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Public Key</label>
+                <input type="text" id="exportPublicKey" class="form-input" readonly>
+            </div>
+
+            <div class="flex gap-3">
+                <button class="btn btn-primary" onclick="copyToClipboard('exportPrivateKey')">
+                    <i class="fas fa-copy"></i> Sao chép Private Key
+                </button>
+                <button class="btn btn-secondary" onclick="copyToClipboard('exportPublicKey')">
+                    <i class="fas fa-copy"></i> Sao chép Public Key
+                </button>
+            </div>
         </div>
     </div>
 
     <script>
+        // Global variables
         let sessionId = null;
         let autoSendInterval = null;
-        let autoSendRunning = false;
+        let isAutoSending = false;
+        const API_BASE = '/api';
 
-        // Hàm tạo ví ngẫu nhiên
-        function generateRandomWallet() {
-            const chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
-            let result = 'oct';
-            for (let i = 0; i < 44; i++) {
-                result += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-            return result;
-        }
-
-        // Hàm tạo tin nhắn ngẫu nhiên
-        function generateRandomMessage() {
-            const messages = [
-                'Giao dịch tự động',
-                'Test transaction',
-                'Auto send OCT',
-                'Random transfer',
-                'Automated payment',
-                'System test',
-                'Auto transaction',
-                'Test payment',
-                'Random send',
-                'Automated transfer'
-            ];
-            return messages[Math.floor(Math.random() * messages.length)];
-        }
-
-        // Hàm log cho auto send
-        function logAutoSend(message) {
-            const logElement = document.getElementById('autoSendLog');
-            const timestamp = new Date().toLocaleTimeString();
-            logElement.innerHTML += `[${timestamp}] ${message}\n`;
-            logElement.scrollTop = logElement.scrollHeight;
-        }
-
-        // Hàm toggle auto send
-        async function toggleAutoSend() {
-            const btn = document.getElementById('autoSendBtn');
-            const statusText = document.getElementById('autoSendStatusText');
-            const intervalInput = document.getElementById('autoSendInterval');
-
-            if (autoSendRunning) {
-                // Dừng auto send
-                clearInterval(autoSendInterval);
-                autoSendRunning = false;
-                btn.textContent = 'Bắt đầu gửi tự động';
-                btn.className = 'auto-send-btn';
-                statusText.textContent = 'Đã dừng';
-                intervalInput.disabled = false;
-                logAutoSend('Đã dừng gửi tự động');
-            } else {
-                // Bắt đầu auto send
-                const interval = parseInt(intervalInput.value) * 1000;
-                if (interval < 1000) {
-                    alert('Khoảng thời gian tối thiểu là 1 giây');
-                    return;
-                }
-
-                autoSendRunning = true;
-                btn.textContent = 'Dừng gửi tự động';
-                btn.className = 'auto-send-btn';
-                statusText.textContent = 'Đang chạy';
-                intervalInput.disabled = true;
-                logAutoSend('Bắt đầu gửi tự động');
-
-                autoSendInterval = setInterval(async () => {
-                    await performAutoSend();
-                }, interval);
+        // Utility functions
+        function showAlert(containerId, message, type = 'error') {
+            const container = document.getElementById(containerId);
+            container.className = `alert alert-${type}`;
+            container.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : 'exclamation-circle'}"></i>
+                <span>${message}</span>
+            `;
+            container.classList.remove('hidden');
+            
+            if (type === 'success') {
+                setTimeout(() => container.classList.add('hidden'), 5000);
             }
         }
 
-        // Hàm thực hiện gửi tự động
-        async function performAutoSend() {
+        function hideAlert(containerId) {
+            document.getElementById(containerId).classList.add('hidden');
+        }
+
+        function formatAddress(address) {
+            if (!address) return '';
+            return address.length > 20 ? 
+                `${address.substring(0, 10)}...${address.substring(address.length - 10)}` : 
+                address;
+        }
+
+        function formatAmount(amount) {
+            return parseFloat(amount).toFixed(6);
+        }
+
+        function formatTime(isoString) {
+            return new Date(isoString).toLocaleString('vi-VN');
+        }
+
+        async function makeRequest(endpoint, options = {}) {
             try {
-                const randomAddress = generateRandomWallet();
-                const amount = 0.00001;
-                const message = generateRandomMessage();
-
-                logAutoSend(`Đang gửi ${amount} OCT đến ${randomAddress.substring(0, 10)}...`);
-
-                const response = await fetch('/api/wallet/send', {
-                    method: 'POST',
+                const response = await fetch(`${API_BASE}${endpoint}`, {
                     headers: {
                         'Content-Type': 'application/json',
+                        ...options.headers
                     },
-                    body: JSON.stringify({
-                        session_id: sessionId,
-                        to: randomAddress,
-                        amount: amount,
-                        message: message
-                    })
+                    ...options
                 });
 
-                const result = await response.json();
-
-                if (result.success) {
-                    logAutoSend(`✓ Thành công! TX: ${result.tx_hash.substring(0, 10)}...`);
-                    await refreshBalance();
-                    await loadHistory();
-                } else {
-                    logAutoSend(`✗ Lỗi: ${result.error}`);
-                    if (result.error.includes('Số dư không đủ')) {
-                        // Dừng auto send nếu hết tiền
-                        toggleAutoSend();
-                        logAutoSend('Đã dừng do không đủ số dư');
-                    }
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || `HTTP ${response.status}`);
                 }
+                
+                return data;
             } catch (error) {
-                logAutoSend(`✗ Lỗi kết nối: ${error.message}`);
+                console.error('API Request failed:', error);
+                throw error;
             }
         }
 
-        // Các hàm khác giữ nguyên...
-        async function login() {
+        // Authentication
+        async function login(event) {
+            event.preventDefault();
+            
             const privateKey = document.getElementById('privateKey').value.trim();
             const address = document.getElementById('address').value.trim();
             const rpcUrl = document.getElementById('rpcUrl').value.trim();
-            const errorDiv = document.getElementById('loginError');
 
             if (!privateKey || !address) {
-                errorDiv.textContent = 'Vui lòng nhập đầy đủ Private Key và Address';
+                showAlert('loginAlert', 'Vui lòng nhập đầy đủ thông tin', 'error');
                 return;
             }
 
             try {
-                const response = await fetch('/api/wallet/login', {
+                const submitBtn = event.target.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<div class="loading"><div class="spinner"></div><span>Đang đăng nhập...</span></div>';
+                submitBtn.disabled = true;
+
+                const result = await makeRequest('/wallet/login', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
                     body: JSON.stringify({
                         private_key: privateKey,
                         address: address,
@@ -354,226 +1020,398 @@
                     })
                 });
 
-                const result = await response.json();
-
                 if (result.success) {
                     sessionId = result.session_id;
-                    document.getElementById('loginForm').classList.remove('active');
-                    document.getElementById('walletInfo').classList.add('active');
-                    await loadWalletInfo();
+                    showAlert('loginAlert', 'Đăng nhập thành công!', 'success');
+                    
+                    setTimeout(() => {
+                        document.getElementById('loginContainer').style.display = 'none';
+                        document.getElementById('dashboard').classList.add('active');
+                        loadWalletData();
+                    }, 1000);
                 } else {
-                    errorDiv.textContent = result.error;
+                    showAlert('loginAlert', result.error || 'Đăng nhập thất bại', 'error');
                 }
+
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+
             } catch (error) {
-                errorDiv.textContent = 'Lỗi kết nối: ' + error.message;
+                showAlert('loginAlert', error.message || 'Lỗi kết nối server', 'error');
+                const submitBtn = event.target.querySelector('button[type="submit"]');
+                submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i><span>Đăng nhập</span>';
+                submitBtn.disabled = false;
             }
         }
 
         async function logout() {
-            if (autoSendRunning) {
-                toggleAutoSend();
-            }
-
             try {
-                await fetch('/api/wallet/logout', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        session_id: sessionId
-                    })
-                });
+                if (sessionId) {
+                    await makeRequest('/wallet/logout', {
+                        method: 'POST',
+                        body: JSON.stringify({ session_id: sessionId })
+                    });
+                }
             } catch (error) {
                 console.error('Logout error:', error);
             }
 
             sessionId = null;
-            document.getElementById('walletInfo').classList.remove('active');
-            document.getElementById('loginForm').classList.add('active');
-            document.getElementById('privateKey').value = '';
-            document.getElementById('address').value = '';
-            document.getElementById('loginError').textContent = '';
+            if (autoSendInterval) {
+                clearInterval(autoSendInterval);
+                autoSendInterval = null;
+                isAutoSending = false;
+                updateAutoSendStatus();
+            }
+
+            document.getElementById('dashboard').classList.remove('active');
+            document.getElementById('loginContainer').style.display = 'flex';
+            
+            // Reset form
+            document.getElementById('loginForm').reset();
+            document.getElementById('rpcUrl').value = 'https://octra.network';
+            hideAlert('loginAlert');
         }
 
-        async function loadWalletInfo() {
+        // Wallet operations
+        async function loadWalletData() {
+            if (!sessionId) return;
+
             try {
-                const response = await fetch('/api/wallet/status', {
+                const result = await makeRequest('/wallet/status', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        session_id: sessionId
-                    })
+                    body: JSON.stringify({ session_id: sessionId })
                 });
 
-                const result = await response.json();
+                document.getElementById('walletBalance').textContent = formatAmount(result.balance || 0);
+                document.getElementById('walletAddress').textContent = formatAddress(result.address || '');
+                document.getElementById('walletNonce').textContent = result.nonce || 0;
 
-                if (result.error) {
-                    alert(result.error);
-                    await logout();
+                // Make address clickable for copy
+                document.getElementById('walletAddress').onclick = () => copyToClipboard('walletAddress');
+
+                await loadTransactionHistory();
+
+            } catch (error) {
+                console.error('Error loading wallet data:', error);
+                showAlert('sendAlert', 'Lỗi tải dữ liệu ví: ' + error.message, 'error');
+            }
+        }
+
+        async function refreshWallet() {
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<div class="loading"><div class="spinner"></div><span>Đang tải...</span></div>';
+            btn.disabled = true;
+
+            try {
+                await loadWalletData();
+            } catch (error) {
+                console.error('Refresh error:', error);
+            }
+
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+
+        async function loadTransactionHistory() {
+            if (!sessionId) return;
+
+            try {
+                const result = await makeRequest('/wallet/history', {
+                    method: 'POST',
+                    body: JSON.stringify({ session_id: sessionId })
+                });
+
+                const transactionList = document.getElementById('transactionList');
+                
+                if (!result.transactions || result.transactions.length === 0) {
+                    transactionList.innerHTML = `
+                        <div class="text-center" style="padding: 40px; color: var(--text-muted);">
+                            <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 16px;"></i>
+                            <p>Chưa có giao dịch nào</p>
+                        </div>
+                    `;
                     return;
                 }
 
-                document.getElementById('walletAddress').textContent = result.address;
-                document.getElementById('walletBalance').textContent = `${result.balance.toFixed(6)} OCT`;
-                document.getElementById('walletNonce').textContent = result.nonce;
-                document.getElementById('stagingCount').textContent = result.staging_count;
-
-                await loadHistory();
-            } catch (error) {
-                console.error('Load wallet info error:', error);
-            }
-        }
-
-        async function loadHistory() {
-            try {
-                const response = await fetch('/api/wallet/history', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        session_id: sessionId
-                    })
-                });
-
-                const result = await response.json();
-                const historyDiv = document.getElementById('transactionHistory');
-
-                if (result.transactions && result.transactions.length > 0) {
-                    historyDiv.innerHTML = result.transactions.map(tx => `
-                        <div class="transaction ${tx.type}">
-                            <div><strong>${tx.type === 'in' ? 'Nhận' : 'Gửi'}</strong> ${tx.amount.toFixed(6)} OCT</div>
-                            <div><strong>Địa chỉ:</strong> ${tx.address}</div>
-                            <div><strong>Thời gian:</strong> ${new Date(tx.time).toLocaleString()}</div>
-                            <div><strong>Hash:</strong> ${tx.hash}</div>
-                            ${tx.message ? `<div><strong>Tin nhắn:</strong> ${tx.message}</div>` : ''}
+                transactionList.innerHTML = result.transactions.map(tx => `
+                    <div class="transaction-item">
+                        <div class="transaction-icon ${tx.type === 'in' ? 'incoming' : 'outgoing'}">
+                            <i class="fas fa-${tx.type === 'in' ? 'arrow-down' : 'arrow-up'}"></i>
                         </div>
-                    `).join('');
-                } else {
-                    historyDiv.innerHTML = '<p>Chưa có giao dịch nào</p>';
-                }
+                        <div class="transaction-details">
+                            <div class="transaction-address">${formatAddress(tx.address)}</div>
+                            <div class="transaction-time">${formatTime(tx.time)}</div>
+                            ${tx.message ? `<div class="transaction-time">💬 ${tx.message}</div>` : ''}
+                        </div>
+                        <div class="transaction-amount ${tx.type === 'in' ? 'incoming' : 'outgoing'}">
+                            ${tx.type === 'in' ? '+' : '-'}${formatAmount(tx.amount)} OCT
+                        </div>
+                    </div>
+                `).join('');
+
+                // Count pending transactions
+                const pendingCount = result.transactions.filter(tx => !tx.confirmed).length;
+                document.getElementById('pendingTx').textContent = pendingCount;
+
             } catch (error) {
-                console.error('Load history error:', error);
+                console.error('Error loading transaction history:', error);
+                document.getElementById('transactionList').innerHTML = `
+                    <div class="text-center" style="padding: 40px; color: var(--error-color);">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 16px;"></i>
+                        <p>Lỗi tải lịch sử giao dịch</p>
+                    </div>
+                `;
             }
         }
 
-        async function refreshBalance() {
-            await loadWalletInfo();
+        async function refreshHistory() {
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<div class="loading"><div class="spinner"></div><span>Đang tải...</span></div>';
+            btn.disabled = true;
+
+            try {
+                await loadTransactionHistory();
+            } catch (error) {
+                console.error('Refresh history error:', error);
+            }
+
+            btn.innerHTML = originalText;
+            btn.disabled = false;
         }
 
-        function showSendModal() {
-            document.getElementById('sendModal').style.display = 'block';
-        }
+        // Send transaction
+        async function sendTransaction(event) {
+            event.preventDefault();
+            
+            if (!sessionId) {
+                showAlert('sendAlert', 'Chưa đăng nhập ví', 'error');
+                return;
+            }
 
-        function closeSendModal() {
-            document.getElementById('sendModal').style.display = 'none';
-            document.getElementById('sendError').textContent = '';
-        }
-
-        async function sendTransaction() {
-            const address = document.getElementById('sendAddress').value.trim();
+            const toAddress = document.getElementById('sendTo').value.trim();
             const amount = parseFloat(document.getElementById('sendAmount').value);
             const message = document.getElementById('sendMessage').value.trim();
-            const errorDiv = document.getElementById('sendError');
 
-            if (!address || !amount || amount <= 0) {
-                errorDiv.textContent = 'Vui lòng nhập đầy đủ thông tin hợp lệ';
+            if (!toAddress || !amount || amount <= 0) {
+                showAlert('sendAlert', 'Vui lòng nhập đầy đủ thông tin giao dịch', 'error');
                 return;
             }
 
             try {
-                const response = await fetch('/api/wallet/send', {
+                const submitBtn = event.target.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<div class="loading"><div class="spinner"></div><span>Đang gửi...</span></div>';
+                submitBtn.disabled = true;
+
+                const result = await makeRequest('/wallet/send', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
                     body: JSON.stringify({
                         session_id: sessionId,
-                        to: address,
+                        to: toAddress,
                         amount: amount,
-                        message: message || null
+                        message: message || undefined
                     })
                 });
 
-                const result = await response.json();
-
                 if (result.success) {
-                    alert(`Giao dịch thành công!\nHash: ${result.tx_hash}`);
-                    closeSendModal();
-                    await refreshBalance();
-                    await loadHistory();
+                    showAlert('sendAlert', `Giao dịch thành công! Hash: ${result.tx_hash}`, 'success');
+                    
+                    // Reset form
+                    document.getElementById('sendForm').reset();
+                    
+                    // Refresh wallet data
+                    setTimeout(() => {
+                        loadWalletData();
+                    }, 2000);
                 } else {
-                    errorDiv.textContent = result.error;
+                    showAlert('sendAlert', result.error || 'Giao dịch thất bại', 'error');
                 }
+
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+
             } catch (error) {
-                errorDiv.textContent = 'Lỗi kết nối: ' + error.message;
+                showAlert('sendAlert', error.message || 'Lỗi gửi giao dịch', 'error');
+                const submitBtn = event.target.querySelector('button[type="submit"]');
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i><span>Gửi giao dịch</span>';
+                submitBtn.disabled = false;
             }
         }
 
-        function showExportModal() {
-            fetch('/api/wallet/export', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    session_id: sessionId
-                })
-            })
-            .then(response => response.json())
-            .then(result => {
-                if (result.error) {
-                    alert(result.error);
-                    return;
+        // Auto send functionality
+        function toggleAutoSend() {
+            if (isAutoSending) {
+                stopAutoSend();
+            } else {
+                startAutoSend();
+            }
+        }
+
+        function startAutoSend() {
+            if (!sessionId) {
+                showAlert('sendAlert', 'Chưa đăng nhập ví', 'error');
+                return;
+            }
+
+            const toAddress = document.getElementById('sendTo').value.trim();
+            const amount = parseFloat(document.getElementById('sendAmount').value);
+            const interval = parseInt(document.getElementById('autoInterval').value) * 1000;
+
+            if (!toAddress || !amount || amount <= 0) {
+                showAlert('sendAlert', 'Vui lòng nhập thông tin giao dịch trước khi bắt đầu gửi tự động', 'error');
+                return;
+            }
+
+            isAutoSending = true;
+            updateAutoSendStatus();
+
+            autoSendInterval = setInterval(async () => {
+                try {
+                    const message = document.getElementById('sendMessage').value.trim();
+                    
+                    const result = await makeRequest('/wallet/send', {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            session_id: sessionId,
+                            to: toAddress,
+                            amount: amount,
+                            message: message || undefined
+                        })
+                    });
+
+                    if (result.success) {
+                        console.log('Auto send successful:', result.tx_hash);
+                        // Refresh wallet data periodically
+                        if (Math.random() < 0.1) { // 10% chance to refresh
+                            loadWalletData();
+                        }
+                    } else {
+                        console.error('Auto send failed:', result.error);
+                        showAlert('sendAlert', 'Gửi tự động thất bại: ' + result.error, 'error');
+                        stopAutoSend();
+                    }
+                } catch (error) {
+                    console.error('Auto send error:', error);
+                    showAlert('sendAlert', 'Lỗi gửi tự động: ' + error.message, 'error');
+                    stopAutoSend();
                 }
+            }, interval);
+        }
+
+        function stopAutoSend() {
+            if (autoSendInterval) {
+                clearInterval(autoSendInterval);
+                autoSendInterval = null;
+            }
+            isAutoSending = false;
+            updateAutoSendStatus();
+        }
+
+        function updateAutoSendStatus() {
+            const statusEl = document.getElementById('autoSendStatus');
+            const btnEl = document.getElementById('autoSendBtn');
+
+            if (isAutoSending) {
+                statusEl.className = 'status-indicator running';
+                statusEl.innerHTML = '<i class="fas fa-play-circle"></i><span>Đang chạy</span>';
+                btnEl.innerHTML = '<i class="fas fa-stop"></i><span>Dừng gửi tự động</span>';
+                btnEl.className = 'btn btn-danger';
+            } else {
+                statusEl.className = 'status-indicator stopped';
+                statusEl.innerHTML = '<i class="fas fa-stop-circle"></i><span>Đã dừng</span>';
+                btnEl.innerHTML = '<i class="fas fa-play"></i><span>Bắt đầu gửi tự động</span>';
+                btnEl.className = 'btn btn-success';
+            }
+        }
+
+        // Export functionality
+        async function showExportModal() {
+            if (!sessionId) {
+                showAlert('sendAlert', 'Chưa đăng nhập ví', 'error');
+                return;
+            }
+
+            try {
+                const result = await makeRequest('/wallet/export', {
+                    method: 'POST',
+                    body: JSON.stringify({ session_id: sessionId })
+                });
+
                 document.getElementById('exportPrivateKey').value = result.private_key;
                 document.getElementById('exportPublicKey').value = result.public_key;
-                document.getElementById('exportModal').style.display = 'block';
-            })
-            .catch(error => {
-                alert('Lỗi: ' + error.message);
-            });
-        }
+                document.getElementById('exportModal').classList.add('active');
 
-        function closeExportModal() {
-            document.getElementById('exportModal').style.display = 'none';
-        }
-
-        function copyPrivateKey() {
-            const textarea = document.getElementById('exportPrivateKey');
-            textarea.select();
-            document.execCommand('copy');
-            alert('Đã sao chép Private Key!');
-        }
-
-        function copyPublicKey() {
-            const textarea = document.getElementById('exportPublicKey');
-            textarea.select();
-            document.execCommand('copy');
-            alert('Đã sao chép Public Key!');
-        }
-
-        function clearHistory() {
-            if (confirm('Bạn có chắc muốn xóa lịch sử giao dịch?')) {
-                document.getElementById('transactionHistory').innerHTML = '<p>Chưa có giao dịch nào</p>';
-                alert('Đã xóa lịch sử!');
+            } catch (error) {
+                showAlert('sendAlert', 'Lỗi xuất khóa: ' + error.message, 'error');
             }
         }
 
-        // Đóng modal khi click bên ngoài
-        window.onclick = function(event) {
-            const sendModal = document.getElementById('sendModal');
-            const exportModal = document.getElementById('exportModal');
-            if (event.target === sendModal) {
-                closeSendModal();
-            }
-            if (event.target === exportModal) {
-                closeExportModal();
+        function hideExportModal() {
+            document.getElementById('exportModal').classList.remove('active');
+        }
+
+        function togglePasswordVisibility(inputId) {
+            const input = document.getElementById(inputId);
+            const icon = event.target.querySelector('i');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'fas fa-eye-slash';
+            } else {
+                input.type = 'password';
+                icon.className = 'fas fa-eye';
             }
         }
+
+        async function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.value || element.textContent;
+            
+            try {
+                await navigator.clipboard.writeText(text);
+                
+                // Show temporary feedback
+                const originalText = element.value || element.textContent;
+                if (element.tagName === 'INPUT') {
+                    element.value = 'Đã sao chép!';
+                    setTimeout(() => element.value = originalText, 1000);
+                } else {
+                    element.textContent = 'Đã sao chép!';
+                    setTimeout(() => element.textContent = originalText, 1000);
+                }
+            } catch (error) {
+                console.error('Copy failed:', error);
+                // Fallback for older browsers
+                element.select();
+                document.execCommand('copy');
+            }
+        }
+
+        // Event listeners
+        document.getElementById('loginForm').addEventListener('submit', login);
+        document.getElementById('sendForm').addEventListener('submit', sendTransaction);
+
+        // Close modal when clicking outside
+        document.getElementById('exportModal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) {
+                hideExportModal();
+            }
+        });
+
+        // Auto-refresh wallet data every 30 seconds
+        setInterval(() => {
+            if (sessionId && !isAutoSending) {
+                loadWalletData();
+            }
+        }, 30000);
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Octra Wallet loaded successfully');
+        });
     </script>
 </body>
 </html>
