@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, session
+from flask import Flask, request, jsonify
 import json, base64, hashlib, time, re, random, os
 from datetime import datetime, timedelta
 import requests
@@ -8,21 +8,43 @@ from itsdangerous import URLSafeTimedSerializer
 app = Flask(__name__)
 app.secret_key = "octra-wallet-secret-key-2025"
 
+# Cấu hình session cho Vercel
+app.config.update(
+    SESSION_COOKIE_SECURE=True,
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE='None',
+    PERMANENT_SESSION_LIFETIME=timedelta(hours=1)
+)
+
 # Global variables
 b58 = re.compile(r"^oct[1-9A-HJ-NP-Za-km-z]{44}$")
 μ = 1_000_000
 
+# In-memory storage để thay thế session (tạm thời)
+wallet_storage = {}
+
 def get_serializer():
     return URLSafeTimedSerializer(app.secret_key)
 
-def get_wallet_data():
+def generate_session_id():
+    """Tạo session ID unique cho mỗi request"""
+    return hashlib.sha256(f"{time.time()}{random.random()}".encode()).hexdigest()[:32]
+
+def get_wallet_data(session_id=None):
+    """Lấy wallet data từ storage"""
+    if not session_id:
+        return None
+    
     try:
-        encrypted_data = session.get('wallet')
-        if not encrypted_data:
+        wallet_data = wallet_storage.get(session_id)
+        if not wallet_data:
             return None
-        
-        wallet_data = get_serializer().loads(encrypted_data, max_age=3600)  # 1 hour
-        
+            
+        # Kiểm tra expiry
+        if time.time() - wallet_data.get('timestamp', 0) > 3600:  # 1 hour
+            del wallet_storage[session_id]
+            return None
+            
         # Add runtime data if not exists
         if 'cb' not in wallet_data:
             wallet_data.update({
@@ -32,13 +54,13 @@ def get_wallet_data():
                 'h': [],
                 'lh': 0
             })
-        
         return wallet_data
     except Exception as e:
         print(f"Error getting wallet data: {e}")
         return None
 
-def set_wallet_data(priv_key, addr, rpc_url):
+def set_wallet_data(session_id, priv_key, addr, rpc_url):
+    """Lưu wallet data vào storage"""
     try:
         sk = nacl.signing.SigningKey(base64.b64decode(priv_key))
         pub = base64.b64encode(sk.verify_key.encode()).decode()
@@ -47,7 +69,7 @@ def set_wallet_data(priv_key, addr, rpc_url):
             'priv': priv_key,
             'addr': addr,
             'rpc': rpc_url,
-            'sk_encoded': base64.b64encode(sk.encode()).decode(),  # Store encoded key
+            'sk_encoded': base64.b64encode(sk.encode()).decode(),
             'pub': pub,
             'cb': None,
             'cn': None,
@@ -57,21 +79,22 @@ def set_wallet_data(priv_key, addr, rpc_url):
             'timestamp': time.time()
         }
         
-        session['wallet'] = get_serializer().dumps(wallet_data)
+        wallet_storage[session_id] = wallet_data
         return True
     except Exception as e:
         print(f"Error setting wallet data: {e}")
         return False
 
 def get_signing_key(wallet_data):
+    """Lấy signing key từ wallet data"""
     try:
         return nacl.signing.SigningKey(base64.b64decode(wallet_data['sk_encoded']))
     except Exception as e:
         print(f"Error getting signing key: {e}")
         return None
 
-def req(method, path, data=None, timeout=10):
-    wallet_data = get_wallet_data()
+def req(method, path, data=None, timeout=10, wallet_data=None):
+    """Thực hiện HTTP request"""
     if not wallet_data:
         return 0, "No wallet loaded", None
     
@@ -81,18 +104,18 @@ def req(method, path, data=None, timeout=10):
             resp = requests.post(url, json=data, timeout=timeout)
         else:
             resp = requests.get(url, timeout=timeout)
-            
+        
         try:
             j = resp.json() if resp.text else None
         except:
             j = None
-            
         return resp.status_code, resp.text, j
     except Exception as e:
         return 0, str(e), None
 
-def get_status():
-    wallet_data = get_wallet_data()
+def get_status(session_id):
+    """Lấy status của wallet"""
+    wallet_data = get_wallet_data(session_id)
     if not wallet_data:
         return None, None
     
@@ -101,16 +124,15 @@ def get_status():
         return wallet_data['cn'], wallet_data['cb']
     
     try:
-        s, t, j = req('GET', f'/balance/{wallet_data["addr"]}')
+        s, t, j = req('GET', f'/balance/{wallet_data["addr"]}', wallet_data=wallet_data)
         if s == 200 and j:
             wallet_data['cn'] = int(j.get('nonce', 0))
             wallet_data['cb'] = float(j.get('balance', 0))
             wallet_data['lu'] = now
-            # Update session
-            session['wallet'] = get_serializer().dumps(wallet_data)
+            wallet_storage[session_id] = wallet_data
         elif s == 404:
             wallet_data['cn'], wallet_data['cb'], wallet_data['lu'] = 0, 0.0, now
-            session['wallet'] = get_serializer().dumps(wallet_data)
+            wallet_storage[session_id] = wallet_data
         elif s == 200 and t and not j:
             try:
                 parts = t.strip().split()
@@ -118,21 +140,22 @@ def get_status():
                     wallet_data['cb'] = float(parts[0]) if parts[0].replace('.', '').isdigit() else 0.0
                     wallet_data['cn'] = int(parts[1]) if parts[1].isdigit() else 0
                     wallet_data['lu'] = now
-                    session['wallet'] = get_serializer().dumps(wallet_data)
+                    wallet_storage[session_id] = wallet_data
                 else:
                     wallet_data['cn'], wallet_data['cb'] = 0, 0.0
             except:
                 wallet_data['cn'], wallet_data['cb'] = 0, 0.0
         else:
             wallet_data['cn'], wallet_data['cb'] = 0, 0.0
-            
+        
         return wallet_data['cn'], wallet_data['cb']
     except Exception as e:
         print(f"Error getting status: {e}")
         return 0, 0.0
 
-def get_history():
-    wallet_data = get_wallet_data()
+def get_history(session_id):
+    """Lấy lịch sử giao dịch"""
+    wallet_data = get_wallet_data(session_id)
     if not wallet_data:
         return []
     
@@ -141,10 +164,10 @@ def get_history():
         return wallet_data['h']
     
     try:
-        s, t, j = req('GET', f'/address/{wallet_data["addr"]}?limit=20')
+        s, t, j = req('GET', f'/address/{wallet_data["addr"]}?limit=20', wallet_data=wallet_data)
         if s != 200:
             wallet_data['lh'] = now
-            session['wallet'] = get_serializer().dumps(wallet_data)
+            wallet_storage[session_id] = wallet_data
             return wallet_data['h']
         
         if j and 'recent_transactions' in j:
@@ -156,7 +179,7 @@ def get_history():
                 if tx_hash in existing_hashes:
                     continue
                 
-                s2, _, j2 = req('GET', f'/tx/{tx_hash}', None, 5)
+                s2, _, j2 = req('GET', f'/tx/{tx_hash}', None, 5, wallet_data)
                 if s2 == 200 and j2 and 'parsed_tx' in j2:
                     p = j2['parsed_tx']
                     is_incoming = p.get('to') == wallet_data['addr']
@@ -185,17 +208,18 @@ def get_history():
             
             wallet_data['h'] = sorted(nh + wallet_data['h'], key=lambda x: x['time'], reverse=True)[:20]
             wallet_data['lh'] = now
-            session['wallet'] = get_serializer().dumps(wallet_data)
+            wallet_storage[session_id] = wallet_data
         
         return wallet_data['h']
     except Exception as e:
         print(f"Error getting history: {e}")
         wallet_data['lh'] = now
-        session['wallet'] = get_serializer().dumps(wallet_data)
+        wallet_storage[session_id] = wallet_data
         return wallet_data['h']
 
-def make_transaction(to, amount, nonce, message=None):
-    wallet_data = get_wallet_data()
+def make_transaction(session_id, to, amount, nonce, message=None):
+    """Tạo giao dịch"""
+    wallet_data = get_wallet_data(session_id)
     if not wallet_data:
         return None, None
     
@@ -217,13 +241,14 @@ def make_transaction(to, amount, nonce, message=None):
     
     base_line = json.dumps({k: v for k, v in tx.items() if k != "message"}, separators=(",", ":"))
     signature = base64.b64encode(sk.sign(base_line.encode()).signature).decode()
-    
     tx.update(signature=signature, public_key=wallet_data['pub'])
+    
     return tx, hashlib.sha256(base_line.encode()).hexdigest()
 
-def send_transaction(tx):
+def send_transaction(tx, wallet_data):
+    """Gửi giao dịch"""
     start_time = time.time()
-    status, text, json_resp = req('POST', '/send-tx', tx)
+    status, text, json_resp = req('POST', '/send-tx', tx, wallet_data=wallet_data)
     duration = time.time() - start_time
     
     if status == 200:
@@ -237,7 +262,7 @@ def send_transaction(tx):
 # API Routes
 @app.route('/')
 def index():
-    return '''API is running. Access the wallet interface at the main domain.'''
+    return jsonify({'message': 'Octra Wallet API is running', 'status': 'ok'})
 
 @app.route('/api')
 @app.route('/api/')
@@ -261,29 +286,50 @@ def wallet_login():
         if not b58.match(address):
             return jsonify({'error': 'Định dạng address không hợp lệ'}), 400
         
-        if set_wallet_data(private_key, address, rpc_url):
-            return jsonify({'success': True, 'message': 'Đăng nhập ví thành công!'})
+        session_id = generate_session_id()
+        if set_wallet_data(session_id, private_key, address, rpc_url):
+            return jsonify({
+                'success': True, 
+                'message': 'Đăng nhập ví thành công!',
+                'session_id': session_id
+            })
         else:
             return jsonify({'error': 'Private Key không hợp lệ'}), 400
+    
     except Exception as e:
+        print(f"Login error: {e}")
         return jsonify({'error': f'Lỗi server: {str(e)}'}), 500
 
 @app.route('/api/wallet/logout', methods=['POST'])
 def wallet_logout():
     try:
-        session.clear()
+        data = request.get_json() or {}
+        session_id = data.get('session_id')
+        
+        if session_id and session_id in wallet_storage:
+            del wallet_storage[session_id]
+        
         return jsonify({'success': True, 'message': 'Đăng xuất thành công!'})
     except Exception as e:
         return jsonify({'error': f'Lỗi đăng xuất: {str(e)}'}), 500
 
-@app.route('/api/wallet/status')
+@app.route('/api/wallet/status', methods=['GET', 'POST'])
 def wallet_status():
     try:
-        wallet_data = get_wallet_data()
+        if request.method == 'POST':
+            data = request.get_json() or {}
+            session_id = data.get('session_id')
+        else:
+            session_id = request.args.get('session_id')
+        
+        if not session_id:
+            return jsonify({'error': 'Session ID không được cung cấp'}), 400
+        
+        wallet_data = get_wallet_data(session_id)
         if not wallet_data:
             return jsonify({'error': 'Chưa đăng nhập ví'}), 401
         
-        nonce, balance = get_status()
+        nonce, balance = get_status(session_id)
         return jsonify({
             'address': wallet_data['addr'],
             'balance': balance or 0.0,
@@ -292,30 +338,45 @@ def wallet_status():
             'staging_count': 0
         })
     except Exception as e:
+        print(f"Status error: {e}")
         return jsonify({'error': f'Lỗi lấy trạng thái: {str(e)}'}), 500
 
-@app.route('/api/wallet/history')
+@app.route('/api/wallet/history', methods=['GET', 'POST'])
 def wallet_history():
     try:
-        wallet_data = get_wallet_data()
+        if request.method == 'POST':
+            data = request.get_json() or {}
+            session_id = data.get('session_id')
+        else:
+            session_id = request.args.get('session_id')
+        
+        if not session_id:
+            return jsonify({'error': 'Session ID không được cung cấp'}), 400
+        
+        wallet_data = get_wallet_data(session_id)
         if not wallet_data:
             return jsonify({'error': 'Chưa đăng nhập ví'}), 401
         
-        history = get_history()
+        history = get_history(session_id)
         return jsonify({'transactions': history})
     except Exception as e:
+        print(f"History error: {e}")
         return jsonify({'error': f'Lỗi lấy lịch sử: {str(e)}'}), 500
 
 @app.route('/api/wallet/send', methods=['POST'])
 def send_tx():
     try:
-        wallet_data = get_wallet_data()
-        if not wallet_data:
-            return jsonify({'error': 'Chưa đăng nhập ví'}), 401
-        
         data = request.get_json()
         if not data:
             return jsonify({'error': 'Không có dữ liệu JSON'}), 400
+        
+        session_id = data.get('session_id')
+        if not session_id:
+            return jsonify({'error': 'Session ID không được cung cấp'}), 400
+        
+        wallet_data = get_wallet_data(session_id)
+        if not wallet_data:
+            return jsonify({'error': 'Chưa đăng nhập ví'}), 401
         
         to_address = data.get('to', '').strip()
         amount = float(data.get('amount', 0))
@@ -327,22 +388,22 @@ def send_tx():
         if amount <= 0:
             return jsonify({'error': 'Số tiền không hợp lệ'}), 400
         
-        nonce, balance = get_status()
+        nonce, balance = get_status(session_id)
         if nonce is None:
             return jsonify({'error': 'Không thể lấy nonce'}), 500
         
         if not balance or balance < amount:
             return jsonify({'error': f'Số dư không đủ ({balance:.6f} < {amount})'}), 400
         
-        tx, tx_hash = make_transaction(to_address, amount, nonce + 1, message)
+        tx, tx_hash = make_transaction(session_id, to_address, amount, nonce + 1, message)
         if not tx:
             return jsonify({'error': 'Không thể tạo giao dịch'}), 500
         
-        success, result, duration, response = send_transaction(tx)
+        success, result, duration, response = send_transaction(tx, wallet_data)
         
         if success:
             # Update history
-            wallet_data = get_wallet_data()
+            wallet_data = get_wallet_data(session_id)
             wallet_data['h'].insert(0, {
                 'time': datetime.now().isoformat(),
                 'hash': result,
@@ -355,7 +416,7 @@ def send_tx():
                 'epoch': 0
             })
             wallet_data['lu'] = 0  # Force refresh on next status check
-            session['wallet'] = get_serializer().dumps(wallet_data)
+            wallet_storage[session_id] = wallet_data
             
             return jsonify({
                 'success': True,
@@ -365,13 +426,24 @@ def send_tx():
             })
         else:
             return jsonify({'error': result}), 400
+    
     except Exception as e:
+        print(f"Send transaction error: {e}")
         return jsonify({'error': f'Lỗi gửi giao dịch: {str(e)}'}), 500
 
-@app.route('/api/wallet/export')
+@app.route('/api/wallet/export', methods=['GET', 'POST'])
 def export_wallet():
     try:
-        wallet_data = get_wallet_data()
+        if request.method == 'POST':
+            data = request.get_json() or {}
+            session_id = data.get('session_id')
+        else:
+            session_id = request.args.get('session_id')
+        
+        if not session_id:
+            return jsonify({'error': 'Session ID không được cung cấp'}), 400
+        
+        wallet_data = get_wallet_data(session_id)
         if not wallet_data:
             return jsonify({'error': 'Chưa đăng nhập ví'}), 401
         
@@ -382,6 +454,7 @@ def export_wallet():
             'rpc': wallet_data['rpc']
         })
     except Exception as e:
+        print(f"Export error: {e}")
         return jsonify({'error': f'Lỗi xuất ví: {str(e)}'}), 500
 
 # Error handlers
@@ -393,10 +466,5 @@ def not_found(error):
 def internal_error(error):
     return jsonify({'error': 'Lỗi server nội bộ'}), 500
 
-# For Vercel deployment
-def handler(request):
-    return app(request.environ, lambda *args: None)
-
-# For local development
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+# Export app for Vercel
+app = app
