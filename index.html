@@ -3,729 +3,748 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ví Octra - Giao diện Web</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>Ví Octra Web</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
         }
-        
-        .container { 
-            max-width: 1400px; 
-            margin: 0 auto; 
-            padding: 20px; 
-        }
-        
-        .header { 
-            text-align: center; 
-            margin-bottom: 30px; 
-            padding: 30px; 
-            background: rgba(255, 255, 255, 0.95);
+
+        .container {
+            background: white;
             border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            backdrop-filter: blur(10px);
-        }
-        
-        .header h1 { 
-            color: #4a5568; 
-            font-size: 2.5em; 
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-        
-        .header p { 
-            color: #718096; 
-            font-size: 1.1em;
-        }
-        
-        .login-section {
-            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
             padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            backdrop-filter: blur(10px);
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .login-section {
+            text-align: center;
             margin-bottom: 30px;
         }
-        
+
+        .login-section h1 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        .btn-success {
+            background: #28a745;
+        }
+
         .wallet-section {
             display: none;
         }
-        
-        .wallet-info { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 30px; 
-            margin-bottom: 30px; 
-        }
-        
-        .info-panel, .actions-panel { 
-            background: rgba(255, 255, 255, 0.95);
-            padding: 30px; 
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            backdrop-filter: blur(10px);
-        }
-        
-        .info-panel h3, .actions-panel h3 {
-            color: #4a5568;
-            margin-bottom: 20px;
-            font-size: 1.4em;
-            font-weight: 600;
-        }
-        
-        .info-row { 
-            display: flex; 
-            justify-content: space-between; 
+
+        .wallet-header {
+            display: flex;
+            justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px; 
-            padding: 10px 0;
-            border-bottom: 1px solid #e2e8f0;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e1e5e9;
         }
-        
-        .info-row:last-child {
-            border-bottom: none;
+
+        .wallet-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
         }
-        
-        .label { 
-            color: #667eea; 
+
+        .info-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .info-card h3 {
+            color: #666;
+            margin-bottom: 10px;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+
+        .info-card p {
+            color: #333;
+            font-size: 18px;
             font-weight: 600;
-            font-size: 1.1em;
+            word-break: break-all;
         }
-        
-        .value { 
-            color: #4a5568; 
-            font-weight: 600;
-            font-family: 'Courier New', monospace;
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 30px;
+            justify-content: center;
         }
-        
-        .balance { 
-            color: #38a169; 
-            font-size: 1.3em;
-            font-weight: 700;
+
+        .history-section {
+            margin-top: 30px;
         }
-        
-        .button { 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white; 
-            border: none; 
-            padding: 15px 25px; 
-            border-radius: 12px; 
-            cursor: pointer; 
-            margin: 8px; 
-            font-size: 1em;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-        }
-        
-        .button:hover { 
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
-        }
-        
-        .button.danger { 
-            background: linear-gradient(135deg, #fc8181 0%, #f56565 100%);
-            box-shadow: 0 4px 15px rgba(245, 101, 101, 0.4);
-        }
-        
-        .button.danger:hover { 
-            box-shadow: 0 6px 20px rgba(245, 101, 101, 0.6);
-        }
-        
-        .button.success {
-            background: linear-gradient(135deg, #68d391 0%, #38a169 100%);
-            box-shadow: 0 4px 15px rgba(56, 161, 105, 0.4);
-        }
-        
-        .button.success:hover {
-            box-shadow: 0 6px 20px rgba(56, 161, 105, 0.6);
-        }
-        
-        .form-group { 
-            margin-bottom: 20px; 
-        }
-        
-        .form-group label { 
-            display: block; 
-            margin-bottom: 8px; 
-            color: #4a5568;
-            font-weight: 600;
-            font-size: 1.1em;
-        }
-        
-        .form-group input, .form-group textarea { 
-            width: 100%; 
-            padding: 15px; 
-            background: rgba(255, 255, 255, 0.8);
-            border: 2px solid #e2e8f0;
-            color: #4a5568;
-            border-radius: 12px;
-            font-size: 1em;
-            transition: all 0.3s ease;
-        }
-        
-        .form-group input:focus, .form-group textarea:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-        
-        .transactions { 
-            background: rgba(255, 255, 255, 0.95);
-            padding: 30px; 
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            backdrop-filter: blur(10px);
-        }
-        
-        .transactions h3 {
-            color: #4a5568;
+
+        .history-section h2 {
+            color: #333;
             margin-bottom: 20px;
-            font-size: 1.4em;
-            font-weight: 600;
+            text-align: center;
         }
-        
-        .transaction { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            padding: 20px; 
-            margin-bottom: 15px;
-            background: rgba(255, 255, 255, 0.7);
-            border-radius: 15px;
-            border-left: 4px solid #e2e8f0;
-            transition: all 0.3s ease;
+
+        .transaction-list {
+            max-height: 400px;
+            overflow-y: auto;
         }
-        
-        .transaction:hover {
-            transform: translateX(5px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+
+        .transaction-item {
+            background: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
         }
-        
-        .transaction.tx-in { 
-            border-left-color: #38a169;
+
+        .transaction-item.incoming {
+            border-left-color: #28a745;
         }
-        
-        .transaction.tx-out { 
-            border-left-color: #f56565;
+
+        .transaction-item.outgoing {
+            border-left-color: #dc3545;
         }
-        
-        .tx-type {
-            font-weight: 600;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.9em;
-        }
-        
-        .tx-in .tx-type { 
-            color: #38a169;
-            background: rgba(56, 161, 105, 0.1);
-        }
-        
-        .tx-out .tx-type { 
-            color: #f56565;
-            background: rgba(245, 101, 101, 0.1);
-        }
-        
-        .modal { 
-            display: none; 
-            position: fixed; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
-            background: rgba(0,0,0,0.7);
+
+        .modal {
+            display: none;
+            position: fixed;
             z-index: 1000;
-            backdrop-filter: blur(5px);
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
         }
-        
-        .modal-content { 
-            position: absolute; 
-            top: 50%; 
-            left: 50%; 
-            transform: translate(-50%, -50%); 
-            background: white;
-            padding: 40px; 
-            border-radius: 20px; 
-            max-width: 600px; 
+
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 30px;
+            border-radius: 15px;
             width: 90%;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 500px;
         }
-        
-        .modal-content h3 {
-            color: #4a5568;
-            margin-bottom: 25px;
-            font-size: 1.5em;
-            font-weight: 600;
-        }
-        
-        .close { 
-            float: right; 
-            font-size: 28px; 
-            cursor: pointer; 
-            color: #a0aec0;
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
             font-weight: bold;
+            cursor: pointer;
         }
-        
-        .close:hover { 
-            color: #4a5568;
+
+        .close:hover {
+            color: black;
         }
-        
-        .status { 
-            padding: 15px; 
-            margin: 15px 0; 
-            border-radius: 12px;
-            font-weight: 600;
+
+        .error {
+            color: #dc3545;
+            background: #f8d7da;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            text-align: center;
         }
-        
-        .status.success { 
-            background: rgba(56, 161, 105, 0.1);
-            color: #38a169;
-            border: 1px solid rgba(56, 161, 105, 0.3);
+
+        .success {
+            color: #155724;
+            background: #d4edda;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            text-align: center;
         }
-        
-        .status.error { 
-            background: rgba(245, 101, 101, 0.1);
-            color: #f56565;
-            border: 1px solid rgba(245, 101, 101, 0.3);
+
+        .loading {
+            text-align: center;
+            color: #666;
+            font-style: italic;
         }
-        
-        .loading { 
-            display: none; 
-            text-align: center; 
-            color: #667eea;
-            font-weight: 600;
-        }
-        
-        .spinner { 
-            display: inline-block; 
-            width: 25px; 
-            height: 25px; 
-            border: 3px solid #e2e8f0;
-            border-radius: 50%; 
-            border-top-color: #667eea;
-            animation: spin 1s ease-in-out infinite;
-            margin-right: 10px;
-        }
-        
-        @keyframes spin { 
-            to { transform: rotate(360deg); } 
-        }
-        
-        .icon {
-            margin-right: 8px;
-        }
-        
-        .logout-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-        }
-        
+
         @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .wallet-header {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .actions {
+                justify-content: center;
+            }
+            
             .wallet-info {
                 grid-template-columns: 1fr;
-            }
-            
-            .container {
-                padding: 10px;
-            }
-            
-            .modal-content {
-                padding: 20px;
-                width: 95%;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Phần đăng nhập -->
+        <!-- Login Section -->
         <div id="loginSection" class="login-section">
-            <h2><i class="fas fa-wallet icon"></i>Đăng nhập Ví Octra</h2>
+            <h1>Đăng nhập Ví Octra</h1>
             <div class="form-group">
-                <label><i class="fas fa-key icon"></i>Private Key:</label>
-                <input type="password" id="privateKey" placeholder="Nhập private key của bạn...">
+                <label for="privateKey">Private Key:</label>
+                <input type="password" id="privateKey" placeholder="Nhập private key của bạn">
             </div>
             <div class="form-group">
-                <label><i class="fas fa-address-card icon"></i>Địa chỉ ví:</label>
-                <input type="text" id="walletAddress" placeholder="oct...">
+                <label for="address">Địa chỉ ví:</label>
+                <input type="text" id="address" placeholder="oct...">
             </div>
             <div class="form-group">
-                <label><i class="fas fa-server icon"></i>RPC URL:</label>
+                <label for="rpcUrl">RPC URL:</label>
                 <input type="text" id="rpcUrl" value="https://octra.network" placeholder="https://octra.network">
             </div>
-            <div id="loginStatus"></div>
-            <button class="button success" onclick="loginWallet()">
-                <i class="fas fa-sign-in-alt icon"></i>Đăng nhập
-            </button>
+            <button class="btn" onclick="loginWallet()">Đăng nhập</button>
+            <div id="loginError"></div>
         </div>
 
-        <!-- Phần ví chính -->
+        <!-- Wallet Section -->
         <div id="walletSection" class="wallet-section">
-            <div class="header">
-                <h1><i class="fas fa-coins icon"></i>Ví Octra Web</h1>
-                <p>Môi trường Testnet - <span id="current-time"></span></p>
-                <button class="button danger logout-btn" onclick="logoutWallet()">
-                    <i class="fas fa-sign-out-alt icon"></i>Đăng xuất
-                </button>
+            <div class="wallet-header">
+                <h1>Ví Octra Web</h1>
+                <div>
+                    <span style="color: #666; margin-right: 15px;">Môi trường Testnet - <span id="currentTime"></span></span>
+                    <button class="btn btn-danger" onclick="logoutWallet()">Đăng xuất</button>
+                </div>
             </div>
 
             <div class="wallet-info">
-                <div class="info-panel">
-                    <h3><i class="fas fa-info-circle icon"></i>Thông tin ví</h3>
-                    <div class="info-row">
-                        <span class="label">Địa chỉ:</span>
-                        <span class="value" id="wallet-address">Đang tải...</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="label">Số dư:</span>
-                        <span class="value balance" id="wallet-balance">Đang tải...</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="label">Nonce:</span>
-                        <span class="value" id="wallet-nonce">Đang tải...</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="label">Giao dịch chờ:</span>
-                        <span class="value" id="staging-count">Đang tải...</span>
-                    </div>
+                <div class="info-card">
+                    <h3>Địa chỉ</h3>
+                    <p id="walletAddress">Đang tải...</p>
                 </div>
-
-                <div class="actions-panel">
-                    <h3><i class="fas fa-cogs icon"></i>Thao tác</h3>
-                    <button class="button" onclick="openSendModal()">
-                        <i class="fas fa-paper-plane icon"></i>Gửi giao dịch
-                    </button>
-                    <button class="button" onclick="refreshWallet()">
-                        <i class="fas fa-sync-alt icon"></i>Làm mới số dư
-                    </button>
-                    <button class="button" onclick="openExportModal()">
-                        <i class="fas fa-download icon"></i>Xuất khóa
-                    </button>
-                    <button class="button danger" onclick="clearHistory()">
-                        <i class="fas fa-trash icon"></i>Xóa lịch sử
-                    </button>
+                <div class="info-card">
+                    <h3>Số dư</h3>
+                    <p id="walletBalance">Đang tải...</p>
+                </div>
+                <div class="info-card">
+                    <h3>Nonce</h3>
+                    <p id="walletNonce">Đang tải...</p>
+                </div>
+                <div class="info-card">
+                    <h3>Giao dịch chờ</h3>
+                    <p id="stagingCount">Đang tải...</p>
                 </div>
             </div>
 
-            <div class="transactions">
-                <h3><i class="fas fa-history icon"></i>Giao dịch gần đây</h3>
-                <div id="transaction-list">
-                    <div class="loading">
-                        <div class="spinner"></div> Đang tải giao dịch...
-                    </div>
+            <div class="actions">
+                <button class="btn" onclick="showSendModal()">Gửi giao dịch</button>
+                <button class="btn btn-secondary" onclick="refreshBalance()">Làm mới số dư</button>
+                <button class="btn btn-secondary" onclick="showExportModal()">Xuất khóa</button>
+                <button class="btn btn-danger" onclick="clearHistory()">Xóa lịch sử</button>
+            </div>
+
+            <div class="history-section">
+                <h2>Giao dịch gần đây</h2>
+                <div id="transactionHistory">
+                    <div class="loading">Đang tải giao dịch...</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal gửi giao dịch -->
+    <!-- Send Transaction Modal -->
     <div id="sendModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeSendModal()">&times;</span>
-            <h3><i class="fas fa-paper-plane icon"></i>Gửi giao dịch</h3>
+            <h2>Gửi giao dịch</h2>
             <div class="form-group">
-                <label>Địa chỉ nhận:</label>
-                <input type="text" id="send-address" placeholder="oct...">
+                <label for="sendTo">Địa chỉ nhận:</label>
+                <input type="text" id="sendTo" placeholder="oct...">
             </div>
             <div class="form-group">
-                <label>Số lượng (OCT):</label>
-                <input type="number" id="send-amount" step="0.000001" placeholder="0.000000">
+                <label for="sendAmount">Số lượng (OCT):</label>
+                <input type="number" id="sendAmount" step="0.000001" placeholder="0.000000">
             </div>
             <div class="form-group">
-                <label>Tin nhắn (Tùy chọn):</label>
-                <textarea id="send-message" rows="3" placeholder="Tin nhắn tùy chọn..."></textarea>
+                <label for="sendMessage">Tin nhắn (Tùy chọn):</label>
+                <input type="text" id="sendMessage" placeholder="Tin nhắn giao dịch">
             </div>
-            <div id="send-status"></div>
-            <button class="button success" onclick="sendTransaction()">
-                <i class="fas fa-paper-plane icon"></i>Gửi giao dịch
-            </button>
-            <button class="button danger" onclick="closeSendModal()">
-                <i class="fas fa-times icon"></i>Hủy
-            </button>
+            <button class="btn btn-success" onclick="sendTransaction()">Gửi giao dịch</button>
+            <button class="btn btn-secondary" onclick="closeSendModal()">Hủy</button>
+            <div id="sendError"></div>
         </div>
     </div>
 
-    <!-- Modal xuất khóa -->
+    <!-- Export Modal -->
     <div id="exportModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeExportModal()">&times;</span>
-            <h3><i class="fas fa-download icon"></i>Xuất khóa ví</h3>
+            <h2>Xuất khóa ví</h2>
             <div class="form-group">
                 <label>Private Key (Giữ bí mật!):</label>
-                <textarea id="export-private" readonly rows="3"></textarea>
+                <input type="text" id="exportPrivateKey" readonly>
             </div>
             <div class="form-group">
                 <label>Public Key:</label>
-                <textarea id="export-public" readonly rows="3"></textarea>
+                <input type="text" id="exportPublicKey" readonly>
             </div>
-            <button class="button" onclick="copyToClipboard('export-private')">
-                <i class="fas fa-copy icon"></i>Sao chép Private Key
-            </button>
-            <button class="button" onclick="copyToClipboard('export-public')">
-                <i class="fas fa-copy icon"></i>Sao chép Public Key
-            </button>
-            <button class="button danger" onclick="closeExportModal()">
-                <i class="fas fa-times icon"></i>Đóng
-            </button>
+            <button class="btn" onclick="copyPrivateKey()">Sao chép Private Key</button>
+            <button class="btn btn-secondary" onclick="copyPublicKey()">Sao chép Public Key</button>
+            <button class="btn btn-danger" onclick="closeExportModal()">Đóng</button>
         </div>
     </div>
 
     <script>
-        let walletData = {};
-        let isLoggedIn = false;
+        // Global variables
+        let sessionId = null;
+        let currentBalance = 0;
+        let currentNonce = 0;
+        let refreshInterval = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user was previously logged in
+            const savedSessionId = localStorage.getItem('octra_session_id');
+            if (savedSessionId) {
+                sessionId = savedSessionId;
+                checkSessionValid();
+            }
+            
+            updateTime();
+            setInterval(updateTime, 1000);
+        });
 
         function updateTime() {
-            document.getElementById('current-time').textContent = new Date().toLocaleTimeString('vi-VN');
+            const now = new Date();
+            document.getElementById('currentTime').textContent = now.toLocaleTimeString('vi-VN');
         }
 
-        async function makeApiCall(url, options = {}) {
-            try {
-                console.log(`Making API call to: ${url}`);
-                const response = await fetch(url, {
-                    ...options,
-                    headers: {
-                        'Content-Type': 'application/json',
-                        ...options.headers
+        // Session management
+        function checkSessionValid() {
+            makeApiCall('/api/wallet/status', 'POST', {session_id: sessionId})
+                .then(data => {
+                    if (data.error) {
+                        // Session expired or invalid
+                        localStorage.removeItem('octra_session_id');
+                        sessionId = null;
+                        showLoginSection();
+                    } else {
+                        showWalletSection();
+                        updateWalletInfo(data);
+                        loadTransactionHistory();
+                        startAutoRefresh();
                     }
+                })
+                .catch(error => {
+                    console.error('Session check failed:', error);
+                    showLoginSection();
                 });
+        }
 
+        // API call function with session_id support
+        async function makeApiCall(endpoint, method = 'GET', data = null) {
+            console.log(`Making API call to: ${endpoint}`);
+            
+            const config = {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            };
+
+            if (data && (method === 'POST' || method === 'PUT')) {
+                config.body = JSON.stringify(data);
+            }
+
+            try {
+                const response = await fetch(endpoint, config);
+                
                 console.log(`Response status: ${response.status}`);
-                console.log(`Response headers:`, [...response.headers.entries()]);
-
+                console.log('Response headers:', [...response.headers.entries()]);
+                
                 if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    const errorText = await response.text();
+                    console.error(`HTTP ${response.status}: ${errorText}`);
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
                 }
 
-                const contentType = response.headers.get('content-type');
-                if (!contentType || !contentType.includes('application/json')) {
-                    const text = await response.text();
-                    console.error('Expected JSON but got:', text.substring(0, 200));
-                    throw new Error(`Server trả về HTML thay vì JSON. Có thể API chưa hoạt động đúng.`);
-                }
-
-                const data = await response.json();
-                console.log('API response:', data);
-                return data;
+                const result = await response.json();
+                console.log('API Response:', result);
+                return result;
             } catch (error) {
                 console.error('API call error:', error);
                 throw error;
             }
         }
 
+        // Login function
         async function loginWallet() {
             const privateKey = document.getElementById('privateKey').value.trim();
-            const address = document.getElementById('walletAddress').value.trim();
+            const address = document.getElementById('address').value.trim();
             const rpcUrl = document.getElementById('rpcUrl').value.trim();
-            const statusDiv = document.getElementById('loginStatus');
+            const errorDiv = document.getElementById('loginError');
 
             if (!privateKey || !address) {
-                statusDiv.innerHTML = '<div class="status error">Vui lòng nhập đầy đủ thông tin!</div>';
+                showError(errorDiv, 'Vui lòng nhập đầy đủ thông tin');
                 return;
             }
 
-            statusDiv.innerHTML = '<div class="loading" style="display: block;"><div class="spinner"></div> Đang đăng nhập...</div>';
-
             try {
-                const data = await makeApiCall('/api/wallet/login', {
-                    method: 'POST',
-                    body: JSON.stringify({ 
-                        private_key: privateKey, 
-                        address: address, 
-                        rpc_url: rpcUrl 
-                    })
+                const data = await makeApiCall('/api/wallet/login', 'POST', {
+                    private_key: privateKey,
+                    address: address,
+                    rpc_url: rpcUrl
                 });
 
                 if (data.success) {
-                    statusDiv.innerHTML = '<div class="status success">✓ Đăng nhập thành công!</div>';
-                    isLoggedIn = true;
-                    document.getElementById('loginSection').style.display = 'none';
-                    document.getElementById('walletSection').style.display = 'block';
-                    await refreshWallet();
-                } else {
-                    statusDiv.innerHTML = `<div class="status error">✗ ${data.error}</div>`;
-                }
-            } catch (error) {
-                statusDiv.innerHTML = `<div class="status error">✗ ${error.message}</div>`;
-            }
-        }
-
-        async function logoutWallet() {
-            if (confirm('Bạn có chắc muốn đăng xuất?')) {
-                try {
-                    await makeApiCall('/api/wallet/logout', { method: 'POST' });
-                    isLoggedIn = false;
-                    document.getElementById('loginSection').style.display = 'block';
-                    document.getElementById('walletSection').style.display = 'none';
+                    sessionId = data.session_id;
+                    localStorage.setItem('octra_session_id', sessionId);
+                    showSuccess(errorDiv, data.message);
                     
-                    document.getElementById('privateKey').value = '';
-                    document.getElementById('walletAddress').value = '';
-                    document.getElementById('loginStatus').innerHTML = '';
-                } catch (error) {
-                    console.error('Lỗi đăng xuất:', error);
+                    setTimeout(() => {
+                        showWalletSection();
+                        loadWalletData();
+                        startAutoRefresh();
+                    }, 1000);
+                } else {
+                    showError(errorDiv, data.error || 'Đăng nhập thất bại');
                 }
-            }
-        }
-
-        async function loadWalletStatus() {
-            if (!isLoggedIn) return;
-            
-            try {
-                const data = await makeApiCall('/api/wallet/status');
-                
-                walletData = data;
-                document.getElementById('wallet-address').textContent = data.address.substring(0, 20) + '...';
-                document.getElementById('wallet-balance').textContent = `${data.balance?.toFixed(6) || '0.000000'} OCT`;
-                document.getElementById('wallet-nonce').textContent = data.nonce || '0';
-                document.getElementById('staging-count').textContent = data.staging_count ? `${data.staging_count} giao dịch` : 'Không có';
             } catch (error) {
-                console.error('Lỗi tải trạng thái ví:', error);
-                document.getElementById('wallet-address').textContent = 'Lỗi tải';
-                document.getElementById('wallet-balance').textContent = 'Lỗi tải';
+                showError(errorDiv, 'Lỗi kết nối: ' + error.message);
             }
         }
 
-        async function loadTransactionHistory() {
-            if (!isLoggedIn) return;
-            
+        // Logout function
+        async function logoutWallet() {
             try {
-                const data = await makeApiCall('/api/wallet/history');
+                if (sessionId) {
+                    await makeApiCall('/api/wallet/logout', 'POST', {session_id: sessionId});
+                }
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+            
+            sessionId = null;
+            localStorage.removeItem('octra_session_id');
+            stopAutoRefresh();
+            showLoginSection();
+            clearForm();
+        }
+
+        // Load wallet data
+        async function loadWalletData() {
+            if (!sessionId) return;
+
+            try {
+                const data = await makeApiCall('/api/wallet/status', 'POST', {session_id: sessionId});
+                updateWalletInfo(data);
+                loadTransactionHistory();
+            } catch (error) {
+                console.error('Error loading wallet data:', error);
+                showError(document.getElementById('loginError'), 'Lỗi tải dữ liệu ví');
+            }
+        }
+
+        // Update wallet info
+        function updateWalletInfo(data) {
+            if (data.error) {
+                console.error('Wallet status error:', data.error);
+                return;
+            }
+
+            document.getElementById('walletAddress').textContent = data.address || 'N/A';
+            document.getElementById('walletBalance').textContent = (data.balance || 0).toFixed(6) + ' OCT';
+            document.getElementById('walletNonce').textContent = data.nonce || 0;
+            document.getElementById('stagingCount').textContent = data.staging_count || 0;
+            
+            currentBalance = data.balance || 0;
+            currentNonce = data.nonce || 0;
+        }
+
+        // Load transaction history
+        async function loadTransactionHistory() {
+            if (!sessionId) return;
+
+            try {
+                const data = await makeApiCall('/api/wallet/history', 'POST', {session_id: sessionId});
+                displayTransactionHistory(data.transactions || []);
+            } catch (error) {
+                console.error('Error loading transaction history:', error);
+                document.getElementById('transactionHistory').innerHTML = '<div class="error">Lỗi tải lịch sử giao dịch</div>';
+            }
+        }
+
+        // Display transaction history
+        function displayTransactionHistory(transactions) {
+            const historyDiv = document.getElementById('transactionHistory');
+            
+            if (transactions.length === 0) {
+                historyDiv.innerHTML = '<div class="loading">Chưa có giao dịch nào</div>';
+                return;
+            }
+
+            let html = '';
+            transactions.forEach(tx => {
+                const isIncoming = tx.type === 'in';
+                const typeClass = isIncoming ? 'incoming' : 'outgoing';
+                const typeText = isIncoming ? 'Nhận' : 'Gửi';
+                const amountText = isIncoming ? `+${tx.amount.toFixed(6)}` : `-${tx.amount.toFixed(6)}`;
                 
-                const transactionList = document.getElementById('transaction-list');
-                
-                if (data.transactions && data.transactions.length > 0) {
-                    transactionList.innerHTML = data.transactions.map(tx => `
-                        <div class="transaction ${tx.type === 'in' ? 'tx-in' : 'tx-out'}">
+                html += `
+                    <div class="transaction-item ${typeClass}">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
                             <div>
-                                <span class="tx-type">
-                                    <i class="fas fa-arrow-${tx.type === 'in' ? 'down' : 'up'}"></i>
-                                    ${tx.type === 'in' ? 'Nhận' : 'Gửi'}
-                                </span>
-                                <div style="margin-top: 5px; color: #718096; font-size: 0.9em;">
-                                    ${new Date(tx.time).toLocaleString('vi-VN')}
-                                </div>
-                            </div>
-                            <div style="text-align: center;">
-                                <strong style="font-size: 1.1em;">${tx.amount.toFixed(6)} OCT</strong>
-                                <div style="color: #718096; font-size: 0.9em;">
-                                    ${tx.address.substring(0, 20)}...
-                                </div>
+                                <strong>${typeText}: ${amountText} OCT</strong>
+                                <br>
+                                <small>${tx.address}</small>
+                                ${tx.message ? `<br><em>"${tx.message}"</em>` : ''}
                             </div>
                             <div style="text-align: right;">
-                                ${tx.message ? '<i class="fas fa-comment" title="Có tin nhắn"></i>' : ''}
-                                <div style="color: #718096; font-size: 0.9em;">
-                                    Epoch ${tx.epoch || 0}
-                                </div>
+                                <small>${new Date(tx.time).toLocaleString('vi-VN')}</small>
+                                <br>
+                                <small>Hash: ${tx.hash.substring(0, 10)}...</small>
                             </div>
                         </div>
-                    `).join('');
+                    </div>
+                `;
+            });
+            
+            historyDiv.innerHTML = html;
+        }
+
+        // Send transaction
+        async function sendTransaction() {
+            if (!sessionId) return;
+
+            const to = document.getElementById('sendTo').value.trim();
+            const amount = parseFloat(document.getElementById('sendAmount').value);
+            const message = document.getElementById('sendMessage').value.trim();
+            const errorDiv = document.getElementById('sendError');
+
+            if (!to || !amount || amount <= 0) {
+                showError(errorDiv, 'Vui lòng nhập đầy đủ thông tin hợp lệ');
+                return;
+            }
+
+            if (amount > currentBalance) {
+                showError(errorDiv, `Số dư không đủ (${currentBalance.toFixed(6)} OCT)`);
+                return;
+            }
+
+            try {
+                const data = await makeApiCall('/api/wallet/send', 'POST', {
+                    session_id: sessionId,
+                    to: to,
+                    amount: amount,
+                    message: message || null
+                });
+
+                if (data.success) {
+                    showSuccess(errorDiv, `Giao dịch thành công! Hash: ${data.tx_hash}`);
+                    setTimeout(() => {
+                        closeSendModal();
+                        loadWalletData(); // Refresh wallet data
+                    }, 2000);
                 } else {
-                    transactionList.innerHTML = '<div style="text-align: center; color: #718096; padding: 40px;"><i class="fas fa-inbox" style="font-size: 3em; margin-bottom: 15px; display: block;"></i>Chưa có giao dịch nào</div>';
+                    showError(errorDiv, data.error || 'Giao dịch thất bại');
                 }
             } catch (error) {
-                console.error('Lỗi tải lịch sử giao dịch:', error);
-                document.getElementById('transaction-list').innerHTML = '<div style="text-align: center; color: #f56565; padding: 40px;">Lỗi tải giao dịch</div>';
+                showError(errorDiv, 'Lỗi gửi giao dịch: ' + error.message);
             }
         }
 
-        function openSendModal() {
+        // Export wallet
+        async function showExportModal() {
+            if (!sessionId) return;
+
+            try {
+                const data = await makeApiCall('/api/wallet/export', 'POST', {session_id: sessionId});
+                
+                if (data.error) {
+                    alert('Lỗi xuất ví: ' + data.error);
+                    return;
+                }
+
+                document.getElementById('exportPrivateKey').value = data.private_key;
+                document.getElementById('exportPublicKey').value = data.public_key;
+                document.getElementById('exportModal').style.display = 'block';
+            } catch (error) {
+                alert('Lỗi xuất ví: ' + error.message);
+            }
+        }
+
+        // Refresh balance
+        async function refreshBalance() {
+            if (!sessionId) return;
+            await loadWalletData();
+        }
+
+        // Clear history
+        function clearHistory() {
+            if (confirm('Bạn có chắc chắn muốn xóa lịch sử giao dịch?')) {
+                document.getElementById('transactionHistory').innerHTML = '<div class="loading">Lịch sử đã được xóa</div>';
+            }
+        }
+
+        // Auto refresh
+        function startAutoRefresh() {
+            if (refreshInterval) clearInterval(refreshInterval);
+            refreshInterval = setInterval(() => {
+                if (sessionId) {
+                    loadWalletData();
+                }
+            }, 30000); // Refresh every 30 seconds
+        }
+
+        function stopAutoRefresh() {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+                refreshInterval = null;
+            }
+        }
+
+        // UI Helper functions
+        function showLoginSection() {
+            document.getElementById('loginSection').style.display = 'block';
+            document.getElementById('walletSection').style.display = 'none';
+        }
+
+        function showWalletSection() {
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('walletSection').style.display = 'block';
+        }
+
+        function showSendModal() {
             document.getElementById('sendModal').style.display = 'block';
         }
 
         function closeSendModal() {
             document.getElementById('sendModal').style.display = 'none';
-            document.getElementById('send-status').innerHTML = '';
-            document.getElementById('send-address').value = '';
-            document.getElementById('send-amount').value = '';
-            document.getElementById('send-message').value = '';
-        }
-
-        async function sendTransaction() {
-            const address = document.getElementById('send-address').value.trim();
-            const amount = parseFloat(document.getElementById('send-amount').value);
-            const message = document.getElementById('send-message').value.trim();
-            const statusDiv = document.getElementById('send-status');
-
-            if (!address || !amount) {
-                statusDiv.innerHTML = '<div class="status error">Vui lòng nhập đầy đủ địa chỉ và số tiền</div>';
-                return;
-            }
-
-            statusDiv.innerHTML = '<div class="loading" style="display: block;"><div class="spinner"></div> Đang gửi giao dịch...</div>';
-
-            try {
-                const data = await makeApiCall('/api/wallet/send', {
-                    method: 'POST',
-                    body: JSON.stringify({ 
-                        to: address, 
-                        amount: amount, 
-                        message: message || undefined 
-                    })
-                });
-
-                if (data.success) {
-                    statusDiv.innerHTML = `<div class="status success">✓ Giao dịch đã gửi thành công!<br>Hash: ${data.tx_hash.substring(0, 32)}...<br>Thời gian: ${data.duration.toFixed(2)}s</div>`;
-                    setTimeout(() => {
-                        closeSendModal();
-                        refreshWallet();
-                    }, 3000);
-                } else {
-                    statusDiv.innerHTML = `<div class="status error">✗ Giao dịch thất bại: ${data.error}</div>`;
-                }
-            } catch (error) {
-                statusDiv.innerHTML = `<div class="status error">✗ ${error.message}</div>`;
-            }
-        }
-
-        async function openExportModal() {
-            try {
-                const data = await makeApiCall('/api/wallet/export');
-                
-                document.getElementById('export-private').value = data.private_key;
-                document.getElementById('export-public').value = data.public_key;
-                document.getElementById('exportModal').style.display = 'block';
-            } catch (error) {
-                alert('Lỗi tải khóa ví: ' + error.message);
-            }
+            document.getElementById('sendError').innerHTML = '';
+            document.getElementById('sendTo').value = '';
+            document.getElementById('sendAmount').value = '';
+            document.getElementById('sendMessage').value = '';
         }
 
         function closeExportModal() {
             document.getElementById('exportModal').style.display = 'none';
         }
 
-        function copyToClipboard(elementId) {
-            const element = document.getElementById(elementId);
-            element.select();
+        function clearForm() {
+            document.getElementById('privateKey').value = '';
+            document.getElementById('address').value = '';
+            document.getElementById('rpcUrl').value = 'https://octra.network';
+            document.getElementById('loginError').innerHTML = '';
+        }
+
+        function showError(element, message) {
+            element.innerHTML = `<div class="error">${message}</div>`;
+        }
+
+        function showSuccess(element, message) {
+            element.innerHTML = `<div class="success">${message}</div>`;
+        }
+
+        // Copy functions
+        function copyPrivateKey() {
+            const privateKey = document.getElementById('exportPrivateKey');
+            privateKey.select();
             document.execCommand('copy');
-            alert('Đã sao chép vào clipboard!');
+            alert('Private Key đã được sao chép!');
         }
 
-        async function refreshWallet() {
-            await loadWalletStatus();
-            await loadTransactionHistory();
+        function copyPublicKey() {
+            const publicKey = document.getElementById('exportPublicKey');
+            publicKey.select();
+            document.execCommand('copy');
+            alert('Public Key đã được sao chép!');
         }
 
-        function clearHistory() {
-            if (confirm('Xóa lịch sử giao dịch?')) {
-                document.getElementById('transaction-list').innerHTML = '<div style="text-align: center; color: #718096; padding: 40px;">Đã xóa lịch sử</div>';
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const sendModal = document.getElementById('sendModal');
+            const exportModal = document.getElementById('exportModal');
+            
+            if (event.target === sendModal) {
+                closeSendModal();
+            }
+            if (event.target === exportModal) {
+                closeExportModal();
             }
         }
-
-        // Khởi tạo
-        setInterval(updateTime, 1000);
-        updateTime();
-        
-        setInterval(() => {
-            if (isLoggedIn) {
-                refreshWallet();
-            }
-        }, 30000);
     </script>
 </body>
 </html>
