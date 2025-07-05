@@ -82,24 +82,7 @@ class WalletManager:
         while num > 0:
             num, remainder = divmod(num, 58)
             encoded = alphabet[remainder] + encoded
-<<<<<<< Updated upstream
-=======
-<<<<<<< HEAD
         encoded = encoded.rjust(44, alphabet[0])
-=======
->>>>>>> Stashed changes
-    
-    # Handle leading zeros properly
-        for byte in data:
-            if byte == 0:
-                encoded = alphabet[0] + encoded
-            else:
-                break
-    
-<<<<<<< Updated upstream
-=======
->>>>>>> 1f1ae1687a50d749bf7e6e2e81dd650580b06202
->>>>>>> Stashed changes
         return encoded
 
     
