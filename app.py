@@ -57,24 +57,14 @@ class WalletManager:
             return False
     
     def _generate_address(self) -> str:
-        # Decode base64 public key to get raw bytes
-        pub_bytes = base64.b64decode(self.public_key)
-    
-    # SHA256 hash the public key bytes
-        hash_obj = hashlib.sha256(pub_bytes)
-    
-    # Take first 25 bytes as address payload
-        address_bytes = hash_obj.digest()[:25]
-    
-    # Calculate 4-byte checksum by hashing the payload
-        checksum = hashlib.sha256(address_bytes).digest()[:4]
-    
-    # Concatenate payload + checksum (29 bytes total)
-        full_address = address_bytes + checksum
-    
-    # Base58 encode and prepend "oct" prefix
-        return "oct" + self._base58_encode(full_address)
-
+        try
+            pub_bytes = base64.b64decode(self.public_key)
+            pubkey_hash = hashlib.sha256(pub_bytes).digest()
+            address_suffix = self._base58_encode(pubkey_hash)[:45]
+            return "oct" + address_suffix
+        except Exception as e:
+            raise ValueError(f"Address generation error: {str(e)}")
+            
     def _base58_encode(self, data: bytes) -> str:
         alphabet = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
         num = int.from_bytes(data, 'big')
