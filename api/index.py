@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template_string
+from flask import Flask, request, jsonify, render_template_string, session
 import json, base64, hashlib, time, re, random, os
 from datetime import datetime, timedelta
 import asyncio
@@ -6,44 +6,59 @@ import aiohttp
 import nacl.signing
 
 app = Flask(__name__)
+app.secret_key = os.urandom(24)  # Tạo secret key ngẫu nhiên cho session
 
 # Global variables
-priv, addr, rpc = None, None, None
-sk, pub = None, None
 b58 = re.compile(r"^oct[1-9A-HJ-NP-Za-km-z]{44}$")
-? = 1_000_000
-h = []
-cb, cn, lu, lh = None, None, 0, 0
-session = None
+μ = 1_000_000
+sessions_data = {}  # Lưu trữ dữ liệu session
 
-def load_wallet():
-    global priv, addr, rpc, sk, pub
+def get_wallet_data():
+    """Lấy thông tin wallet từ session"""
+    session_id = session.get('session_id')
+    if not session_id or session_id not in sessions_data:
+        return None
+    return sessions_data[session_id]
+
+def set_wallet_data(priv_key, addr, rpc_url):
+    """Lưu thông tin wallet vào session"""
+    session_id = session.get('session_id')
+    if not session_id:
+        session_id = os.urandom(16).hex()
+        session['session_id'] = session_id
+    
     try:
-        wallet_data = {
-            'priv': os.environ.get('WALLET_PRIVATE_KEY'),
-            'addr': os.environ.get('WALLET_ADDRESS'),
-            'rpc': os.environ.get('RPC_URL', 'https://octra.network')
-        }
-        
-        if not wallet_data['priv'] or not wallet_data['addr']:
-            return False
-            
-        priv = wallet_data['priv']
-        addr = wallet_data['addr']
-        rpc = wallet_data['rpc']
-        sk = nacl.signing.SigningKey(base64.b64decode(priv))
+        sk = nacl.signing.SigningKey(base64.b64decode(priv_key))
         pub = base64.b64encode(sk.verify_key.encode()).decode()
+        
+        sessions_data[session_id] = {
+            'priv': priv_key,
+            'addr': addr,
+            'rpc': rpc_url,
+            'sk': sk,
+            'pub': pub,
+            'cb': None,
+            'cn': None,
+            'lu': 0,
+            'h': [],
+            'lh': 0,
+            'session': None
+        }
         return True
     except:
         return False
 
 async def req(method, path, data=None, timeout=10):
-    global session
-    if not session:
-        session = aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=timeout))
+    wallet_data = get_wallet_data()
+    if not wallet_data:
+        return 0, "No wallet loaded", None
+        
+    if not wallet_data['session']:
+        wallet_data['session'] = aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=timeout))
+    
     try:
-        url = f"{rpc}{path}"
-        async with getattr(session, method.lower())(url, json=data if method == 'POST' else None) as resp:
+        url = f"{wallet_data['rpc']}{path}"
+        async with getattr(wallet_data['session'], method.lower())(url, json=data if method == 'POST' else None) as resp:
             text = await resp.text()
             try:
                 j = json.loads(text) if text else None
@@ -54,14 +69,17 @@ async def req(method, path, data=None, timeout=10):
         return 0, str(e), None
 
 async def get_status():
-    global cb, cn, lu
+    wallet_data = get_wallet_data()
+    if not wallet_data:
+        return None, None
+        
     now = time.time()
-    if cb is not None and (now - lu) < 30:
-        return cn, cb
+    if wallet_data['cb'] is not None and (now - wallet_data['lu']) < 30:
+        return wallet_data['cn'], wallet_data['cb']
     
     try:
         results = await asyncio.gather(
-            req('GET', f'/balance/{addr}'),
+            req('GET', f'/balance/{wallet_data["addr"]}'),
             req('GET', '/staging', 5),
             return_exceptions=True
         )
@@ -70,46 +88,49 @@ async def get_status():
         s2, _, j2 = results[1] if not isinstance(results[1], Exception) else (0, None, None)
         
         if s == 200 and j:
-            cn = int(j.get('nonce', 0))
-            cb = float(j.get('balance', 0))
-            lu = now
+            wallet_data['cn'] = int(j.get('nonce', 0))
+            wallet_data['cb'] = float(j.get('balance', 0))
+            wallet_data['lu'] = now
             if s2 == 200 and j2:
-                our = [tx for tx in j2.get('staged_transactions', []) if tx.get('from') == addr]
+                our = [tx for tx in j2.get('staged_transactions', []) if tx.get('from') == wallet_data['addr']]
                 if our:
-                    cn = max(cn, max(int(tx.get('nonce', 0)) for tx in our))
+                    wallet_data['cn'] = max(wallet_data['cn'], max(int(tx.get('nonce', 0)) for tx in our))
         elif s == 404:
-            cn, cb, lu = 0, 0.0, now
+            wallet_data['cn'], wallet_data['cb'], wallet_data['lu'] = 0, 0.0, now
         elif s == 200 and t and not j:
             try:
                 parts = t.strip().split()
                 if len(parts) >= 2:
-                    cb = float(parts[0]) if parts[0].replace('.', '').isdigit() else 0.0
-                    cn = int(parts[1]) if parts[1].isdigit() else 0
-                    lu = now
+                    wallet_data['cb'] = float(parts[0]) if parts[0].replace('.', '').isdigit() else 0.0
+                    wallet_data['cn'] = int(parts[1]) if parts[1].isdigit() else 0
+                    wallet_data['lu'] = now
                 else:
-                    cn, cb = None, None
+                    wallet_data['cn'], wallet_data['cb'] = None, None
             except:
-                cn, cb = None, None
-        return cn, cb
+                wallet_data['cn'], wallet_data['cb'] = None, None
+        return wallet_data['cn'], wallet_data['cb']
     except:
         return None, None
 
 async def get_history():
-    global h, lh
+    wallet_data = get_wallet_data()
+    if not wallet_data:
+        return []
+        
     now = time.time()
-    if now - lh < 60 and h:
-        return h
+    if now - wallet_data['lh'] < 60 and wallet_data['h']:
+        return wallet_data['h']
     
     try:
-        s, t, j = await req('GET', f'/address/{addr}?limit=20')
+        s, t, j = await req('GET', f'/address/{wallet_data["addr"]}?limit=20')
         if s != 200 or (not j and not t):
-            return h
+            return wallet_data['h']
         
         if j and 'recent_transactions' in j:
             tx_hashes = [ref["hash"] for ref in j.get('recent_transactions', [])]
             tx_results = await asyncio.gather(*[req('GET', f'/tx/{hash}', 5) for hash in tx_hashes], return_exceptions=True)
             
-            existing_hashes = {tx['hash'] for tx in h}
+            existing_hashes = {tx['hash'] for tx in wallet_data['h']}
             nh = []
             
             for i, (ref, result) in enumerate(zip(j.get('recent_transactions', []), tx_results)):
@@ -123,9 +144,9 @@ async def get_history():
                     if tx_hash in existing_hashes:
                         continue
                     
-                    is_incoming = p.get('to') == addr
+                    is_incoming = p.get('to') == wallet_data['addr']
                     amount_raw = p.get('amount_raw', p.get('amount', '0'))
-                    amount = float(amount_raw) if '.' in str(amount_raw) else int(amount_raw) / ?
+                    amount = float(amount_raw) if '.' in str(amount_raw) else int(amount_raw) / μ
                     msg = None
                     if 'data' in j2:
                         try:
@@ -146,21 +167,25 @@ async def get_history():
                     })
             
             old_time = datetime.now() - timedelta(hours=1)
-            h[:] = sorted(nh + [tx for tx in h if datetime.fromisoformat(tx.get('time', datetime.now().isoformat())) > old_time], 
+            wallet_data['h'][:] = sorted(nh + [tx for tx in wallet_data['h'] if datetime.fromisoformat(tx.get('time', datetime.now().isoformat())) > old_time], 
                          key=lambda x: x['time'], reverse=True)[:50]
-            lh = now
+            wallet_data['lh'] = now
         elif s == 404 or (s == 200 and t and 'no transactions' in t.lower()):
-            h.clear()
-            lh = now
-        return h
+            wallet_data['h'].clear()
+            wallet_data['lh'] = now
+        return wallet_data['h']
     except:
-        return h
+        return wallet_data['h']
 
 def make_transaction(to, amount, nonce, message=None):
+    wallet_data = get_wallet_data()
+    if not wallet_data:
+        return None, None
+        
     tx = {
-        "from": addr,
+        "from": wallet_data['addr'],
         "to_": to,
-        "amount": str(int(amount * ?)),
+        "amount": str(int(amount * μ)),
         "nonce": int(nonce),
         "ou": "1" if amount < 1000 else "3",
         "timestamp": time.time() + random.random() * 0.01
@@ -169,8 +194,8 @@ def make_transaction(to, amount, nonce, message=None):
         tx["message"] = message
     
     base_line = json.dumps({k: v for k, v in tx.items() if k != "message"}, separators=(",", ":"))
-    signature = base64.b64encode(sk.sign(base_line.encode()).signature).decode()
-    tx.update(signature=signature, public_key=pub)
+    signature = base64.b64encode(wallet_data['sk'].sign(base_line.encode()).signature).decode()
+    tx.update(signature=signature, public_key=wallet_data['pub'])
     return tx, hashlib.sha256(base_line.encode()).hexdigest()
 
 async def send_transaction(tx):
@@ -187,25 +212,60 @@ async def send_transaction(tx):
 
 @app.route('/')
 def index():
-    return render_template_string(open('index.html').read())
+    return render_template_string(open('index.html', 'r', encoding='utf-8').read())
+
+@app.route('/api/wallet/login', methods=['POST'])
+def wallet_login():
+    data = request.json
+    private_key = data.get('private_key', '').strip()
+    address = data.get('address', '').strip()
+    rpc_url = data.get('rpc_url', 'https://octra.network').strip()
+    
+    if not private_key or not address:
+        return jsonify({'error': 'Vui lòng nhập đầy đủ Private Key và Address'}), 400
+    
+    if not b58.match(address):
+        return jsonify({'error': 'Định dạng address không hợp lệ'}), 400
+    
+    if set_wallet_data(private_key, address, rpc_url):
+        return jsonify({'success': True, 'message': 'Đăng nhập ví thành công!'})
+    else:
+        return jsonify({'error': 'Private Key không hợp lệ'}), 400
+
+@app.route('/api/wallet/logout', methods=['POST'])
+def wallet_logout():
+    session_id = session.get('session_id')
+    if session_id and session_id in sessions_data:
+        # Đóng session aiohttp nếu có
+        if sessions_data[session_id]['session']:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                loop.run_until_complete(sessions_data[session_id]['session'].close())
+            finally:
+                loop.close()
+        del sessions_data[session_id]
+    session.clear()
+    return jsonify({'success': True, 'message': 'Đăng xuất thành công!'})
 
 @app.route('/api/wallet/status')
 def wallet_status():
-    if not load_wallet():
-        return jsonify({'error': 'Wallet not configured'}), 400
+    wallet_data = get_wallet_data()
+    if not wallet_data:
+        return jsonify({'error': 'Chưa đăng nhập ví'}), 401
     
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     try:
         nonce, balance = loop.run_until_complete(get_status())
         staging_status, _, staging_json = loop.run_until_complete(req('GET', '/staging', None, 2))
-        staging_count = len([tx for tx in staging_json.get('staged_transactions', []) if tx.get('from') == addr]) if staging_json else 0
+        staging_count = len([tx for tx in staging_json.get('staged_transactions', []) if tx.get('from') == wallet_data['addr']]) if staging_json else 0
         
         return jsonify({
-            'address': addr,
+            'address': wallet_data['addr'],
             'balance': balance,
             'nonce': nonce,
-            'public_key': pub,
+            'public_key': wallet_data['pub'],
             'staging_count': staging_count
         })
     finally:
@@ -213,8 +273,9 @@ def wallet_status():
 
 @app.route('/api/wallet/history')
 def wallet_history():
-    if not load_wallet():
-        return jsonify({'error': 'Wallet not configured'}), 400
+    wallet_data = get_wallet_data()
+    if not wallet_data:
+        return jsonify({'error': 'Chưa đăng nhập ví'}), 401
     
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
@@ -226,8 +287,9 @@ def wallet_history():
 
 @app.route('/api/wallet/send', methods=['POST'])
 def send_tx():
-    if not load_wallet():
-        return jsonify({'error': 'Wallet not configured'}), 400
+    wallet_data = get_wallet_data()
+    if not wallet_data:
+        return jsonify({'error': 'Chưa đăng nhập ví'}), 401
     
     data = request.json
     to_address = data.get('to')
@@ -235,10 +297,10 @@ def send_tx():
     message = data.get('message')
     
     if not b58.match(to_address):
-        return jsonify({'error': 'Invalid address format'}), 400
+        return jsonify({'error': 'Định dạng address không hợp lệ'}), 400
     
     if amount <= 0:
-        return jsonify({'error': 'Invalid amount'}), 400
+        return jsonify({'error': 'Số tiền không hợp lệ'}), 400
     
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
@@ -246,16 +308,16 @@ def send_tx():
         nonce, balance = loop.run_until_complete(get_status())
         
         if nonce is None:
-            return jsonify({'error': 'Failed to get nonce'}), 500
+            return jsonify({'error': 'Không thể lấy nonce'}), 500
         
         if not balance or balance < amount:
-            return jsonify({'error': f'Insufficient balance ({balance:.6f} < {amount})'}), 400
+            return jsonify({'error': f'Số dư không đủ ({balance:.6f} < {amount})'}), 400
         
         tx, tx_hash = make_transaction(to_address, amount, nonce + 1, message)
         success, result, duration, response = loop.run_until_complete(send_transaction(tx))
         
         if success:
-            h.append({
+            wallet_data['h'].append({
                 'time': datetime.now().isoformat(),
                 'hash': result,
                 'amount': amount,
@@ -264,8 +326,7 @@ def send_tx():
                 'confirmed': True,
                 'message': message
             })
-            global lu
-            lu = 0
+            wallet_data['lu'] = 0
             
             return jsonify({
                 'success': True,
@@ -280,14 +341,15 @@ def send_tx():
 
 @app.route('/api/wallet/export')
 def export_wallet():
-    if not load_wallet():
-        return jsonify({'error': 'Wallet not configured'}), 400
+    wallet_data = get_wallet_data()
+    if not wallet_data:
+        return jsonify({'error': 'Chưa đăng nhập ví'}), 401
     
     return jsonify({
-        'private_key': priv,
-        'public_key': pub,
-        'address': addr,
-        'rpc': rpc
+        'private_key': wallet_data['priv'],
+        'public_key': wallet_data['pub'],
+        'address': wallet_data['addr'],
+        'rpc': wallet_data['rpc']
     })
 
 if __name__ == '__main__':
