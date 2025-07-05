@@ -2,27 +2,18 @@
   "version": 2,
   "builds": [
     {
-      "src": "api/wallet.py",
+      "src": "api/*.py",
       "use": "@vercel/python"
-    },
-    {
-      "src": "index.html",
-      "use": "@vercel/static"
     }
   ],
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/api/wallet.py"
+      "dest": "/api/$1"
     },
     {
       "src": "/(.*)",
       "dest": "/index.html"
     }
-  ],
-  "env": {
-    "WALLET_PRIVATE_KEY": "",
-    "WALLET_ADDRESS": "",
-    "RPC_URL": "https://octra.network"
-  }
+  ]
 }
