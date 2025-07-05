@@ -3,9 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Octra Wallet - Ví Điện Tử Hiện Đại</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Octra Wallet</title>
     <style>
         * {
             margin: 0;
@@ -13,965 +11,309 @@
             box-sizing: border-box;
         }
 
-        :root {
-            --primary-color: #667eea;
-            --primary-dark: #5a6fd8;
-            --secondary-color: #764ba2;
-            --success-color: #10b981;
-            --error-color: #ef4444;
-            --warning-color: #f59e0b;
-            --bg-primary: #0f172a;
-            --bg-secondary: #1e293b;
-            --bg-card: #334155;
-            --text-primary: #f8fafc;
-            --text-secondary: #cbd5e1;
-            --text-muted: #94a3b8;
-            --border-color: #475569;
-            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            --gradient-primary: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            --gradient-success: linear-gradient(135deg, #10b981, #059669);
-            --gradient-error: linear-gradient(135deg, #ef4444, #dc2626);
-        }
-
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            line-height: 1.6;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        /* Header */
-        .header {
-            background: var(--bg-secondary);
-            border-bottom: 1px solid var(--border-color);
-            padding: 1rem 0;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            backdrop-filter: blur(10px);
-        }
-
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-
-        .logo i {
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .status-badge {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            background: var(--bg-card);
+            background: white;
             border-radius: 20px;
-            font-size: 0.875rem;
-            font-weight: 500;
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--success-color);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        /* Login Form */
-        .login-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: calc(100vh - 80px);
-            padding: 20px;
-        }
-
-        .login-card {
-            background: var(--bg-secondary);
-            border-radius: 20px;
-            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
             width: 100%;
-            max-width: 450px;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border-color);
+            max-width: 500px;
+            margin: 20px;
         }
 
-        .login-header {
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
             text-align: center;
-            margin-bottom: 32px;
         }
 
-        .login-header h1 {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 8px;
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
         }
 
-        .login-header p {
-            color: var(--text-muted);
-            font-size: 0.95rem;
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .content {
+            padding: 40px;
         }
 
         .form-group {
-            margin-bottom: 24px;
+            margin-bottom: 25px;
         }
 
-        .form-label {
+        label {
             display: block;
             margin-bottom: 8px;
-            font-weight: 500;
-            color: var(--text-secondary);
+            font-weight: 600;
+            color: #333;
         }
 
-        .form-input {
+        input[type="text"], input[type="password"], input[type="number"] {
             width: 100%;
-            padding: 12px 16px;
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            color: var(--text-primary);
-            font-size: 0.95rem;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
             transition: all 0.3s ease;
+            background: #f8f9fa;
         }
 
-        .form-input:focus {
+        input[type="text"]:focus, input[type="password"]:focus, input[type="number"]:focus {
             outline: none;
-            border-color: var(--primary-color);
+            border-color: #667eea;
+            background: white;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
         .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 12px 24px;
+            width: 100%;
+            padding: 15px;
             border: none;
-            border-radius: 12px;
-            font-weight: 500;
-            font-size: 0.95rem;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            text-decoration: none;
-            min-height: 48px;
+            margin-bottom: 15px;
         }
 
         .btn-primary {
-            background: var(--gradient-primary);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            width: 100%;
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px -5px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
         }
 
         .btn-secondary {
-            background: var(--bg-card);
-            color: var(--text-secondary);
-            border: 1px solid var(--border-color);
+            background: #6c757d;
+            color: white;
         }
 
         .btn-secondary:hover {
-            background: var(--border-color);
-            color: var(--text-primary);
+            background: #5a6268;
+            transform: translateY(-2px);
         }
 
-        .btn-success {
-            background: var(--gradient-success);
-            color: white;
-        }
-
-        .btn-danger {
-            background: var(--gradient-error);
-            color: white;
-        }
-
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-
-        /* Dashboard */
-        .dashboard {
-            display: none;
-            padding: 20px 0;
-        }
-
-        .dashboard.active {
-            display: block;
-        }
-
-        .dashboard-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 32px;
-            flex-wrap: wrap;
-            gap: 16px;
-        }
-
-        .dashboard-title {
-            flex: 1;
-        }
-
-        .dashboard-title h1 {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
-
-        .dashboard-title p {
-            color: var(--text-muted);
-        }
-
-        .dashboard-actions {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        /* Cards */
-        .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 24px;
-            margin-bottom: 32px;
-        }
-
-        .card {
-            background: var(--bg-secondary);
-            border-radius: 16px;
-            padding: 24px;
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow);
-            transition: all 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.2);
-        }
-
-        .card-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 16px;
-        }
-
-        .card-title {
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .card-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--gradient-primary);
-            color: white;
-        }
-
-        .card-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 8px;
-            cursor: pointer;
-        }
-
-        .card-subtitle {
-            font-size: 0.875rem;
-            color: var(--text-muted);
-        }
-
-        /* Balance Card Special */
-        .balance-card {
-            background: var(--gradient-primary);
-            color: white;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .balance-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-            animation: float 6s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(180deg); }
-        }
-
-        .balance-card .card-title,
-        .balance-card .card-subtitle {
-            color: rgba(255, 255, 255, 0.9);
-        }
-
-        .balance-card .card-value {
-            color: white;
-        }
-
-        /* Transaction Section */
-        .transaction-section {
-            background: var(--bg-secondary);
-            border-radius: 16px;
-            padding: 24px;
-            border: 1px solid var(--border-color);
-        }
-
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-        }
-
-        .section-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .transaction-list {
-            space-y: 12px;
-        }
-
-        .transaction-item {
-            display: flex;
-            align-items: center;
-            padding: 16px;
-            background: var(--bg-card);
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-            margin-bottom: 12px;
-            transition: all 0.3s ease;
-        }
-
-        .transaction-item:hover {
-            background: var(--border-color);
-            transform: translateX(4px);
-        }
-
-        .transaction-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 16px;
-            font-size: 1.1rem;
-        }
-
-        .transaction-icon.incoming {
-            background: var(--gradient-success);
-            color: white;
-        }
-
-        .transaction-icon.outgoing {
-            background: var(--gradient-error);
-            color: white;
-        }
-
-        .transaction-details {
-            flex: 1;
-        }
-
-        .transaction-address {
-            font-weight: 500;
-            color: var(--text-primary);
-            margin-bottom: 4px;
-        }
-
-        .transaction-time {
-            font-size: 0.875rem;
-            color: var(--text-muted);
-        }
-
-        .transaction-amount {
-            font-weight: 600;
-            font-size: 1.1rem;
-        }
-
-        .transaction-amount.incoming {
-            color: var(--success-color);
-        }
-
-        .transaction-amount.outgoing {
-            color: var(--error-color);
-        }
-
-        /* Send Transaction Form */
-        .send-form {
-            background: var(--bg-secondary);
-            border-radius: 16px;
-            padding: 24px;
-            border: 1px solid var(--border-color);
-            margin-bottom: 24px;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
-
-        /* Auto Send Feature */
-        .auto-send-section {
-            background: var(--bg-secondary);
-            border-radius: 16px;
-            padding: 24px;
-            border: 1px solid var(--border-color);
-            margin-bottom: 24px;
-        }
-
-        .auto-send-controls {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            flex-wrap: wrap;
-        }
-
-        .status-indicator {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.875rem;
-            font-weight: 500;
-        }
-
-        .status-indicator.running {
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--success-color);
-            border: 1px solid rgba(16, 185, 129, 0.2);
-        }
-
-        .status-indicator.stopped {
-            background: rgba(239, 68, 68, 0.1);
-            color: var(--error-color);
-            border: 1px solid rgba(239, 68, 68, 0.2);
-        }
-
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 1000;
-            backdrop-filter: blur(4px);
-        }
-
-        .modal.active {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-content {
-            background: var(--bg-secondary);
-            border-radius: 16px;
-            padding: 32px;
-            width: 90%;
-            max-width: 500px;
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow);
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-        }
-
-        .modal-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 4px;
-            border-radius: 4px;
-            transition: all 0.3s ease;
-        }
-
-        .modal-close:hover {
-            background: var(--bg-card);
-            color: var(--text-primary);
-        }
-
-        /* Alerts */
         .alert {
-            padding: 16px;
-            border-radius: 12px;
-            margin-bottom: 16px;
-            border: 1px solid;
-            display: flex;
-            align-items: center;
-            gap: 12px;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 500;
         }
 
         .alert-success {
-            background: rgba(16, 185, 129, 0.1);
-            border-color: rgba(16, 185, 129, 0.2);
-            color: var(--success-color);
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
         }
 
         .alert-error {
-            background: rgba(239, 68, 68, 0.1);
-            border-color: rgba(239, 68, 68, 0.2);
-            color: var(--error-color);
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
         }
 
-        .alert-warning {
-            background: rgba(245, 158, 11, 0.1);
-            border-color: rgba(245, 158, 11, 0.2);
-            color: var(--warning-color);
+        .wallet-info {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
         }
 
-        /* Loading */
-        .loading {
-            display: inline-flex;
+        .wallet-info h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #666;
+        }
+
+        .info-value {
+            color: #333;
+            word-break: break-all;
+        }
+
+        .transaction-history {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #e1e5e9;
+            border-radius: 10px;
+        }
+
+        .transaction-item {
+            padding: 15px;
+            border-bottom: 1px solid #e1e5e9;
+            display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 8px;
         }
 
-        .spinner {
-            width: 16px;
-            height: 16px;
-            border: 2px solid var(--border-color);
-            border-top: 2px solid var(--primary-color);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+        .transaction-item:last-child {
+            border-bottom: none;
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .transaction-incoming {
+            border-left: 4px solid #28a745;
         }
 
-        /* Responsive */
-        @media (max-width: 768px) {
+        .transaction-outgoing {
+            border-left: 4px solid #dc3545;
+        }
+
+        .transaction-pending {
+            border-left: 4px solid #ffc107;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .send-form {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 600px) {
             .container {
-                padding: 16px;
+                margin: 10px;
             }
-
-            .header-content {
-                padding: 0 16px;
+            
+            .header {
+                padding: 20px;
             }
-
-            .login-card {
-                padding: 24px;
-            }
-
-            .cards-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-
-            .dashboard-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .dashboard-actions {
-                width: 100%;
-                justify-content: flex-start;
-            }
-
-            .auto-send-controls {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .modal-content {
-                padding: 24px;
-                margin: 16px;
+            
+            .content {
+                padding: 20px;
             }
         }
-
-        /* Utility Classes */
-        .text-center { text-align: center; }
-        .text-right { text-align: right; }
-        .mb-0 { margin-bottom: 0; }
-        .mb-1 { margin-bottom: 8px; }
-        .mb-2 { margin-bottom: 16px; }
-        .mb-3 { margin-bottom: 24px; }
-        .mt-2 { margin-top: 16px; }
-        .hidden { display: none; }
-        .flex { display: flex; }
-        .items-center { align-items: center; }
-        .justify-between { justify-content: space-between; }
-        .gap-2 { gap: 8px; }
-        .gap-3 { gap: 16px; }
-        .w-full { width: 100%; }
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="header-content">
-            <div class="logo">
-                <i class="fas fa-wallet"></i>
-                <span>Octra Wallet</span>
-            </div>
-            <div class="status-badge">
-                <div class="status-dot"></div>
-                <span id="networkStatus">Testnet</span>
-            </div>
-        </div>
-    </header>
-
     <div class="container">
-        <!-- Login Form -->
-        <div id="loginContainer" class="login-container">
-            <div class="login-card">
-                <div class="login-header">
-                    <h1>Chào mừng trở lại</h1>
-                    <p>Đăng nhập vào ví Octra của bạn để tiếp tục</p>
-                </div>
-
-                <form id="loginForm">
-                    <div class="form-group">
-                        <label class="form-label" for="privateKey">
-                            <i class="fas fa-key"></i> Private Key
-                        </label>
-                        <input type="password" id="privateKey" class="form-input" 
-                               placeholder="Nhập private key của bạn" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="address">
-                            <i class="fas fa-wallet"></i> Địa chỉ ví
-                        </label>
-                        <input type="text" id="address" class="form-input" 
-                               placeholder="oct..." required>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="rpcUrl">
-                            <i class="fas fa-server"></i> RPC URL
-                        </label>
-                        <input type="url" id="rpcUrl" class="form-input" 
-                               value="https://octra.network" required>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-sign-in-alt"></i>
-                        <span>Đăng nhập</span>
-                    </button>
-                </form>
-
-                <div id="loginAlert" class="hidden"></div>
-            </div>
+        <div class="header">
+            <h1>🔐 Octra Wallet</h1>
+            <p>Đăng nhập vào ví Octra của bạn để tiếp tục</p>
         </div>
 
-        <!-- Dashboard -->
-        <div id="dashboard" class="dashboard">
-            <div class="dashboard-header">
-                <div class="dashboard-title">
-                    <h1>Bảng điều khiển</h1>
-                    <p>Quản lý tài sản và giao dịch của bạn</p>
+        <div class="content">
+            <!-- Login Form -->
+            <div id="loginForm">
+                <div class="form-group">
+                    <label for="privateKey">Private Key:</label>
+                    <input type="password" id="privateKey" placeholder="Nhập private key của bạn">
                 </div>
-                <div class="dashboard-actions">
-                    <button class="btn btn-secondary" onclick="refreshWallet()">
-                        <i class="fas fa-sync-alt"></i> Làm mới
-                    </button>
-                    <button class="btn btn-secondary" onclick="showExportModal()">
-                        <i class="fas fa-download"></i> Xuất khóa
-                    </button>
-                    <button class="btn btn-danger" onclick="logout()">
-                        <i class="fas fa-sign-out-alt"></i> Đăng xuất
-                    </button>
+
+                <div class="form-group">
+                    <label for="address">Address:</label>
+                    <input type="text" id="address" placeholder="Nhập address của bạn">
                 </div>
+
+                <div class="form-group">
+                    <label for="rpcUrl">RPC URL:</label>
+                    <input type="text" id="rpcUrl" value="https://octra.network" placeholder="RPC URL">
+                </div>
+
+                <button class="btn btn-primary" onclick="login()">Đăng nhập</button>
             </div>
 
-            <!-- Wallet Stats Cards -->
-            <div class="cards-grid">
-                <div class="card balance-card">
-                    <div class="card-header">
-                        <div class="card-title">Số dư tài khoản</div>
-                        <div class="card-icon">
-                            <i class="fas fa-coins"></i>
-                        </div>
+            <!-- Wallet Dashboard -->
+            <div id="walletDashboard" class="hidden">
+                <div class="wallet-info">
+                    <h3>💼 Thông tin ví</h3>
+                    <div class="info-item">
+                        <span class="info-label">Address:</span>
+                        <span class="info-value" id="walletAddress">-</span>
                     </div>
-                    <div class="card-value" id="walletBalance">0.000000</div>
-                    <div class="card-subtitle">OCT</div>
+                    <div class="info-item">
+                        <span class="info-label">Balance:</span>
+                        <span class="info-value" id="walletBalance">0.000000 OCTRA</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Nonce:</span>
+                        <span class="info-value" id="walletNonce">0</span>
+                    </div>
                 </div>
 
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-title">Địa chỉ ví</div>
-                        <div class="card-icon">
-                            <i class="fas fa-wallet"></i>
-                        </div>
-                    </div>
-                    <div class="card-value" id="walletAddress" style="font-size: 1.2rem; word-break: break-all;">
-                        Đang tải...
-                    </div>
-                    <div class="card-subtitle">Nhấn để sao chép</div>
-                </div>
-
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-title">Nonce</div>
-                        <div class="card-icon">
-                            <i class="fas fa-hashtag"></i>
-                        </div>
-                    </div>
-                    <div class="card-value" id="walletNonce">0</div>
-                    <div class="card-subtitle">Số thứ tự giao dịch</div>
-                </div>
-
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-title">Giao dịch chờ</div>
-                        <div class="card-icon">
-                            <i class="fas fa-clock"></i>
-                        </div>
-                    </div>
-                    <div class="card-value" id="pendingTx">0</div>
-                    <div class="card-subtitle">Đang xử lý</div>
-                </div>
-            </div>
-
-            <!-- Send Transaction Form -->
-            <div class="send-form">
-                <div class="section-header">
-                    <h2 class="section-title">
-                        <i class="fas fa-paper-plane"></i> Gửi giao dịch
-                    </h2>
-                </div>
-
-                <form id="sendForm">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label" for="sendTo">Địa chỉ người nhận</label>
-                            <input type="text" id="sendTo" class="form-input" 
-                                   placeholder="oct..." required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label" for="sendAmount">Số lượng (OCT)</label>
-                            <input type="number" id="sendAmount" class="form-input" 
-                                   placeholder="0.000000" step="0.000001" min="0.000001" required>
-                        </div>
-                    </div>
-
+                <!-- Send Transaction Form -->
+                <div class="send-form">
+                    <h3>💸 Gửi giao dịch</h3>
                     <div class="form-group">
-                        <label class="form-label" for="sendMessage">Tin nhắn (tùy chọn)</label>
-                        <input type="text" id="sendMessage" class="form-input" 
-                               placeholder="Nhập tin nhắn..." maxlength="200">
+                        <label for="sendTo">Địa chỉ nhận:</label>
+                        <input type="text" id="sendTo" placeholder="oct...">
                     </div>
+                    <div class="form-group">
+                        <label for="sendAmount">Số lượng:</label>
+                        <input type="number" id="sendAmount" placeholder="0.000000" step="0.000001">
+                    </div>
+                    <div class="form-group">
+                        <label for="sendMessage">Tin nhắn (tùy chọn):</label>
+                        <input type="text" id="sendMessage" placeholder="Tin nhắn giao dịch">
+                    </div>
+                    <button class="btn btn-primary" onclick="sendTransaction()">Gửi giao dịch</button>
+                </div>
 
-                    <button type="submit" class="btn btn-success">
-                        <i class="fas fa-paper-plane"></i>
-                        <span>Gửi giao dịch</span>
-                    </button>
-                </form>
-
-                <div id="sendAlert" class="hidden"></div>
-            </div>
-
-            <!-- Auto Send Feature -->
-            <div class="auto-send-section">
-                <div class="section-header">
-                    <h2 class="section-title">
-                        <i class="fas fa-robot"></i> Gửi giao dịch tự động
-                    </h2>
-                    <div class="status-indicator stopped" id="autoSendStatus">
-                        <i class="fas fa-stop-circle"></i>
-                        <span>Đã dừng</span>
+                <!-- Transaction History -->
+                <div style="margin-top: 30px;">
+                    <h3>📋 Lịch sử giao dịch</h3>
+                    <div id="transactionHistory" class="transaction-history">
+                        <div class="loading">Đang tải lịch sử giao dịch...</div>
                     </div>
                 </div>
 
-                <div class="auto-send-controls">
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <label class="form-label" for="autoInterval">Khoảng thời gian (giây)</label>
-                        <input type="number" id="autoInterval" class="form-input" 
-                               value="10" min="5" max="3600" style="width: 120px;">
-                    </div>
-
-                    <button id="autoSendBtn" class="btn btn-success" onclick="toggleAutoSend()">
-                        <i class="fas fa-play"></i>
-                        <span>Bắt đầu gửi tự động</span>
-                    </button>
-                </div>
+                <button class="btn btn-secondary" onclick="logout()" style="margin-top: 20px;">Đăng xuất</button>
             </div>
 
-            <!-- Transaction History -->
-            <div class="transaction-section">
-                <div class="section-header">
-                    <h2 class="section-title">
-                        <i class="fas fa-history"></i> Lịch sử giao dịch
-                    </h2>
-                    <button class="btn btn-secondary" onclick="refreshHistory()">
-                        <i class="fas fa-sync-alt"></i> Làm mới
-                    </button>
-                </div>
-
-                <div id="transactionList" class="transaction-list">
-                    <div class="text-center" style="padding: 40px; color: var(--text-muted);">
-                        <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 16px;"></i>
-                        <p>Đang tải lịch sử giao dịch...</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Export Modal -->
-    <div id="exportModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">
-                    <i class="fas fa-download"></i> Xuất khóa ví
-                </h2>
-                <button class="modal-close" onclick="hideExportModal()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-
-            <div class="alert alert-warning">
-                <i class="fas fa-exclamation-triangle"></i>
-                <span>Giữ bí mật thông tin này! Không chia sẻ với bất kỳ ai.</span>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Private Key</label>
-                <div style="position: relative;">
-                    <input type="password" id="exportPrivateKey" class="form-input" readonly>
-                    <button type="button" class="btn btn-secondary" 
-                            style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); padding: 8px 12px; min-height: auto;"
-                            onclick="togglePasswordVisibility('exportPrivateKey')">
-                        <i class="fas fa-eye"></i>
-                    </button>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Public Key</label>
-                <input type="text" id="exportPublicKey" class="form-input" readonly>
-            </div>
-
-            <div class="flex gap-3">
-                <button class="btn btn-primary" onclick="copyToClipboard('exportPrivateKey')">
-                    <i class="fas fa-copy"></i> Sao chép Private Key
-                </button>
-                <button class="btn btn-secondary" onclick="copyToClipboard('exportPublicKey')">
-                    <i class="fas fa-copy"></i> Sao chép Public Key
-                </button>
-            </div>
+            <!-- Alert Messages -->
+            <div id="alertContainer"></div>
         </div>
     </div>
 
     <script>
-        // Global variables
         let sessionId = null;
-        let autoSendInterval = null;
-        let isAutoSending = false;
-        const API_BASE = '/api';
+        let walletAddress = null;
 
-        // Utility functions
-        function showAlert(containerId, message, type = 'error') {
-            const container = document.getElementById(containerId);
-            container.className = `alert alert-${type}`;
-            container.innerHTML = `
-                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : 'exclamation-circle'}"></i>
-                <span>${message}</span>
-            `;
-            container.classList.remove('hidden');
-            
-            if (type === 'success') {
-                setTimeout(() => container.classList.add('hidden'), 5000);
-            }
-        }
+        // ============= ERROR HANDLING - SỬA LỖI CHÍNH =============
 
-        function hideAlert(containerId) {
-            document.getElementById(containerId).classList.add('hidden');
-        }
-
-        function formatAddress(address) {
-            if (!address) return '';
-            return address.length > 20 ? 
-                `${address.substring(0, 10)}...${address.substring(address.length - 10)}` : 
-                address;
-        }
-
-        function formatAmount(amount) {
-            return parseFloat(amount).toFixed(6);
-        }
-
-        function formatTime(isoString) {
-            return new Date(isoString).toLocaleString('vi-VN');
-        }
-
-        async function makeRequest(endpoint, options = {}) {
+        async function makeRequest(url, options = {}) {
             try {
-                const response = await fetch(`${API_BASE}${endpoint}`, {
+                const response = await fetch(url, {
                     headers: {
                         'Content-Type': 'application/json',
                         ...options.headers
@@ -979,12 +321,30 @@
                     ...options
                 });
 
-                const data = await response.json();
+                let data;
+                const contentType = response.headers.get('content-type');
                 
-                if (!response.ok) {
-                    throw new Error(data.error || `HTTP ${response.status}`);
+                // Kiểm tra xem response có phải JSON không
+                if (contentType && contentType.includes('application/json')) {
+                    try {
+                        data = await response.json();
+                    } catch (jsonError) {
+                        console.error('JSON parse error:', jsonError);
+                        throw new Error(`Invalid JSON response from server`);
+                    }
+                } else {
+                    // Server trả về HTML error page
+                    const text = await response.text();
+                    console.error('Non-JSON response:', text);
+                    throw new Error(`Server returned non-JSON response: ${response.status} ${response.statusText}`);
                 }
-                
+
+                // Kiểm tra response status
+                if (!response.ok) {
+                    const errorMessage = data.error || data.message || `HTTP ${response.status}`;
+                    throw new Error(errorMessage);
+                }
+
                 return data;
             } catch (error) {
                 console.error('API Request failed:', error);
@@ -992,26 +352,51 @@
             }
         }
 
-        // Authentication
-        async function login(event) {
-            event.preventDefault();
+        function showAlert(message, type = 'error') {
+            const alertContainer = document.getElementById('alertContainer');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
             
-            const privateKey = document.getElementById('privateKey').value.trim();
-            const address = document.getElementById('address').value.trim();
-            const rpcUrl = document.getElementById('rpcUrl').value.trim();
+            alertContainer.innerHTML = '';
+            alertContainer.appendChild(alertDiv);
+            
+            // Auto hide after 5 seconds
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.parentNode.removeChild(alertDiv);
+                }
+            }, 5000);
+        }
 
-            if (!privateKey || !address) {
-                showAlert('loginAlert', 'Vui lòng nhập đầy đủ thông tin', 'error');
-                return;
-            }
+        function showSuccess(message) {
+            showAlert(message, 'success');
+        }
 
+        function showError(message) {
+            showAlert(message, 'error');
+        }
+
+        // ============= AUTHENTICATION =============
+
+        async function login() {
             try {
-                const submitBtn = event.target.querySelector('button[type="submit"]');
-                const originalText = submitBtn.innerHTML;
-                submitBtn.innerHTML = '<div class="loading"><div class="spinner"></div><span>Đang đăng nhập...</span></div>';
-                submitBtn.disabled = true;
+                const privateKey = document.getElementById('privateKey').value.trim();
+                const address = document.getElementById('address').value.trim();
+                const rpcUrl = document.getElementById('rpcUrl').value.trim() || 'https://octra.network';
 
-                const result = await makeRequest('/wallet/login', {
+                if (!privateKey || !address) {
+                    showError('Vui lòng nhập đầy đủ private key và address');
+                    return;
+                }
+
+                // Validate address format
+                if (!address.match(/^oct[1-9A-HJ-NP-Za-km-z]{44}$/)) {
+                    showError('Định dạng address không hợp lệ');
+                    return;
+                }
+
+                const data = await makeRequest('/api/wallet/login', {
                     method: 'POST',
                     body: JSON.stringify({
                         private_key: privateKey,
@@ -1020,397 +405,252 @@
                     })
                 });
 
-                if (result.success) {
-                    sessionId = result.session_id;
-                    showAlert('loginAlert', 'Đăng nhập thành công!', 'success');
+                if (data.success) {
+                    sessionId = data.session_id;
+                    walletAddress = data.address;
                     
-                    setTimeout(() => {
-                        document.getElementById('loginContainer').style.display = 'none';
-                        document.getElementById('dashboard').classList.add('active');
-                        loadWalletData();
-                    }, 1000);
+                    // Store in sessionStorage
+                    sessionStorage.setItem('session_id', sessionId);
+                    sessionStorage.setItem('wallet_address', walletAddress);
+                    
+                    showSuccess('Đăng nhập thành công!');
+                    showWalletDashboard();
+                    loadWalletData();
                 } else {
-                    showAlert('loginAlert', result.error || 'Đăng nhập thất bại', 'error');
+                    showError(data.error || 'Đăng nhập thất bại');
                 }
-
-                submitBtn.innerHTML = originalText;
-                submitBtn.disabled = false;
-
             } catch (error) {
-                showAlert('loginAlert', error.message || 'Lỗi kết nối server', 'error');
-                const submitBtn = event.target.querySelector('button[type="submit"]');
-                submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i><span>Đăng nhập</span>';
-                submitBtn.disabled = false;
+                showError(`Lỗi đăng nhập: ${error.message}`);
             }
         }
 
         async function logout() {
             try {
                 if (sessionId) {
-                    await makeRequest('/wallet/logout', {
+                    await makeRequest('/api/wallet/logout', {
                         method: 'POST',
-                        body: JSON.stringify({ session_id: sessionId })
+                        body: JSON.stringify({
+                            session_id: sessionId
+                        })
                     });
                 }
             } catch (error) {
                 console.error('Logout error:', error);
+            } finally {
+                sessionId = null;
+                walletAddress = null;
+                sessionStorage.removeItem('session_id');
+                sessionStorage.removeItem('wallet_address');
+                showLoginForm();
+                showSuccess('Đã đăng xuất thành công');
             }
-
-            sessionId = null;
-            if (autoSendInterval) {
-                clearInterval(autoSendInterval);
-                autoSendInterval = null;
-                isAutoSending = false;
-                updateAutoSendStatus();
-            }
-
-            document.getElementById('dashboard').classList.remove('active');
-            document.getElementById('loginContainer').style.display = 'flex';
-            
-            // Reset form
-            document.getElementById('loginForm').reset();
-            document.getElementById('rpcUrl').value = 'https://octra.network';
-            hideAlert('loginAlert');
         }
 
-        // Wallet operations
+        // ============= UI MANAGEMENT =============
+
+        function showLoginForm() {
+            document.getElementById('loginForm').classList.remove('hidden');
+            document.getElementById('walletDashboard').classList.add('hidden');
+        }
+
+        function showWalletDashboard() {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('walletDashboard').classList.remove('hidden');
+        }
+
+        // ============= WALLET DATA =============
+
         async function loadWalletData() {
             if (!sessionId) return;
 
             try {
-                const result = await makeRequest('/wallet/status', {
+                // Load wallet status
+                const statusData = await makeRequest('/api/wallet/status', {
                     method: 'POST',
-                    body: JSON.stringify({ session_id: sessionId })
+                    body: JSON.stringify({
+                        session_id: sessionId
+                    })
                 });
 
-                document.getElementById('walletBalance').textContent = formatAmount(result.balance || 0);
-                document.getElementById('walletAddress').textContent = formatAddress(result.address || '');
-                document.getElementById('walletNonce').textContent = result.nonce || 0;
+                if (statusData.success) {
+                    document.getElementById('walletAddress').textContent = statusData.address;
+                    document.getElementById('walletBalance').textContent = `${statusData.balance.toFixed(6)} OCTRA`;
+                    document.getElementById('walletNonce').textContent = statusData.nonce;
+                }
 
-                // Make address clickable for copy
-                document.getElementById('walletAddress').onclick = () => copyToClipboard('walletAddress');
-
+                // Load transaction history
                 await loadTransactionHistory();
 
             } catch (error) {
                 console.error('Error loading wallet data:', error);
-                showAlert('sendAlert', 'Lỗi tải dữ liệu ví: ' + error.message, 'error');
+                showError(`Lỗi tải dữ liệu ví: ${error.message}`);
             }
-        }
-
-        async function refreshWallet() {
-            const btn = event.target;
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<div class="loading"><div class="spinner"></div><span>Đang tải...</span></div>';
-            btn.disabled = true;
-
-            try {
-                await loadWalletData();
-            } catch (error) {
-                console.error('Refresh error:', error);
-            }
-
-            btn.innerHTML = originalText;
-            btn.disabled = false;
         }
 
         async function loadTransactionHistory() {
             if (!sessionId) return;
 
             try {
-                const result = await makeRequest('/wallet/history', {
-                    method: 'POST',
-                    body: JSON.stringify({ session_id: sessionId })
-                });
-
-                const transactionList = document.getElementById('transactionList');
-                
-                if (!result.transactions || result.transactions.length === 0) {
-                    transactionList.innerHTML = `
-                        <div class="text-center" style="padding: 40px; color: var(--text-muted);">
-                            <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 16px;"></i>
-                            <p>Chưa có giao dịch nào</p>
-                        </div>
-                    `;
-                    return;
-                }
-
-                transactionList.innerHTML = result.transactions.map(tx => `
-                    <div class="transaction-item">
-                        <div class="transaction-icon ${tx.type === 'in' ? 'incoming' : 'outgoing'}">
-                            <i class="fas fa-${tx.type === 'in' ? 'arrow-down' : 'arrow-up'}"></i>
-                        </div>
-                        <div class="transaction-details">
-                            <div class="transaction-address">${formatAddress(tx.address)}</div>
-                            <div class="transaction-time">${formatTime(tx.time)}</div>
-                            ${tx.message ? `<div class="transaction-time">💬 ${tx.message}</div>` : ''}
-                        </div>
-                        <div class="transaction-amount ${tx.type === 'in' ? 'incoming' : 'outgoing'}">
-                            ${tx.type === 'in' ? '+' : '-'}${formatAmount(tx.amount)} OCT
-                        </div>
-                    </div>
-                `).join('');
-
-                // Count pending transactions
-                const pendingCount = result.transactions.filter(tx => !tx.confirmed).length;
-                document.getElementById('pendingTx').textContent = pendingCount;
-
-            } catch (error) {
-                console.error('Error loading transaction history:', error);
-                document.getElementById('transactionList').innerHTML = `
-                    <div class="text-center" style="padding: 40px; color: var(--error-color);">
-                        <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 16px;"></i>
-                        <p>Lỗi tải lịch sử giao dịch</p>
-                    </div>
-                `;
-            }
-        }
-
-        async function refreshHistory() {
-            const btn = event.target;
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<div class="loading"><div class="spinner"></div><span>Đang tải...</span></div>';
-            btn.disabled = true;
-
-            try {
-                await loadTransactionHistory();
-            } catch (error) {
-                console.error('Refresh history error:', error);
-            }
-
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-        }
-
-        // Send transaction
-        async function sendTransaction(event) {
-            event.preventDefault();
-            
-            if (!sessionId) {
-                showAlert('sendAlert', 'Chưa đăng nhập ví', 'error');
-                return;
-            }
-
-            const toAddress = document.getElementById('sendTo').value.trim();
-            const amount = parseFloat(document.getElementById('sendAmount').value);
-            const message = document.getElementById('sendMessage').value.trim();
-
-            if (!toAddress || !amount || amount <= 0) {
-                showAlert('sendAlert', 'Vui lòng nhập đầy đủ thông tin giao dịch', 'error');
-                return;
-            }
-
-            try {
-                const submitBtn = event.target.querySelector('button[type="submit"]');
-                const originalText = submitBtn.innerHTML;
-                submitBtn.innerHTML = '<div class="loading"><div class="spinner"></div><span>Đang gửi...</span></div>';
-                submitBtn.disabled = true;
-
-                const result = await makeRequest('/wallet/send', {
+                const historyData = await makeRequest('/api/wallet/history', {
                     method: 'POST',
                     body: JSON.stringify({
                         session_id: sessionId,
-                        to: toAddress,
-                        amount: amount,
-                        message: message || undefined
+                        limit: 20
                     })
                 });
 
+                if (historyData.success) {
+                    displayTransactionHistory(historyData.transactions);
+                }
+            } catch (error) {
+                console.error('Error loading transaction history:', error);
+                document.getElementById('transactionHistory').innerHTML = 
+                    '<div class="loading">Không thể tải lịch sử giao dịch</div>';
+            }
+        }
+
+        function displayTransactionHistory(transactions) {
+            const historyContainer = document.getElementById('transactionHistory');
+            
+            if (!transactions || transactions.length === 0) {
+                historyContainer.innerHTML = '<div class="loading">Chưa có giao dịch nào</div>';
+                return;
+            }
+
+            const historyHTML = transactions.map(tx => {
+                const typeClass = tx.type === 'incoming' ? 'transaction-incoming' : 
+                                 tx.type === 'outgoing' ? 'transaction-outgoing' : 'transaction-pending';
+                const typeIcon = tx.type === 'incoming' ? '📥' : 
+                                tx.type === 'outgoing' ? '📤' : '⏳';
+                const amountPrefix = tx.type === 'incoming' ? '+' : '-';
+                
+                return `
+                    <div class="transaction-item ${typeClass}">
+                        <div>
+                            <div style="font-weight: 600;">
+                                ${typeIcon} ${amountPrefix}${tx.amount.toFixed(6)} OCTRA
+                            </div>
+                            <div style="font-size: 0.9em; color: #666;">
+                                ${tx.type === 'incoming' ? 'Từ' : 'Đến'}: ${tx.address.substring(0, 10)}...
+                            </div>
+                            ${tx.message ? `<div style="font-size: 0.8em; color: #888;">${tx.message}</div>` : ''}
+                        </div>
+                        <div style="text-align: right; font-size: 0.8em; color: #666;">
+                            <div>${new Date(tx.time).toLocaleDateString('vi-VN')}</div>
+                            <div>${new Date(tx.time).toLocaleTimeString('vi-VN')}</div>
+                            <div style="color: ${tx.confirmed ? '#28a745' : '#ffc107'};">
+                                ${tx.confirmed ? 'Đã xác nhận' : 'Đang chờ'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            historyContainer.innerHTML = historyHTML;
+        }
+
+        // ============= SEND TRANSACTION =============
+
+        async function sendTransaction() {
+            if (!sessionId) {
+                showError('Vui lòng đăng nhập trước');
+                return;
+            }
+
+            try {
+                const toAddress = document.getElementById('sendTo').value.trim();
+                const amount = parseFloat(document.getElementById('sendAmount').value);
+                const message = document.getElementById('sendMessage').value.trim();
+
+                // Validate inputs
+                if (!toAddress) {
+                    showError('Vui lòng nhập địa chỉ nhận');
+                    return;
+                }
+
+                if (!toAddress.match(/^oct[1-9A-HJ-NP-Za-km-z]{44}$/)) {
+                    showError('Định dạng địa chỉ nhận không hợp lệ');
+                    return;
+                }
+
+                if (!amount || amount <= 0) {
+                    showError('Vui lòng nhập số lượng hợp lệ');
+                    return;
+                }
+
+                if (amount > 1000000) {
+                    showError('Số lượng không được vượt quá 1,000,000 OCTRA');
+                    return;
+                }
+
+                const sendData = {
+                    session_id: sessionId,
+                    to: toAddress,
+                    amount: amount
+                };
+
+                if (message) {
+                    sendData.message = message;
+                }
+
+                const result = await makeRequest('/api/wallet/send', {
+                    method: 'POST',
+                    body: JSON.stringify(sendData)
+                });
+
                 if (result.success) {
-                    showAlert('sendAlert', `Giao dịch thành công! Hash: ${result.tx_hash}`, 'success');
+                    showSuccess(`Giao dịch đã được gửi thành công! TX Hash: ${result.tx_hash}`);
                     
-                    // Reset form
-                    document.getElementById('sendForm').reset();
+                    // Clear form
+                    document.getElementById('sendTo').value = '';
+                    document.getElementById('sendAmount').value = '';
+                    document.getElementById('sendMessage').value = '';
                     
-                    // Refresh wallet data
+                    // Reload wallet data
                     setTimeout(() => {
                         loadWalletData();
                     }, 2000);
                 } else {
-                    showAlert('sendAlert', result.error || 'Giao dịch thất bại', 'error');
+                    showError(result.error || 'Gửi giao dịch thất bại');
                 }
-
-                submitBtn.innerHTML = originalText;
-                submitBtn.disabled = false;
-
             } catch (error) {
-                showAlert('sendAlert', error.message || 'Lỗi gửi giao dịch', 'error');
-                const submitBtn = event.target.querySelector('button[type="submit"]');
-                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i><span>Gửi giao dịch</span>';
-                submitBtn.disabled = false;
+                showError(`Lỗi gửi giao dịch: ${error.message}`);
             }
         }
 
-        // Auto send functionality
-        function toggleAutoSend() {
-            if (isAutoSending) {
-                stopAutoSend();
-            } else {
-                startAutoSend();
-            }
-        }
+        // ============= INITIALIZATION =============
 
-        function startAutoSend() {
-            if (!sessionId) {
-                showAlert('sendAlert', 'Chưa đăng nhập ví', 'error');
-                return;
-            }
-
-            const toAddress = document.getElementById('sendTo').value.trim();
-            const amount = parseFloat(document.getElementById('sendAmount').value);
-            const interval = parseInt(document.getElementById('autoInterval').value) * 1000;
-
-            if (!toAddress || !amount || amount <= 0) {
-                showAlert('sendAlert', 'Vui lòng nhập thông tin giao dịch trước khi bắt đầu gửi tự động', 'error');
-                return;
-            }
-
-            isAutoSending = true;
-            updateAutoSendStatus();
-
-            autoSendInterval = setInterval(async () => {
-                try {
-                    const message = document.getElementById('sendMessage').value.trim();
-                    
-                    const result = await makeRequest('/wallet/send', {
-                        method: 'POST',
-                        body: JSON.stringify({
-                            session_id: sessionId,
-                            to: toAddress,
-                            amount: amount,
-                            message: message || undefined
-                        })
-                    });
-
-                    if (result.success) {
-                        console.log('Auto send successful:', result.tx_hash);
-                        // Refresh wallet data periodically
-                        if (Math.random() < 0.1) { // 10% chance to refresh
-                            loadWalletData();
-                        }
-                    } else {
-                        console.error('Auto send failed:', result.error);
-                        showAlert('sendAlert', 'Gửi tự động thất bại: ' + result.error, 'error');
-                        stopAutoSend();
-                    }
-                } catch (error) {
-                    console.error('Auto send error:', error);
-                    showAlert('sendAlert', 'Lỗi gửi tự động: ' + error.message, 'error');
-                    stopAutoSend();
-                }
-            }, interval);
-        }
-
-        function stopAutoSend() {
-            if (autoSendInterval) {
-                clearInterval(autoSendInterval);
-                autoSendInterval = null;
-            }
-            isAutoSending = false;
-            updateAutoSendStatus();
-        }
-
-        function updateAutoSendStatus() {
-            const statusEl = document.getElementById('autoSendStatus');
-            const btnEl = document.getElementById('autoSendBtn');
-
-            if (isAutoSending) {
-                statusEl.className = 'status-indicator running';
-                statusEl.innerHTML = '<i class="fas fa-play-circle"></i><span>Đang chạy</span>';
-                btnEl.innerHTML = '<i class="fas fa-stop"></i><span>Dừng gửi tự động</span>';
-                btnEl.className = 'btn btn-danger';
-            } else {
-                statusEl.className = 'status-indicator stopped';
-                statusEl.innerHTML = '<i class="fas fa-stop-circle"></i><span>Đã dừng</span>';
-                btnEl.innerHTML = '<i class="fas fa-play"></i><span>Bắt đầu gửi tự động</span>';
-                btnEl.className = 'btn btn-success';
-            }
-        }
-
-        // Export functionality
-        async function showExportModal() {
-            if (!sessionId) {
-                showAlert('sendAlert', 'Chưa đăng nhập ví', 'error');
-                return;
-            }
-
-            try {
-                const result = await makeRequest('/wallet/export', {
-                    method: 'POST',
-                    body: JSON.stringify({ session_id: sessionId })
-                });
-
-                document.getElementById('exportPrivateKey').value = result.private_key;
-                document.getElementById('exportPublicKey').value = result.public_key;
-                document.getElementById('exportModal').classList.add('active');
-
-            } catch (error) {
-                showAlert('sendAlert', 'Lỗi xuất khóa: ' + error.message, 'error');
-            }
-        }
-
-        function hideExportModal() {
-            document.getElementById('exportModal').classList.remove('active');
-        }
-
-        function togglePasswordVisibility(inputId) {
-            const input = document.getElementById(inputId);
-            const icon = event.target.querySelector('i');
+        // Check for existing session on page load
+        window.addEventListener('load', () => {
+            const storedSessionId = sessionStorage.getItem('session_id');
+            const storedAddress = sessionStorage.getItem('wallet_address');
             
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.className = 'fas fa-eye-slash';
+            if (storedSessionId && storedAddress) {
+                sessionId = storedSessionId;
+                walletAddress = storedAddress;
+                showWalletDashboard();
+                loadWalletData();
             } else {
-                input.type = 'password';
-                icon.className = 'fas fa-eye';
-            }
-        }
-
-        async function copyToClipboard(elementId) {
-            const element = document.getElementById(elementId);
-            const text = element.value || element.textContent;
-            
-            try {
-                await navigator.clipboard.writeText(text);
-                
-                // Show temporary feedback
-                const originalText = element.value || element.textContent;
-                if (element.tagName === 'INPUT') {
-                    element.value = 'Đã sao chép!';
-                    setTimeout(() => element.value = originalText, 1000);
-                } else {
-                    element.textContent = 'Đã sao chép!';
-                    setTimeout(() => element.textContent = originalText, 1000);
-                }
-            } catch (error) {
-                console.error('Copy failed:', error);
-                // Fallback for older browsers
-                element.select();
-                document.execCommand('copy');
-            }
-        }
-
-        // Event listeners
-        document.getElementById('loginForm').addEventListener('submit', login);
-        document.getElementById('sendForm').addEventListener('submit', sendTransaction);
-
-        // Close modal when clicking outside
-        document.getElementById('exportModal').addEventListener('click', (e) => {
-            if (e.target === e.currentTarget) {
-                hideExportModal();
+                showLoginForm();
             }
         });
 
-        // Auto-refresh wallet data every 30 seconds
+        // Auto refresh wallet data every 30 seconds
         setInterval(() => {
-            if (sessionId && !isAutoSending) {
+            if (sessionId && !document.getElementById('walletDashboard').classList.contains('hidden')) {
                 loadWalletData();
             }
         }, 30000);
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log('Octra Wallet loaded successfully');
+        // Handle Enter key in forms
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                if (!document.getElementById('loginForm').classList.contains('hidden')) {
+                    login();
+                } else if (!document.getElementById('walletDashboard').classList.contains('hidden')) {
+                    sendTransaction();
+                }
+            }
         });
     </script>
 </body>
