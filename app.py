@@ -498,3 +498,441 @@ def export_wallet():
 def clear_cache():
     wallet.cache.clear()
     return jsonify({'success': True})
+
+# Template for the main HTML page
+@app.route('/templates/index.html')
+def get_template():
+    return '''
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Octra Web Wallet</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Courier New', monospace; 
+            background: #1a1a1a; 
+            color: #fff; 
+            line-height: 1.6; 
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .wallet-section { 
+            background: #2a2a2a; 
+            border: 1px solid #444; 
+            border-radius: 8px; 
+            padding: 20px; 
+            margin-bottom: 20px; 
+        }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; color: #ccc; }
+        input, textarea, select { 
+            width: 100%; 
+            padding: 10px; 
+            background: #333; 
+            border: 1px solid #555; 
+            border-radius: 4px; 
+            color: #fff; 
+        }
+        button { 
+            background: #007acc; 
+            color: white; 
+            padding: 10px 20px; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            margin-right: 10px; 
+        }
+        button:hover { background: #005a9e; }
+        .success { color: #4caf50; }
+        .error { color: #f44336; }
+        .tx-list { max-height: 400px; overflow-y: auto; }
+        .tx-item { 
+            border-bottom: 1px solid #444; 
+            padding: 10px 0; 
+            display: flex; 
+            justify-content: space-between; 
+        }
+        .hidden { display: none; }
+        .loading { color: #ffa500; }
+        .tabs { display: flex; margin-bottom: 20px; }
+        .tab { 
+            padding: 10px 20px; 
+            background: #333; 
+            border: 1px solid #555; 
+            cursor: pointer; 
+            margin-right: 5px; 
+        }
+        .tab.active { background: #007acc; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>?? Octra Web Wallet</h1>
+            <p>Testnet Environment - v1.0.0</p>
+        </div>
+
+        <!-- Wallet Setup -->
+        <div id="wallet-setup" class="wallet-section">
+            <h2>Wallet Setup</h2>
+            <div class="tabs">
+                <div class="tab active" onclick="showTab('load')">Load Wallet</div>
+                <div class="tab" onclick="showTab('generate')">Generate New</div>
+            </div>
+            
+            <div id="load-tab">
+                <div class="form-group">
+                    <label>Private Key:</label>
+                    <input type="password" id="private-key" placeholder="Enter your private key">
+                </div>
+                <div class="form-group">
+                    <label>RPC URL:</label>
+                    <input type="text" id="rpc-url" value="https://octra.network" placeholder="RPC endpoint">
+                </div>
+                <button onclick="loadWallet()">Load Wallet</button>
+            </div>
+            
+            <div id="generate-tab" class="hidden">
+                <p>Generate a new wallet with a random private key.</p>
+                <button onclick="generateWallet()">Generate New Wallet</button>
+            </div>
+            
+            <div id="wallet-result"></div>
+        </div>
+
+        <!-- Wallet Info -->
+        <div id="wallet-info" class="wallet-section hidden">
+            <h2>Wallet Information</h2>
+            <div id="wallet-details"></div>
+            <button onclick="refreshWallet()">Refresh</button>
+            <button onclick="exportWallet()">Export</button>
+        </div>
+
+        <!-- Send Transaction -->
+        <div id="send-section" class="wallet-section hidden">
+            <h2>Send Transaction</h2>
+            <div class="form-group">
+                <label>To Address:</label>
+                <input type="text" id="send-to" placeholder="oct...">
+            </div>
+            <div class="form-group">
+                <label>Amount (OCT):</label>
+                <input type="number" id="send-amount" step="0.000001" placeholder="0.000000">
+            </div>
+            <div class="form-group">
+                <label>Message (optional):</label>
+                <textarea id="send-message" placeholder="Optional message" maxlength="1024"></textarea>
+            </div>
+            <button onclick="sendTransaction()">Send Transaction</button>
+            <div id="send-result"></div>
+        </div>
+
+        <!-- Multi Send -->
+        <div id="multi-send-section" class="wallet-section hidden">
+            <h2>Multi Send</h2>
+            <div id="recipients-list">
+                <div class="recipient-item">
+                    <div class="form-group">
+                        <label>Address:</label>
+                        <input type="text" class="recipient-address" placeholder="oct...">
+                    </div>
+                    <div class="form-group">
+                        <label>Amount:</label>
+                        <input type="number" class="recipient-amount" step="0.000001" placeholder="0.000000">
+                    </div>
+                </div>
+            </div>
+            <button onclick="addRecipient()">Add Recipient</button>
+            <button onclick="multiSend()">Send All</button>
+            <div id="multi-send-result"></div>
+        </div>
+
+        <!-- Transaction History -->
+        <div id="history-section" class="wallet-section hidden">
+            <h2>Transaction History</h2>
+            <div id="transaction-list" class="tx-list"></div>
+        </div>
+    </div>
+
+    <script>
+        let walletLoaded = false;
+
+        function showTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('[id$="-tab"]').forEach(t => t.classList.add('hidden'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tab + '-tab').classList.remove('hidden');
+        }
+
+        async function loadWallet() {
+            const privateKey = document.getElementById('private-key').value;
+            const rpcUrl = document.getElementById('rpc-url').value;
+            
+            if (!privateKey) {
+                showResult('wallet-result', 'Private key is required', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/load_wallet', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({private_key: privateKey, rpc_url: rpcUrl})
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    walletLoaded = true;
+                    showResult('wallet-result', 'Wallet loaded successfully!', 'success');
+                    showWalletSections();
+                    refreshWallet();
+                } else {
+                    showResult('wallet-result', data.error, 'error');
+                }
+            } catch (error) {
+                showResult('wallet-result', 'Network error: ' + error.message, 'error');
+            }
+        }
+
+        async function generateWallet() {
+            try {
+                const response = await fetch('/api/generate_wallet', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'}
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('private-key').value = data.private_key;
+                    showResult('wallet-result', 
+                        `New wallet generated!<br>
+                        Address: ${data.address}<br>
+                        <strong>Save your private key safely!</strong>`, 'success');
+                } else {
+                    showResult('wallet-result', data.error, 'error');
+                }
+            } catch (error) {
+                showResult('wallet-result', 'Network error: ' + error.message, 'error');
+            }
+        }
+
+        async function refreshWallet() {
+            if (!walletLoaded) return;
+            
+            try {
+                const response = await fetch('/api/status');
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('wallet-details').innerHTML = `
+                        <p><strong>Address:</strong> ${data.address}</p>
+                        <p><strong>Balance:</strong> ${data.balance ? data.balance.toFixed(6) : '---'} OCT</p>
+                        <p><strong>Nonce:</strong> ${data.nonce !== null ? data.nonce : '---'}</p>
+                    `;
+                    
+                    loadHistory();
+                } else {
+                    showResult('wallet-details', data.error, 'error');
+                }
+            } catch (error) {
+                showResult('wallet-details', 'Network error: ' + error.message, 'error');
+            }
+        }
+
+        async function loadHistory() {
+            try {
+                const response = await fetch('/api/history');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const historyHtml = data.transactions.map(tx => `
+                        <div class="tx-item">
+                            <div>
+                                <strong>${tx.type.toUpperCase()}</strong> 
+                                ${tx.amount.toFixed(6)} OCT
+                                ${tx.message ? '<br><small>?? ' + tx.message + '</small>' : ''}
+                            </div>
+                            <div>
+                                <small>${new Date(tx.time).toLocaleString()}</small><br>
+                                <small>${tx.address.substring(0, 20)}...</small><br>
+                                <small>${tx.confirmed ? '? Confirmed' : '? Pending'}</small>
+                            </div>
+                        </div>
+                    `).join('');
+                    
+                    document.getElementById('transaction-list').innerHTML = 
+                        historyHtml || '<p>No transactions yet</p>';
+                }
+            } catch (error) {
+                console.error('Error loading history:', error);
+            }
+        }
+
+        async function sendTransaction() {
+            const to = document.getElementById('send-to').value;
+            const amount = document.getElementById('send-amount').value;
+            const message = document.getElementById('send-message').value;
+            
+            if (!to || !amount) {
+                showResult('send-result', 'Address and amount are required', 'error');
+                return;
+            }
+            
+            showResult('send-result', 'Sending transaction...', 'loading');
+            
+            try {
+                const response = await fetch('/api/send', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({to, amount, message})
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showResult('send-result', 
+                        `Transaction sent successfully!<br>Hash: ${data.hash}`, 'success');
+                    document.getElementById('send-to').value = '';
+                    document.getElementById('send-amount').value = '';
+                    document.getElementById('send-message').value = '';
+                    setTimeout(refreshWallet, 2000);
+                } else {
+                    showResult('send-result', data.error, 'error');
+                }
+            } catch (error) {
+                showResult('send-result', 'Network error: ' + error.message, 'error');
+            }
+        }
+
+        function addRecipient() {
+            const recipientHtml = `
+                <div class="recipient-item">
+                    <div class="form-group">
+                        <label>Address:</label>
+                        <input type="text" class="recipient-address" placeholder="oct...">
+                    </div>
+                    <div class="form-group">
+                        <label>Amount:</label>
+                        <input type="number" class="recipient-amount" step="0.000001" placeholder="0.000000">
+                    </div>
+                    <button onclick="this.parentElement.remove()">Remove</button>
+                </div>
+            `;
+            document.getElementById('recipients-list').insertAdjacentHTML('beforeend', recipientHtml);
+        }
+
+        async function multiSend() {
+            const recipients = [];
+            document.querySelectorAll('.recipient-item').forEach(item => {
+                const address = item.querySelector('.recipient-address').value;
+                const amount = item.querySelector('.recipient-amount').value;
+                if (address && amount) {
+                    recipients.push({address, amount});
+                }
+            });
+            
+            if (recipients.length === 0) {
+                showResult('multi-send-result', 'No recipients specified', 'error');
+                return;
+            }
+            
+            showResult('multi-send-result', 'Sending transactions...', 'loading');
+            
+            try {
+                const response = await fetch('/api/multi_send', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({recipients})
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showResult('multi-send-result', 
+                        `Multi-send completed!<br>
+                        Successful: ${data.summary.successful}<br>
+                        Failed: ${data.summary.failed}`, 'success');
+                    setTimeout(refreshWallet, 2000);
+                } else {
+                    showResult('multi-send-result', data.error, 'error');
+                }
+            } catch (error) {
+                showResult('multi-send-result', 'Network error: ' + error.message, 'error');
+            }
+        }
+
+        async function exportWallet() {
+            const type = prompt('Export type: address, private_key, or wallet_file', 'address');
+            if (!type) return;
+            
+            try {
+                const response = await fetch('/api/export', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({type})
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    if (type === 'wallet_file') {
+                        const blob = new Blob([JSON.stringify(data.wallet_data, null, 2)], 
+                            {type: 'application/json'});
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `octra_wallet_${Date.now()}.json`;
+                        a.click();
+                    } else {
+                        const text = type === 'private_key' ? 
+                            `Private Key: ${data.private_key}\nPublic Key: ${data.public_key}` :
+                            data.address;
+                        navigator.clipboard.writeText(text);
+                        alert('Copied to clipboard!');
+                    }
+                }
+            } catch (error) {
+                alert('Export failed: ' + error.message);
+            }
+        }
+
+        function showWalletSections() {
+            document.getElementById('wallet-setup').classList.add('hidden');
+            document.getElementById('wallet-info').classList.remove('hidden');
+            document.getElementById('send-section').classList.remove('hidden');
+            document.getElementById('multi-send-section').classList.remove('hidden');
+            document.getElementById('history-section').classList.remove('hidden');
+        }
+
+        function showResult(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="${type}">${message}</div>`;
+        }
+
+        // Auto-refresh every 30 seconds
+        setInterval(() => {
+            if (walletLoaded) {
+                refreshWallet();
+            }
+        }, 30000);
+    </script>
+</body>
+</html>
+    '''
+
+# Create templates directory if it doesn't exist
+if not os.path.exists('templates'):
+    os.makedirs('templates')
+
+# Write the template file
+with open('templates/index.html', 'w') as f:
+    f.write(get_template().strip())
+
+if __name__ == '__main__':
+    app.run(debug=True)
