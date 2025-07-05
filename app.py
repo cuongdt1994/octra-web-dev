@@ -60,11 +60,11 @@ class WalletManager:
         try
             pub_bytes = base64.b64decode(self.public_key)
             pubkey_hash = hashlib.sha256(pub_bytes).digest()
-            address_suffix = self._base58_encode(pubkey_hash)[:45]
-            return "oct" + address_suffix
+            full_encoded = self._base58_encode(pubkey_hash)
+            return "oct" + full_encoded
         except Exception as e:
             raise ValueError(f"Address generation error: {str(e)}")
-            
+
     def _base58_encode(self, data: bytes) -> str:
         alphabet = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
         num = int.from_bytes(data, 'big')
