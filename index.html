@@ -485,6 +485,40 @@
             document.getElementById('current-time').textContent = new Date().toLocaleTimeString('vi-VN');
         }
 
+        async function makeApiCall(url, options = {}) {
+            try {
+                console.log(`Making API call to: ${url}`);
+                const response = await fetch(url, {
+                    ...options,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    }
+                });
+
+                console.log(`Response status: ${response.status}`);
+                console.log(`Response headers:`, [...response.headers.entries()]);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const text = await response.text();
+                    console.error('Expected JSON but got:', text.substring(0, 200));
+                    throw new Error(`Server trả về HTML thay vì JSON. Có thể API chưa hoạt động đúng.`);
+                }
+
+                const data = await response.json();
+                console.log('API response:', data);
+                return data;
+            } catch (error) {
+                console.error('API call error:', error);
+                throw error;
+            }
+        }
+
         async function loginWallet() {
             const privateKey = document.getElementById('privateKey').value.trim();
             const address = document.getElementById('walletAddress').value.trim();
@@ -496,20 +530,17 @@
                 return;
             }
 
-            statusDiv.innerHTML = '<div class="loading"><div class="spinner"></div> Đang đăng nhập...</div>';
+            statusDiv.innerHTML = '<div class="loading" style="display: block;"><div class="spinner"></div> Đang đăng nhập...</div>';
 
             try {
-                const response = await fetch('/api/wallet/login', {
+                const data = await makeApiCall('/api/wallet/login', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
                         private_key: privateKey, 
                         address: address, 
                         rpc_url: rpcUrl 
                     })
                 });
-
-                const data = await response.json();
 
                 if (data.success) {
                     statusDiv.innerHTML = '<div class="status success">✓ Đăng nhập thành công!</div>';
@@ -521,19 +552,18 @@
                     statusDiv.innerHTML = `<div class="status error">✗ ${data.error}</div>`;
                 }
             } catch (error) {
-                statusDiv.innerHTML = `<div class="status error">✗ Lỗi kết nối: ${error.message}</div>`;
+                statusDiv.innerHTML = `<div class="status error">✗ ${error.message}</div>`;
             }
         }
 
         async function logoutWallet() {
             if (confirm('Bạn có chắc muốn đăng xuất?')) {
                 try {
-                    await fetch('/api/wallet/logout', { method: 'POST' });
+                    await makeApiCall('/api/wallet/logout', { method: 'POST' });
                     isLoggedIn = false;
                     document.getElementById('loginSection').style.display = 'block';
                     document.getElementById('walletSection').style.display = 'none';
                     
-                    // Xóa thông tin form
                     document.getElementById('privateKey').value = '';
                     document.getElementById('walletAddress').value = '';
                     document.getElementById('loginStatus').innerHTML = '';
@@ -547,13 +577,8 @@
             if (!isLoggedIn) return;
             
             try {
-                const response = await fetch('/api/wallet/status');
-                const data = await response.json();
+                const data = await makeApiCall('/api/wallet/status');
                 
-                if (data.error) {
-                    throw new Error(data.error);
-                }
-
                 walletData = data;
                 document.getElementById('wallet-address').textContent = data.address.substring(0, 20) + '...';
                 document.getElementById('wallet-balance').textContent = `${data.balance?.toFixed(6) || '0.000000'} OCT`;
@@ -570,8 +595,7 @@
             if (!isLoggedIn) return;
             
             try {
-                const response = await fetch('/api/wallet/history');
-                const data = await response.json();
+                const data = await makeApiCall('/api/wallet/history');
                 
                 const transactionList = document.getElementById('transaction-list');
                 
@@ -623,9 +647,9 @@
         }
 
         async function sendTransaction() {
-            const address = document.getElementById('send-address').value;
+            const address = document.getElementById('send-address').value.trim();
             const amount = parseFloat(document.getElementById('send-amount').value);
-            const message = document.getElementById('send-message').value;
+            const message = document.getElementById('send-message').value.trim();
             const statusDiv = document.getElementById('send-status');
 
             if (!address || !amount) {
@@ -633,16 +657,17 @@
                 return;
             }
 
-            statusDiv.innerHTML = '<div class="loading"><div class="spinner"></div> Đang gửi giao dịch...</div>';
+            statusDiv.innerHTML = '<div class="loading" style="display: block;"><div class="spinner"></div> Đang gửi giao dịch...</div>';
 
             try {
-                const response = await fetch('/api/wallet/send', {
+                const data = await makeApiCall('/api/wallet/send', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ to: address, amount: amount, message: message || undefined })
+                    body: JSON.stringify({ 
+                        to: address, 
+                        amount: amount, 
+                        message: message || undefined 
+                    })
                 });
-
-                const data = await response.json();
 
                 if (data.success) {
                     statusDiv.innerHTML = `<div class="status success">✓ Giao dịch đã gửi thành công!<br>Hash: ${data.tx_hash.substring(0, 32)}...<br>Thời gian: ${data.duration.toFixed(2)}s</div>`;
@@ -654,14 +679,13 @@
                     statusDiv.innerHTML = `<div class="status error">✗ Giao dịch thất bại: ${data.error}</div>`;
                 }
             } catch (error) {
-                statusDiv.innerHTML = `<div class="status error">✗ Lỗi mạng: ${error.message}</div>`;
+                statusDiv.innerHTML = `<div class="status error">✗ ${error.message}</div>`;
             }
         }
 
         async function openExportModal() {
             try {
-                const response = await fetch('/api/wallet/export');
-                const data = await response.json();
+                const data = await makeApiCall('/api/wallet/export');
                 
                 document.getElementById('export-private').value = data.private_key;
                 document.getElementById('export-public').value = data.public_key;
@@ -697,7 +721,6 @@
         setInterval(updateTime, 1000);
         updateTime();
         
-        // Auto refresh nếu đã đăng nhập
         setInterval(() => {
             if (isLoggedIn) {
                 refreshWallet();
