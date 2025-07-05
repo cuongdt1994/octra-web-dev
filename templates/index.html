@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Octra Wallet Web</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1><i class="fas fa-wallet"></i> Octra Wallet Web</h1>
+                <div class="header-info">
+                    <span class="testnet-badge">TESTNET</span>
+                    <span class="time" id="current-time"></span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Wallet Initialization -->
+        <div class="wallet-init" id="wallet-init">
+            <div class="init-card">
+                <h2><i class="fas fa-key"></i> Khởi tạo Ví</h2>
+                <form id="init-form">
+                    <div class="form-group">
+                        <label for="private-key">Private Key:</label>
+                        <textarea id="private-key" placeholder="Nhập private key của bạn..." required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="rpc-url">RPC URL:</label>
+                        <input type="url" id="rpc-url" value="https://octra.network" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-unlock"></i> Khởi tạo Ví
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Main Wallet Interface -->
+        <div class="wallet-interface" id="wallet-interface" style="display: none;">
+            <div class="main-content">
+                <!-- Sidebar -->
+                <aside class="sidebar">
+                    <div class="wallet-info">
+                        <h3><i class="fas fa-info-circle"></i> Thông tin Ví</h3>
+                        <div class="info-item">
+                            <label>Địa chỉ:</label>
+                            <span id="wallet-address" class="address"></span>
+                            <button class="copy-btn" onclick="copyToClipboard('wallet-address')">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                        <div class="info-item">
+                            <label>Số dư:</label>
+                            <span id="wallet-balance" class="balance">0.000000 OCT</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Nonce:</label>
+                            <span id="wallet-nonce">0</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Đang chờ:</label>
+                            <span id="staging-count">0</span>
+                        </div>
+                    </div>
+
+                    <div class="actions">
+                        <h3><i class="fas fa-cogs"></i> Hành động</h3>
+                        <button class="btn btn-primary" onclick="showSendForm()">
+                            <i class="fas fa-paper-plane"></i> Gửi Giao dịch
+                        </button>
+                        <button class="btn btn-secondary" onclick="showMultiSendForm()">
+                            <i class="fas fa-share-alt"></i> Gửi Nhiều
+                        </button>
+                        <button class="btn btn-info" onclick="refreshWallet()">
+                            <i class="fas fa-sync-alt"></i> Làm mới
+                        </button>
+                        <button class="btn btn-warning" onclick="showExportModal()">
+                            <i class="fas fa-download"></i> Xuất Ví
+                        </button>
+                    </div>
+
+                    <div class="testnet-info">
+                        <h4><i class="fas fa-exclamation-triangle"></i> Lưu ý</h4>
+                        <p>Đây là môi trường testnet.</p>
+                        <p>Token testnet không có giá trị thương mại.</p>
+                    </div>
+                </aside>
+
+                <!-- Main Panel -->
+                <main class="main-panel">
+                    <div class="panel-header">
+                        <h2><i class="fas fa-history"></i> Lịch sử Giao dịch</h2>
+                        <button class="btn btn-sm btn-secondary" onclick="loadTransactions()">
+                            <i class="fas fa-refresh"></i> Tải lại
+                        </button>
+                    </div>
+                    
+                    <div class="transactions-container">
+                        <div class="transactions-header">
+                            <span>Thời gian</span>
+                            <span>Loại</span>
+                            <span>Số tiền</span>
+                            <span>Địa chỉ</span>
+                            <span>Trạng thái</span>
+                        </div>
+                        <div class="transactions-list" id="transactions-list">
+                            <div class="no-transactions">
+                                <i class="fas fa-inbox"></i>
+                                <p>Chưa có giao dịch nào</p>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <!-- Send Transaction Modal -->
+    <div class="modal" id="send-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-paper-plane"></i> Gửi Giao dịch</h3>
+                <button class="close-btn" onclick="closeSendModal()">&times;</button>
+            </div>
+            <form id="send-form">
+                <div class="form-group">
+                    <label for="send-address">Địa chỉ nhận:</label>
+                    <input type="text" id="send-address" placeholder="oct..." required>
+                </div>
+                <div class="form-group">
+                    <label for="send-amount">Số tiền:</label>
+                    <input type="number" id="send-amount" step="0.000001" min="0.000001" placeholder="0.000000" required>
+                </div>
+                <div class="form-group">
+                    <label for="send-message">Tin nhắn (tùy chọn):</label>
+                    <textarea id="send-message" placeholder="Tin nhắn..." maxlength="1024"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeSendModal()">Hủy</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i> Gửi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Multi Send Modal -->
+    <div class="modal" id="multi-send-modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3><i class="fas fa-share-alt"></i> Gửi Nhiều Giao dịch</h3>
+                <button class="close-btn" onclick="closeMultiSendModal()">&times;</button>
+            </div>
+            <div class="multi-send-content">
+                <div class="recipients-section">
+                    <h4>Danh sách người nhận:</h4>
+                    <div class="recipients-list" id="recipients-list">
+                        <!-- Recipients will be added here -->
+                    </div>
+                    <div class="add-recipient">
+                        <input type="text" id="recipient-address" placeholder="Địa chỉ nhận...">
+                        <input type="number" id="recipient-amount" step="0.000001" min="0.000001" placeholder="Số tiền...">
+                        <button type="button" class="btn btn-sm btn-primary" onclick="addRecipient()">
+                            <i class="fas fa-plus"></i> Thêm
+                        </button>
+                    </div>
+                </div>
+                <div class="multi-send-summary">
+                    <p>Tổng số người nhận: <span id="total-recipients">0</span></p>
+                    <p>Tổng số tiền: <span id="total-amount">0.000000 OCT</span></p>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeMultiSendModal()">Hủy</button>
+                    <button type="button" class="btn btn-primary" onclick="sendMultiTransactions()">
+                        <i class="fas fa-share-alt"></i> Gửi Tất cả
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Modal -->
+    <div class="modal" id="export-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-download"></i> Xuất Ví</h3>
+                <button class="close-btn" onclick="closeExportModal()">&times;</button>
+            </div>
+            <div class="export-content">
+                <div class="export-option">
+                    <button class="btn btn-primary" onclick="showPrivateKey()">
+                        <i class="fas fa-key"></i> Hiển thị Private Key
+                    </button>
+                </div>
+                <div class="export-option">
+                    <button class="btn btn-secondary" onclick="downloadWallet()">
+                        <i class="fas fa-file-download"></i> Tải file ví
+                    </button>
+                </div>
+                <div class="export-option">
+                    <button class="btn btn-info" onclick="copyAddress()">
+                        <i class="fas fa-copy"></i> Copy địa chỉ
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p id="loading-text">Đang xử lý...</p>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
