@@ -15,6 +15,8 @@ from concurrent.futures import ThreadPoolExecutor
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 import os
+import tempfile
+import shutil
 
 app = FastAPI(title="Octra Wallet", version="2.0.0")
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -295,25 +297,73 @@ async def send_transaction(tx: Dict) -> tuple:
         return False, str(e), time.time() - start_time, None
 
 def load_wallet_addresses() -> List[str]:
-    """Load addresses from wallet.json with validation."""
+    """Load addresses from wallet.json with improved error handling."""
+    file_paths = ["wallet.json", os.path.expanduser("~/wallet.json")]
+    
+    for file_path in file_paths:
+        try:
+            if not os.path.exists(file_path):
+                continue
+                
+            with open(file_path, "r") as f:
+                addresses = json.load(f)
+            
+            if not isinstance(addresses, list):
+                continue
+                
+            valid_addresses = [addr for addr in addresses if validate_address(addr)]
+            return valid_addresses
+            
+        except (json.JSONDecodeError, PermissionError, IOError):
+            continue
+    
+    # Tạo file mới nếu không tìm thấy
     try:
-        if not os.path.exists("wallet.json"):
-            return []
-        
-        with open("wallet.json", "r") as f:
-            addresses = json.load(f)
-        
-        valid_addresses = [addr for addr in addresses if validate_address(addr)]
-        return valid_addresses
+        with open("wallet.json", "w") as f:
+            json.dump([], f)
+        return []
     except Exception:
         return []
 
 def save_wallet_addresses(addresses: List[str]) -> bool:
-    """Save addresses to wallet.json."""
+    """Save addresses to wallet.json with improved error handling."""
     try:
-        with open("wallet.json", "w") as f:
-            json.dump(addresses, f, indent=2)
-        return True
+        # Tạo thư mục nếu chưa tồn tại
+        os.makedirs(os.path.dirname(os.path.abspath("wallet.json")), exist_ok=True)
+        
+        # Sử dụng temporary file để tránh corruption
+        temp_file = None
+        try:
+            with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json') as temp_file:
+                json.dump(addresses, temp_file, indent=2, ensure_ascii=False)
+                temp_file_path = temp_file.name
+            
+            # Atomic move để đảm bảo file integrity
+            shutil.move(temp_file_path, "wallet.json")
+            
+            # Verify file was written correctly
+            with open("wallet.json", "r") as f:
+                saved_addresses = json.load(f)
+                if len(saved_addresses) != len(addresses):
+                    raise ValueError("Address count mismatch after save")
+            
+            return True
+            
+        except Exception as e:
+            # Cleanup temp file if exists
+            if temp_file and os.path.exists(temp_file.name):
+                os.unlink(temp_file.name)
+            raise e
+            
+    except PermissionError:
+        # Thử lưu vào thư mục user home nếu không có quyền
+        try:
+            home_path = os.path.expanduser("~/wallet.json")
+            with open(home_path, "w") as f:
+                json.dump(addresses, f, indent=2, ensure_ascii=False)
+            return True
+        except Exception:
+            return False
     except Exception:
         return False
 
@@ -486,7 +536,7 @@ async def get_wallet_addresses():
 
 @app.post("/api/add_address")
 async def add_wallet_address(request: AddAddressRequest):
-    """Add a new address to wallet.json."""
+    """Add a new address to wallet.json with better error handling."""
     try:
         if not validate_address(request.address):
             raise HTTPException(status_code=400, detail="Invalid address format")
@@ -496,14 +546,32 @@ async def add_wallet_address(request: AddAddressRequest):
             raise HTTPException(status_code=400, detail="Address already exists")
         
         addresses.append(request.address)
-        if save_wallet_addresses(addresses):
-            return {
-                "status": "success",
-                "message": "Address added successfully",
-                "total_addresses": len(addresses)
-            }
-        else:
-            raise HTTPException(status_code=500, detail="Failed to save address")
+        
+        # Retry logic for save operation
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                if save_wallet_addresses(addresses):
+                    return {
+                        "status": "success",
+                        "message": "Address added successfully",
+                        "total_addresses": len(addresses)
+                    }
+                else:
+                    if attempt < max_retries - 1:
+                        await asyncio.sleep(0.5)  # Wait before retry
+                        continue
+                    else:
+                        raise HTTPException(status_code=500, detail="Failed to save address after multiple attempts")
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    await asyncio.sleep(0.5)
+                    continue
+                else:
+                    raise HTTPException(status_code=500, detail=f"Failed to save address: {str(e)}")
+                    
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to add address: {str(e)}")
 
