@@ -409,22 +409,23 @@
 
         <div class="wallet-card">
             <div class="tabs">
-                <div class="tab active" onclick="switchTab('wallet')">
-                    <i class="fas fa-wallet"></i> Ví của tôi
-                </div>
-                <div class="tab" onclick="switchTab('send')">
-                    <i class="fas fa-paper-plane"></i> Gửi tiền
-                </div>
-                <div class="tab" onclick="switchTab('addresses')">
-                    <i class="fas fa-address-book"></i> Danh sách địa chỉ
-                </div>
-                <div class="tab" onclick="switchTab('auto-send')">
-                    <i class="fas fa-rocket"></i> Gửi tự động
-                </div>
-                <div class="tab" onclick="switchTab('settings')">
-                    <i class="fas fa-cog"></i> Cài đặt
-                </div>
-            </div>
+    <div class="tab active" onclick="switchTab('wallet', this)">
+        <i class="fas fa-wallet"></i> Ví của tôi
+    </div>
+    <div class="tab" onclick="switchTab('send', this)">
+        <i class="fas fa-paper-plane"></i> Gửi tiền
+    </div>
+    <div class="tab" onclick="switchTab('addresses', this)">
+        <i class="fas fa-address-book"></i> Danh sách địa chỉ
+    </div>
+    <div class="tab" onclick="switchTab('auto-send', this)">
+        <i class="fas fa-rocket"></i> Gửi tự động
+    </div>
+    <div class="tab" onclick="switchTab('settings', this)">
+        <i class="fas fa-cog"></i> Cài đặt
+    </div>
+</div>
+
 
             <!-- Tab Ví của tôi -->
             <div id="wallet" class="tab-content active">
@@ -582,29 +583,42 @@
         let walletLoaded = false;
         let autoSendRunning = false;
 
-        // Chuyển đổi tab
-        function switchTab(tabName) {
-            // Ẩn tất cả tab content
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
-            });
-            
-            // Bỏ active từ tất cả tab
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            // Hiện tab được chọn
-            document.getElementById(tabName).classList.add('active');
-            event.target.classList.add('active');
-            
-            // Tự động refresh dữ liệu khi chuyển tab
-            if (tabName === 'wallet' && walletLoaded) {
-                refreshWallet();
-            } else if (tabName === 'addresses') {
-                refreshAddresses();
+
+        // Chuyển đổi tab - Đã sửa lỗi event.target
+function switchTab(tabName, clickedElement = null) {
+    // Ẩn tất cả tab content
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+    });
+    
+    // Bỏ active từ tất cả tab
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    // Hiện tab được chọn
+    document.getElementById(tabName).classList.add('active');
+    
+    // Thêm active cho tab được click
+    if (clickedElement) {
+        clickedElement.classList.add('active');
+    } else {
+        // Tìm tab button tương ứng nếu không có element được truyền vào
+        const tabButtons = document.querySelectorAll('.tab');
+        tabButtons.forEach(tab => {
+            if (tab.onclick && tab.onclick.toString().includes(tabName)) {
+                tab.classList.add('active');
             }
-        }
+        });
+    }
+    
+    // Tự động refresh dữ liệu khi chuyển tab
+    if (tabName === 'wallet' && walletLoaded) {
+        refreshWallet();
+    } else if (tabName === 'addresses') {
+        refreshAddresses();
+    }
+}
 
         // Tải ví
         async function loadWallet() {
