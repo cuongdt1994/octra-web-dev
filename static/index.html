@@ -1,678 +1,1245 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Octra Wallet</title>
+    <title>Octra Wallet - Secure & User-Friendly</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 20px;
+            color: #333;
         }
-        
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            overflow: hidden;
+            padding: 20px;
         }
-        
+
         .header {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
-            padding: 30px;
             text-align: center;
+            margin-bottom: 30px;
+            color: white;
         }
-        
+
         .header h1 {
-            font-size: 2.5em;
+            font-size: 2.5rem;
             margin-bottom: 10px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
-        
+
         .header p {
-            font-size: 1.2em;
+            font-size: 1.1rem;
             opacity: 0.9;
         }
-        
-        .content {
-            padding: 30px;
+
+        .language-selector {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
         }
-        
-        .section {
-            margin-bottom: 30px;
-            padding: 25px;
-            border: 1px solid #e0e0e0;
-            border-radius: 10px;
-            background: #fafafa;
-        }
-        
-        .section h2 {
+
+        .language-selector select {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.9);
             color: #333;
-            margin-bottom: 20px;
-            font-size: 1.5em;
-            border-bottom: 2px solid #4facfe;
-            padding-bottom: 10px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
-        
-        .input-group {
+
+        .language-selector select:hover {
+            background: white;
+            transform: translateY(-2px);
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
             margin-bottom: 20px;
         }
-        
-        .input-group label {
+
+        .form-group label {
             display: block;
             margin-bottom: 8px;
             font-weight: 600;
             color: #555;
         }
-        
-        .input-group input, .input-group select {
+
+        .form-group input, .form-group textarea, .form-group select {
             width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
             border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s;
+            font-size: 14px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
-        
-        .input-group input:focus, .input-group select:focus {
+
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
             outline: none;
-            border-color: #4facfe;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
-        
+
         .btn {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
             padding: 12px 25px;
             border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 600;
-            transition: transform 0.2s, box-shadow 0.2s;
-            margin-right: 10px;
-            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
         }
-        
+
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
-        
+
         .btn:active {
             transform: translateY(0);
         }
-        
+
+        .btn-success {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+        }
+
         .btn-danger {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            background: linear-gradient(135deg, #f44336 0%, #da190b 100%);
         }
-        
-        .btn-danger:hover {
-            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
         }
-        
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
         .wallet-info {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 25px;
             margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-        
-        .wallet-info h3 {
-            color: #333;
-            margin-bottom: 15px;
+
+        .wallet-info h2 {
+            color: white;
+            margin-bottom: 20px;
         }
-        
+
         .info-item {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 10px;
-            padding: 8px 0;
-            border-bottom: 1px solid #eee;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
         }
-        
+
         .info-item:last-child {
             border-bottom: none;
         }
-        
+
         .info-label {
             font-weight: 600;
-            color: #666;
+            opacity: 0.9;
         }
-        
+
         .info-value {
-            color: #333;
+            font-family: 'Courier New', monospace;
+            background: rgba(255,255,255,0.1);
+            padding: 5px 10px;
+            border-radius: 5px;
             word-break: break-all;
         }
-        
+
         .transaction-history {
             max-height: 400px;
             overflow-y: auto;
-            border: 1px solid #ddd;
-            border-radius: 8px;
         }
-        
+
         .transaction-item {
-            padding: 15px;
-            border-bottom: 1px solid #eee;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.3s ease;
         }
-        
+
+        .transaction-item:hover {
+            background-color: #f8f9fa;
+        }
+
         .transaction-item:last-child {
             border-bottom: none;
         }
-        
-        .transaction-item.in {
-            background: #f0f9ff;
-            border-left: 4px solid #10b981;
+
+        .transaction-type {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
         }
-        
-        .transaction-item.out {
-            background: #fef2f2;
-            border-left: 4px solid #ef4444;
+
+        .transaction-type.in {
+            background: #d4edda;
+            color: #155724;
         }
-        
-        .transaction-details {
+
+        .transaction-type.out {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .address-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .address-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.3s ease;
+        }
+
+        .address-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .address-item:last-child {
+            border-bottom: none;
+        }
+
+        .address-text {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #666;
             flex: 1;
+            margin-right: 10px;
         }
-        
-        .transaction-amount {
-            font-weight: 600;
-            font-size: 1.1em;
+
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
         }
-        
-        .transaction-amount.in {
-            color: #10b981;
+
+        .status-indicator.online {
+            background: #4CAF50;
         }
-        
-        .transaction-amount.out {
-            color: #ef4444;
+
+        .status-indicator.offline {
+            background: #f44336;
         }
-        
-        .transaction-address {
-            color: #666;
-            font-size: 0.9em;
-            margin-top: 5px;
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e1e5e9;
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 10px 0;
         }
-        
-        .transaction-time {
-            color: #999;
-            font-size: 0.8em;
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s ease;
         }
-        
-        .status-message {
+
+        .alert {
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 20px;
-            font-weight: 600;
+            border-left: 4px solid;
         }
-        
-        .status-success {
-            background: #d1fae5;
-            color: #065f46;
-            border: 1px solid #10b981;
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border-color: #4CAF50;
         }
-        
-        .status-error {
-            background: #fee2e2;
-            color: #991b1b;
-            border: 1px solid #ef4444;
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border-color: #f44336;
         }
-        
-        .status-info {
-            background: #dbeafe;
-            color: #1e40af;
-            border: 1px solid #3b82f6;
+
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border-color: #ff9800;
         }
-        
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-color: #17a2b8;
+        }
+
         .loading {
-            text-align: center;
-            padding: 20px;
-            color: #666;
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
-        
-        .auto-send-info {
-            background: #f0f9ff;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border-left: 4px solid #3b82f6;
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
-        
-        .error-message {
-            color: #ef4444;
-            font-size: 0.9em;
-            margin-top: 5px;
+
+        .hidden {
+            display: none !important;
         }
-        
-        .success-message {
-            color: #10b981;
-            font-size: 0.9em;
-            margin-top: 5px;
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
         }
-        
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .tooltip {
+            position: relative;
+            cursor: help;
+        }
+
+        .tooltip:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 1000;
+        }
+
         @media (max-width: 768px) {
             .container {
-                margin: 10px;
-                border-radius: 10px;
-            }
-            
-            .header {
-                padding: 20px;
+                padding: 10px;
             }
             
             .header h1 {
-                font-size: 2em;
+                font-size: 2rem;
             }
             
-            .content {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .card {
                 padding: 20px;
-            }
-            
-            .section {
-                padding: 20px;
-            }
-            
-            .info-item {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
-            .info-value {
-                margin-top: 5px;
             }
         }
     </style>
 </head>
 <body>
+    <div class="language-selector">
+        <select id="languageSelect">
+            <option value="en">🇺🇸 English</option>
+            <option value="vi">🇻🇳 Tiếng Việt</option>
+            <option value="zh">🇨🇳 中文</option>
+            <option value="ja">🇯🇵 日本語</option>
+            <option value="ko">🇰🇷 한국어</option>
+        </select>
+    </div>
+
     <div class="container">
         <div class="header">
-            <h1>🔐 Octra Wallet</h1>
-            <p>Ví điện tử an toàn và dễ sử dụng cho mạng Octra</p>
+            <h1>
+                <i class="fas fa-wallet"></i>
+                <span data-translate="app_title">Octra Wallet</span>
+            </h1>
+            <p data-translate="app_subtitle">Secure and user-friendly wallet for Octra network</p>
         </div>
-        
-        <div class="content">
+
+        <div id="alertContainer"></div>
+
+        <div class="grid">
             <!-- Load Wallet Section -->
-            <div class="section">
-                <h2>📱 Load Wallet</h2>
-                <div class="input-group">
-                    <label for="privateKey">Private Key (Base64):</label>
-                    <input type="password" id="privateKey" placeholder="Nhập private key base64 của bạn">
-                    <div id="keyValidation" class="error-message"></div>
+            <div class="card">
+                <h2>
+                    <i class="fas fa-key"></i>
+                    <span data-translate="load_wallet">Load Wallet</span>
+                </h2>
+                <div class="form-group">
+                    <label for="privateKey" data-translate="private_key_label">Private Key (Base64):</label>
+                    <textarea id="privateKey" rows="3" placeholder="Enter your base64 private key here..." data-translate-placeholder="private_key_placeholder"></textarea>
                 </div>
-                <button class="btn" onclick="loadWallet()">🔑 Load Wallet</button>
-                <div id="loadStatus"></div>
+                <button class="btn" onclick="loadWallet()">
+                    <i class="fas fa-unlock"></i>
+                    <span data-translate="load_wallet_btn">Load Wallet</span>
+                </button>
             </div>
-            
+
             <!-- Wallet Info Section -->
-            <div class="section" id="walletSection" style="display: none;">
-                <h2>💼 Thông tin Wallet</h2>
-                <div class="wallet-info">
-                    <div class="info-item">
-                        <span class="info-label">Địa chỉ:</span>
-                        <span class="info-value" id="walletAddress">-</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Số dư:</span>
-                        <span class="info-value" id="walletBalance">-</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Nonce:</span>
-                        <span class="info-value" id="walletNonce">-</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Giao dịch chờ:</span>
-                        <span class="info-value" id="pendingTxs">-</span>
-                    </div>
+            <div class="wallet-info hidden" id="walletInfo">
+                <h2>
+                    <i class="fas fa-info-circle"></i>
+                    <span data-translate="wallet_info">Wallet Information</span>
+                </h2>
+                <div class="info-item">
+                    <span class="info-label" data-translate="address">Address:</span>
+                    <span class="info-value" id="walletAddress">-</span>
                 </div>
-                <button class="btn" onclick="refreshWallet()">🔄 Refresh</button>
+                <div class="info-item">
+                    <span class="info-label" data-translate="balance">Balance:</span>
+                    <span class="info-value" id="walletBalance">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label" data-translate="nonce">Nonce:</span>
+                    <span class="info-value" id="walletNonce">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label" data-translate="pending_txs">Pending Transactions:</span>
+                    <span class="info-value" id="pendingTxs">-</span>
+                </div>
+                <button class="btn btn-success" onclick="refreshWallet()">
+                    <i class="fas fa-sync-alt"></i>
+                    <span data-translate="refresh">Refresh</span>
+                </button>
             </div>
-            
+        </div>
+
+        <div class="grid">
             <!-- Send Transaction Section -->
-            <div class="section" id="sendSection" style="display: none;">
-                <h2>💸 Gửi giao dịch</h2>
-                <div class="input-group">
-                    <label for="sendTo">Địa chỉ nhận:</label>
-                    <input type="text" id="sendTo" placeholder="oct...">
+            <div class="card hidden" id="sendSection">
+                <h2>
+                    <i class="fas fa-paper-plane"></i>
+                    <span data-translate="send_transaction">Send Transaction</span>
+                </h2>
+                <div class="form-group">
+                    <label for="recipientAddress" data-translate="recipient_address">Recipient Address:</label>
+                    <input type="text" id="recipientAddress" placeholder="oct..." data-translate-placeholder="recipient_placeholder">
                 </div>
-                <div class="input-group">
-                    <label for="sendAmount">Số lượng OCT:</label>
-                    <input type="number" id="sendAmount" step="0.000001" placeholder="0.000001">
+                <div class="form-group">
+                    <label for="sendAmount" data-translate="amount">Amount (OCT):</label>
+                    <input type="number" id="sendAmount" step="0.000001" min="0" placeholder="0.000001" data-translate-placeholder="amount_placeholder">
                 </div>
-                <button class="btn" onclick="sendTransaction()">📤 Gửi</button>
-                <div id="sendStatus"></div>
+                <button class="btn" onclick="sendTransaction()">
+                    <i class="fas fa-send"></i>
+                    <span data-translate="send_btn">Send</span>
+                </button>
             </div>
-            
-            <!-- Auto Send Section -->
-            <div class="section" id="autoSendSection" style="display: none;">
-                <h2>🚀 Auto Send from wallet.json</h2>
-                <div class="auto-send-info">
-                    <p><strong>Đã tải <span id="addressCount">0</span> địa chỉ từ wallet.json</strong></p>
-                    <button class="btn" onclick="loadWalletAddresses()">📂 Load Addresses</button>
+
+            <!-- Address Management Section -->
+            <div class="card">
+                <h2>
+                    <i class="fas fa-address-book"></i>
+                    <span data-translate="address_management">Address Management</span>
+                </h2>
+                <div class="form-group">
+                    <label for="newAddress" data-translate="new_address">New Address:</label>
+                    <input type="text" id="newAddress" placeholder="oct..." data-translate-placeholder="new_address_placeholder">
                 </div>
+                <button class="btn btn-success" onclick="addAddress()">
+                    <i class="fas fa-plus"></i>
+                    <span data-translate="add_address">Add Address</span>
+                </button>
+                <button class="btn btn-warning" onclick="loadAddresses()">
+                    <i class="fas fa-download"></i>
+                    <span data-translate="load_addresses">Load Addresses</span>
+                </button>
                 
-                <div class="input-group">
-                    <label for="autoAmount">Số lượng OCT gửi cho mỗi địa chỉ:</label>
-                    <input type="number" id="autoAmount" step="0.000001" value="0.00001" placeholder="0.00001">
-                </div>
-                <div class="input-group">
-                    <label for="autoDelay">Delay giữa các giao dịch (giây):</label>
-                    <input type="number" id="autoDelay" step="0.1" value="0.1" placeholder="0.1">
-                </div>
-                
-                <button class="btn" onclick="autoSendToAll()">🎯 Auto Send to All</button>
-                <div id="autoSendStatus"></div>
-                
-                <div id="autoSendResults" style="display: none;">
-                    <h3>📊 Kết quả Auto Send</h3>
-                    <div id="autoSendProgress">
-                        <p><span id="successCount">0</span>/<span id="totalCount">0</span></p>
+                <div class="address-list" id="addressList">
+                    <div style="text-align: center; color: #666; padding: 20px;" data-translate="no_addresses">
+                        No addresses loaded
                     </div>
-                    <div id="autoSendDetails"></div>
+                </div>
+                
+                <div style="margin-top: 15px;">
+                    <span data-translate="total_addresses">Total addresses:</span>
+                    <strong id="addressCount">0</strong>
                 </div>
             </div>
+        </div>
+
+        <!-- Auto Send Section -->
+        <div class="card hidden" id="autoSendSection">
+            <h2>
+                <i class="fas fa-rocket"></i>
+                <span data-translate="auto_send">Auto Send (Sequential)</span>
+            </h2>
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i>
+                <span data-translate="auto_send_info">Transactions will be sent one by one to prevent network congestion</span>
+            </div>
             
-            <!-- Transaction History Section -->
-            <div class="section" id="historySection" style="display: none;">
-                <h2>📜 Lịch sử giao dịch</h2>
-                <div class="transaction-history" id="transactionHistory">
-                    <div class="loading">Đang tải lịch sử giao dịch...</div>
+            <div class="form-group">
+                <label for="autoSendAmount" data-translate="amount_per_address">Amount per address (OCT):</label>
+                <input type="number" id="autoSendAmount" step="0.000001" min="0" value="0.00001" data-translate-placeholder="auto_amount_placeholder">
+            </div>
+            <div class="form-group">
+                <label for="batchDelay" data-translate="delay_between_txs">Delay between transactions (seconds):</label>
+                <input type="number" id="batchDelay" step="0.1" min="0.1" value="1.0" data-translate-placeholder="delay_placeholder">
+            </div>
+            
+            <button class="btn btn-warning" onclick="startAutoSend()">
+                <i class="fas fa-play"></i>
+                <span data-translate="start_auto_send">Start Auto Send</span>
+            </button>
+            
+            <div id="autoSendProgress" class="hidden">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div style="text-align: center; margin-top: 10px;">
+                    <span data-translate="progress">Progress:</span>
+                    <span id="progressText">0/0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transaction History Section -->
+        <div class="card hidden" id="historySection">
+            <h2>
+                <i class="fas fa-history"></i>
+                <span data-translate="transaction_history">Transaction History</span>
+            </h2>
+            <div class="transaction-history" id="transactionHistory">
+                <div style="text-align: center; color: #666; padding: 20px;" data-translate="loading_history">
+                    Loading transaction history...
                 </div>
             </div>
         </div>
     </div>
 
     <script>
+        // Multi-language support
+        const translations = {
+            en: {
+                app_title: "Octra Wallet",
+                app_subtitle: "Secure and user-friendly wallet for Octra network",
+                load_wallet: "Load Wallet",
+                private_key_label: "Private Key (Base64):",
+                private_key_placeholder: "Enter your base64 private key here...",
+                load_wallet_btn: "Load Wallet",
+                wallet_info: "Wallet Information",
+                address: "Address:",
+                balance: "Balance:",
+                nonce: "Nonce:",
+                pending_txs: "Pending Transactions:",
+                refresh: "Refresh",
+                send_transaction: "Send Transaction",
+                recipient_address: "Recipient Address:",
+                recipient_placeholder: "oct...",
+                amount: "Amount (OCT):",
+                amount_placeholder: "0.000001",
+                send_btn: "Send",
+                address_management: "Address Management",
+                new_address: "New Address:",
+                new_address_placeholder: "oct...",
+                add_address: "Add Address",
+                load_addresses: "Load Addresses",
+                no_addresses: "No addresses loaded",
+                total_addresses: "Total addresses:",
+                auto_send: "Auto Send (Sequential)",
+                auto_send_info: "Transactions will be sent one by one to prevent network congestion",
+                amount_per_address: "Amount per address (OCT):",
+                auto_amount_placeholder: "0.00001",
+                delay_between_txs: "Delay between transactions (seconds):",
+                delay_placeholder: "1.0",
+                start_auto_send: "Start Auto Send",
+                progress: "Progress:",
+                transaction_history: "Transaction History",
+                loading_history: "Loading transaction history...",
+                wallet_loaded: "Wallet loaded successfully!",
+                wallet_load_error: "Failed to load wallet. Please check your private key.",
+                invalid_address: "Invalid address format",
+                invalid_amount: "Invalid amount",
+                transaction_sent: "Transaction sent successfully!",
+                transaction_failed: "Transaction failed",
+                address_added: "Address added successfully!",
+                address_exists: "Address already exists",
+                auto_send_started: "Auto send started in background",
+                insufficient_balance: "Insufficient balance",
+                no_wallet: "Please load your wallet first"
+            },
+            vi: {
+                app_title: "Ví Octra",
+                app_subtitle: "Ví điện tử an toàn và dễ sử dụng cho mạng Octra",
+                load_wallet: "Tải Ví",
+                private_key_label: "Khóa riêng (Base64):",
+                private_key_placeholder: "Nhập khóa riêng base64 của bạn tại đây...",
+                load_wallet_btn: "Tải Ví",
+                wallet_info: "Thông tin Ví",
+                address: "Địa chỉ:",
+                balance: "Số dư:",
+                nonce: "Nonce:",
+                pending_txs: "Giao dịch chờ:",
+                refresh: "Làm mới",
+                send_transaction: "Gửi giao dịch",
+                recipient_address: "Địa chỉ nhận:",
+                recipient_placeholder: "oct...",
+                amount: "Số lượng (OCT):",
+                amount_placeholder: "0.000001",
+                send_btn: "Gửi",
+                address_management: "Quản lý địa chỉ",
+                new_address: "Địa chỉ mới:",
+                new_address_placeholder: "oct...",
+                add_address: "Thêm địa chỉ",
+                load_addresses: "Tải địa chỉ",
+                no_addresses: "Chưa có địa chỉ nào",
+                total_addresses: "Tổng số địa chỉ:",
+                auto_send: "Gửi tự động (Tuần tự)",
+                auto_send_info: "Giao dịch sẽ được gửi từng cái một để tránh tắc nghẽn mạng",
+                amount_per_address: "Số lượng mỗi địa chỉ (OCT):",
+                auto_amount_placeholder: "0.00001",
+                delay_between_txs: "Độ trễ giữa các giao dịch (giây):",
+                delay_placeholder: "1.0",
+                start_auto_send: "Bắt đầu gửi tự động",
+                progress: "Tiến độ:",
+                transaction_history: "Lịch sử giao dịch",
+                loading_history: "Đang tải lịch sử giao dịch...",
+                wallet_loaded: "Ví đã được tải thành công!",
+                wallet_load_error: "Không thể tải ví. Vui lòng kiểm tra khóa riêng.",
+                invalid_address: "Định dạng địa chỉ không hợp lệ",
+                invalid_amount: "Số lượng không hợp lệ",
+                transaction_sent: "Giao dịch đã được gửi thành công!",
+                transaction_failed: "Giao dịch thất bại",
+                address_added: "Địa chỉ đã được thêm thành công!",
+                address_exists: "Địa chỉ đã tồn tại",
+                auto_send_started: "Gửi tự động đã bắt đầu trong nền",
+                insufficient_balance: "Số dư không đủ",
+                no_wallet: "Vui lòng tải ví của bạn trước"
+            },
+            zh: {
+                app_title: "Octra 钱包",
+                app_subtitle: "Octra 网络的安全易用钱包",
+                load_wallet: "加载钱包",
+                private_key_label: "私钥 (Base64):",
+                private_key_placeholder: "在此输入您的 base64 私钥...",
+                load_wallet_btn: "加载钱包",
+                wallet_info: "钱包信息",
+                address: "地址:",
+                balance: "余额:",
+                nonce: "随机数:",
+                pending_txs: "待处理交易:",
+                refresh: "刷新",
+                send_transaction: "发送交易",
+                recipient_address: "收款地址:",
+                recipient_placeholder: "oct...",
+                amount: "金额 (OCT):",
+                amount_placeholder: "0.000001",
+                send_btn: "发送",
+                address_management: "地址管理",
+                new_address: "新地址:",
+                new_address_placeholder: "oct...",
+                add_address: "添加地址",
+                load_addresses: "加载地址",
+                no_addresses: "未加载地址",
+                total_addresses: "总地址数:",
+                auto_send: "自动发送 (顺序)",
+                auto_send_info: "交易将逐个发送以防止网络拥堵",
+                amount_per_address: "每个地址的金额 (OCT):",
+                auto_amount_placeholder: "0.00001",
+                delay_between_txs: "交易间延迟 (秒):",
+                delay_placeholder: "1.0",
+                start_auto_send: "开始自动发送",
+                progress: "进度:",
+                transaction_history: "交易历史",
+                loading_history: "正在加载交易历史...",
+                wallet_loaded: "钱包加载成功！",
+                wallet_load_error: "加载钱包失败。请检查您的私钥。",
+                invalid_address: "地址格式无效",
+                invalid_amount: "金额无效",
+                transaction_sent: "交易发送成功！",
+                transaction_failed: "交易失败",
+                address_added: "地址添加成功！",
+                address_exists: "地址已存在",
+                auto_send_started: "自动发送已在后台启动",
+                insufficient_balance: "余额不足",
+                no_wallet: "请先加载您的钱包"
+            },
+            ja: {
+                app_title: "Octra ウォレット",
+                app_subtitle: "Octra ネットワーク用の安全で使いやすいウォレット",
+                load_wallet: "ウォレットを読み込む",
+                private_key_label: "秘密鍵 (Base64):",
+                private_key_placeholder: "base64 秘密鍵をここに入力してください...",
+                load_wallet_btn: "ウォレットを読み込む",
+                wallet_info: "ウォレット情報",
+                address: "アドレス:",
+                balance: "残高:",
+                nonce: "ナンス:",
+                pending_txs: "保留中の取引:",
+                refresh: "更新",
+                send_transaction: "取引を送信",
+                recipient_address: "受信者アドレス:",
+                recipient_placeholder: "oct...",
+                amount: "金額 (OCT):",
+                amount_placeholder: "0.000001",
+                send_btn: "送信",
+                address_management: "アドレス管理",
+                new_address: "新しいアドレス:",
+                new_address_placeholder: "oct...",
+                add_address: "アドレスを追加",
+                load_addresses: "アドレスを読み込む",
+                no_addresses: "アドレスが読み込まれていません",
+                total_addresses: "総アドレス数:",
+                auto_send: "自動送信 (順次)",
+                auto_send_info: "ネットワークの混雑を防ぐため、取引は一つずつ送信されます",
+                amount_per_address: "アドレスあたりの金額 (OCT):",
+                auto_amount_placeholder: "0.00001",
+                delay_between_txs: "取引間の遅延 (秒):",
+                delay_placeholder: "1.0",
+                start_auto_send: "自動送信を開始",
+                progress: "進行状況:",
+                transaction_history: "取引履歴",
+                loading_history: "取引履歴を読み込み中...",
+                wallet_loaded: "ウォレットが正常に読み込まれました！",
+                wallet_load_error: "ウォレットの読み込みに失敗しました。秘密鍵を確認してください。",
+                invalid_address: "無効なアドレス形式",
+                invalid_amount: "無効な金額",
+                transaction_sent: "取引が正常に送信されました！",
+                transaction_failed: "取引が失敗しました",
+                address_added: "アドレスが正常に追加されました！",
+                address_exists: "アドレスは既に存在します",
+                auto_send_started: "自動送信がバックグラウンドで開始されました",
+                insufficient_balance: "残高不足",
+                no_wallet: "まずウォレットを読み込んでください"
+            },
+            ko: {
+                app_title: "Octra 지갑",
+                app_subtitle: "Octra 네트워크를 위한 안전하고 사용하기 쉬운 지갑",
+                load_wallet: "지갑 로드",
+                private_key_label: "개인 키 (Base64):",
+                private_key_placeholder: "여기에 base64 개인 키를 입력하세요...",
+                load_wallet_btn: "지갑 로드",
+                wallet_info: "지갑 정보",
+                address: "주소:",
+                balance: "잔액:",
+                nonce: "논스:",
+                pending_txs: "대기 중인 거래:",
+                refresh: "새로 고침",
+                send_transaction: "거래 전송",
+                recipient_address: "수신자 주소:",
+                recipient_placeholder: "oct...",
+                amount: "금액 (OCT):",
+                amount_placeholder: "0.000001",
+                send_btn: "전송",
+                address_management: "주소 관리",
+                new_address: "새 주소:",
+                new_address_placeholder: "oct...",
+                add_address: "주소 추가",
+                load_addresses: "주소 로드",
+                no_addresses: "로드된 주소가 없습니다",
+                total_addresses: "총 주소 수:",
+                auto_send: "자동 전송 (순차)",
+                auto_send_info: "네트워크 혼잡을 방지하기 위해 거래가 하나씩 전송됩니다",
+                amount_per_address: "주소당 금액 (OCT):",
+                auto_amount_placeholder: "0.00001",
+                delay_between_txs: "거래 간 지연 (초):",
+                delay_placeholder: "1.0",
+                start_auto_send: "자동 전송 시작",
+                progress: "진행률:",
+                transaction_history: "거래 내역",
+                loading_history: "거래 내역을 로드하는 중...",
+                wallet_loaded: "지갑이 성공적으로 로드되었습니다!",
+                wallet_load_error: "지갑 로드에 실패했습니다. 개인 키를 확인하세요.",
+                invalid_address: "유효하지 않은 주소 형식",
+                invalid_amount: "유효하지 않은 금액",
+                transaction_sent: "거래가 성공적으로 전송되었습니다!",
+                transaction_failed: "거래 실패",
+                address_added: "주소가 성공적으로 추가되었습니다!",
+                address_exists: "주소가 이미 존재합니다",
+                auto_send_started: "자동 전송이 백그라운드에서 시작되었습니다",
+                insufficient_balance: "잔액 부족",
+                no_wallet: "먼저 지갑을 로드하세요"
+            }
+        };
+
+        let currentLanguage = 'en';
         let walletLoaded = false;
-        let addressCount = 0;
+        let addresses = [];
 
-        // Validate private key format
-        function validatePrivateKey(key) {
-            try {
-                // Check if it's valid base64
-                const decoded = atob(key);
-                return decoded.length === 32;
-            } catch (e) {
-                return false;
+        // Initialize language
+        function initializeLanguage() {
+            const savedLanguage = localStorage.getItem('octra_wallet_language');
+            if (savedLanguage && translations[savedLanguage]) {
+                currentLanguage = savedLanguage;
+                document.getElementById('languageSelect').value = currentLanguage;
             }
+            updateLanguage();
         }
 
-        // Load wallet
-        async function loadWallet() {
-            const privateKey = document.getElementById('privateKey').value.trim();
-            const keyValidation = document.getElementById('keyValidation');
-            const loadStatus = document.getElementById('loadStatus');
-            
-            // Clear previous messages
-            keyValidation.innerHTML = '';
-            loadStatus.innerHTML = '';
-            
-            if (!privateKey) {
-                keyValidation.innerHTML = 'Vui lòng nhập private key';
-                return;
-            }
-            
-            // Validate private key format
-            if (!validatePrivateKey(privateKey)) {
-                keyValidation.innerHTML = 'Private key không hợp lệ (phải là base64, 32 bytes)';
-                return;
-            }
-            
-            keyValidation.innerHTML = '<span class="success-message">✓ Private key hợp lệ</span>';
-            
-            try {
-                loadStatus.innerHTML = '<div class="status-info">🔄 Đang load wallet...</div>';
-                
-                const response = await fetch('/api/load_wallet', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        private_key: privateKey
-                    })
-                });
-                
-                const result = await response.json();
-                
-                if (response.ok) {
-                    walletLoaded = true;
-                    loadStatus.innerHTML = `<div class="status-success">✅ Wallet đã được load thành công!<br>Địa chỉ: ${result.address}</div>`;
-                    
-                    // Show wallet sections
-                    document.getElementById('walletSection').style.display = 'block';
-                    document.getElementById('sendSection').style.display = 'block';
-                    document.getElementById('autoSendSection').style.display = 'block';
-                    document.getElementById('historySection').style.display = 'block';
-                    
-                    // Load wallet info
-                    await refreshWallet();
-                    await loadWalletAddresses();
-                } else {
-                    loadStatus.innerHTML = `<div class="status-error">❌ Lỗi: ${result.detail}</div>`;
-                }
-            } catch (error) {
-                loadStatus.innerHTML = `<div class="status-error">❌ Lỗi kết nối: ${error.message}</div>`;
-            }
+        // Update language
+        function updateLanguage() {
+    const elements = document.querySelectorAll('[data-translate]');
+    elements.forEach(element => {
+        const key = element.getAttribute('data-translate');
+        if (translations[currentLanguage] && translations[currentLanguage][key]) {
+            element.textContent = translations[currentLanguage][key];
         }
+    });
 
-        // Refresh wallet info
-        async function refreshWallet() {
-            if (!walletLoaded) return;
-            
-            try {
-                const response = await fetch('/api/wallet');
-                const data = await response.json();
-                
-                if (response.ok) {
-                    document.getElementById('walletAddress').textContent = data.address;
-                    document.getElementById('walletBalance').textContent = data.balance;
-                    document.getElementById('walletNonce').textContent = data.nonce;
-                    document.getElementById('pendingTxs').textContent = data.pending_txs;
-                    
-                    // Update transaction history
-                    updateTransactionHistory(data.transactions);
-                } else {
-                    console.error('Failed to refresh wallet:', data.detail);
-                }
-            } catch (error) {
-                console.error('Error refreshing wallet:', error);
-            }
+    // Update placeholder attributes
+    const placeholderElements = document.querySelectorAll('[data-translate-placeholder]');
+    placeholderElements.forEach(element => {
+        const key = element.getAttribute('data-translate-placeholder');
+        if (translations[currentLanguage] && translations[currentLanguage][key]) {
+            element.placeholder = translations[currentLanguage][key];
         }
+    });
 
-        // Update transaction history
-        function updateTransactionHistory(transactions) {
-            const historyDiv = document.getElementById('transactionHistory');
-            
-            if (!transactions || transactions.length === 0) {
-                historyDiv.innerHTML = '<div class="loading">Chưa có giao dịch nào</div>';
-                return;
-            }
-            
-            let html = '';
-            transactions.forEach(tx => {
-                const typeClass = tx.type === 'in' ? 'in' : 'out';
-                const typeSymbol = tx.type === 'in' ? '+' : '-';
-                const typeText = tx.type === 'in' ? 'Nhận từ' : 'Gửi tới';
-                
-                html += `
-                    <div class="transaction-item ${typeClass}">
-                        <div class="transaction-details">
-                            <div class="transaction-amount ${typeClass}">
-                                ${typeSymbol}${tx.amt} OCT
-                            </div>
-                            <div class="transaction-address">
-                                ${typeText}: ${tx.to}
-                            </div>
-                            <div class="transaction-time">${tx.time}</div>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            historyDiv.innerHTML = html;
-        }
+    // Update document title
+    if (translations[currentLanguage] && translations[currentLanguage]['app_title']) {
+        document.title = translations[currentLanguage]['app_title'] + ' - Secure Wallet';
+    }
 
-        // Send transaction
-        async function sendTransaction() {
-            const to = document.getElementById('sendTo').value.trim();
-            const amount = parseFloat(document.getElementById('sendAmount').value);
-            const sendStatus = document.getElementById('sendStatus');
-            
-            sendStatus.innerHTML = '';
-            
-            if (!to || !amount || amount <= 0) {
-                sendStatus.innerHTML = '<div class="status-error">❌ Vui lòng nhập đầy đủ thông tin</div>';
-                return;
-            }
-            
-            try {
-                sendStatus.innerHTML = '<div class="status-info">🔄 Đang gửi giao dịch...</div>';
-                
-                const response = await fetch('/api/send', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        to: to,
-                        amount: amount
-                    })
-                });
-                
-                const result = await response.json();
-                
-                if (response.ok) {
-                    sendStatus.innerHTML = `<div class="status-success">✅ Giao dịch thành công!<br>Hash: ${result.tx_hash}<br>Thời gian: ${result.time}</div>`;
-                    
-                    // Clear form
-                    document.getElementById('sendTo').value = '';
-                    document.getElementById('sendAmount').value = '';
-                    
-                    // Refresh wallet
-                    setTimeout(refreshWallet, 1000);
-                } else {
-                    sendStatus.innerHTML = `<div class="status-error">❌ Lỗi: ${result.detail}</div>`;
-                }
-            } catch (error) {
-                sendStatus.innerHTML = `<div class="status-error">❌ Lỗi kết nối: ${error.message}</div>`;
-            }
-        }
+    // Save language preference
+    localStorage.setItem('octra_wallet_language', currentLanguage);
+}
 
-        // Load wallet addresses
-        async function loadWalletAddresses() {
-            try {
-                const response = await fetch('/api/load_wallet_addresses');
-                const data = await response.json();
-                
-                if (response.ok) {
-                    addressCount = data.count;
-                    document.getElementById('addressCount').textContent = addressCount;
-                } else {
-                    console.error('Failed to load addresses:', data.detail);
-                    document.getElementById('addressCount').textContent = '0';
-                }
-            } catch (error) {
-                console.error('Error loading addresses:', error);
-                document.getElementById('addressCount').textContent = '0';
-            }
-        }
+// Language change event handler
+document.getElementById('languageSelect').addEventListener('change', function(e) {
+    currentLanguage = e.target.value;
+    updateLanguage();
+});
 
-        // Auto send to all addresses
-        async function autoSendToAll() {
-            const amount = parseFloat(document.getElementById('autoAmount').value);
-            const delay = parseFloat(document.getElementById('autoDelay').value);
-            const autoSendStatus = document.getElementById('autoSendStatus');
-            const autoSendResults = document.getElementById('autoSendResults');
-            
-            autoSendStatus.innerHTML = '';
-            autoSendResults.style.display = 'none';
-            
-            if (!amount || amount <= 0) {
-                autoSendStatus.innerHTML = '<div class="status-error">❌ Vui lòng nhập số lượng OCT hợp lệ</div>';
-                return;
-            }
-            
-            if (addressCount === 0) {
-                autoSendStatus.innerHTML = '<div class="status-error">❌ Chưa có địa chỉ nào được load từ wallet.json</div>';
-                return;
-            }
-            
-            try {
-                autoSendStatus.innerHTML = '<div class="status-info">🚀 Đang thực hiện Auto Send...</div>';
-                
-                const response = await fetch('/api/auto_send', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        amount: amount,
-                        batch_delay: delay
-                    })
-                });
-                
-                const result = await response.json();
-                
-                if (response.ok) {
-                    autoSendStatus.innerHTML = `<div class="status-success">✅ Auto Send hoàn thành!<br>Thành công: ${result.successful_transactions}/${result.total_addresses}<br>Tổng số OCT đã gửi: ${result.total_amount}</div>`;
-                    
-                    // Show results
-                    document.getElementById('successCount').textContent = result.successful_transactions;
-                    document.getElementById('totalCount').textContent = result.total_addresses;
-                    
-                    let detailsHtml = '';
-                    result.results.forEach(r => {
-                        const statusClass = r.status === 'success' ? 'status-success' : 'status-error';
-                        const statusIcon = r.status === 'success' ? '✅' : '❌';
-                        
-                        detailsHtml += `
-                            <div class="${statusClass}" style="margin-bottom: 10px; padding: 10px;">
-                                ${statusIcon} ${r.to}: ${r.amount} OCT
-                                ${r.status === 'success' ? `(${r.tx_hash})` : `(${r.error})`}
-                            </div>
-                        `;
-                    });
-                    
-                    document.getElementById('autoSendDetails').innerHTML = detailsHtml;
-                    autoSendResults.style.display = 'block';
-                    
-                    // Refresh wallet
-                    setTimeout(refreshWallet, 2000);
-                } else {
-                    autoSendStatus.innerHTML = `<div class="status-error">❌ Lỗi: ${result.detail}</div>`;
-                }
-            } catch (error) {
-                autoSendStatus.innerHTML = `<div class="status-error">❌ Lỗi kết nối: ${error.message}</div>`;
-            }
-        }
+// Utility functions for alerts and notifications
+function showAlert(message, type = 'info', duration = 5000) {
+    const alertContainer = document.getElementById('alertContainer');
+    const alertId = 'alert_' + Date.now();
+    
+    const alertDiv = document.createElement('div');
+    alertDiv.id = alertId;
+    alertDiv.className = `alert alert-${type} fade-in`;
+    alertDiv.innerHTML = `
+        <i class="fas fa-${getAlertIcon(type)}"></i>
+        ${message}
+        <button onclick="closeAlert('${alertId}')" style="float: right; background: none; border: none; font-size: 18px; cursor: pointer;">&times;</button>
+    `;
+    
+    alertContainer.appendChild(alertDiv);
+    
+    // Auto remove after duration
+    setTimeout(() => {
+        closeAlert(alertId);
+    }, duration);
+}
 
-        // Auto refresh wallet every 30 seconds
-        setInterval(() => {
-            if (walletLoaded) {
-                refreshWallet();
-            }
-        }, 30000);
+function getAlertIcon(type) {
+    const icons = {
+        'success': 'check-circle',
+        'error': 'exclamation-triangle',
+        'warning': 'exclamation-circle',
+        'info': 'info-circle'
+    };
+    return icons[type] || 'info-circle';
+}
 
-        // Enter key support
-        document.getElementById('privateKey').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                loadWallet();
-            }
+function closeAlert(alertId) {
+    const alert = document.getElementById(alertId);
+    if (alert) {
+        alert.remove();
+    }
+}
+
+function translate(key) {
+    return translations[currentLanguage] && translations[currentLanguage][key] 
+        ? translations[currentLanguage][key] 
+        : key;
+}
+
+// Main application functions
+async function loadWallet() {
+    const privateKey = document.getElementById('privateKey').value.trim();
+    
+    if (!privateKey) {
+        showAlert(translate('wallet_load_error'), 'error');
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/load_wallet', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ private_key: privateKey })
         });
-    </script>
-</body>
-</html>
+
+        const data = await response.json();
+
+        if (response.ok) {
+            walletLoaded = true;
+            showAlert(translate('wallet_loaded'), 'success');
+            
+            // Show wallet sections
+            document.getElementById('walletInfo').classList.remove('hidden');
+            document.getElementById('sendSection').classList.remove('hidden');
+            document.getElementById('autoSendSection').classList.remove('hidden');
+            document.getElementById('historySection').classList.remove('hidden');
+            
+            // Clear private key field for security
+            document.getElementById('privateKey').value = '';
+            
+            // Refresh wallet info
+            await refreshWallet();
+        } else {
+            showAlert(data.detail || translate('wallet_load_error'), 'error');
+        }
+    } catch (error) {
+        showAlert(translate('wallet_load_error') + ': ' + error.message, 'error');
+    }
+}
+
+async function refreshWallet() {
+    if (!walletLoaded) {
+        showAlert(translate('no_wallet'), 'warning');
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/wallet');
+        const data = await response.json();
+
+        if (response.ok) {
+            // Update wallet info
+            document.getElementById('walletAddress').textContent = data.address;
+            document.getElementById('walletBalance').textContent = data.balance;
+            document.getElementById('walletNonce').textContent = data.nonce;
+            document.getElementById('pendingTxs').textContent = data.pending_txs;
+
+            // Update transaction history
+            updateTransactionHistory(data.transactions);
+        } else {
+            showAlert(data.detail || 'Failed to refresh wallet', 'error');
+        }
+    } catch (error) {
+        showAlert('Network error: ' + error.message, 'error');
+    }
+}
+
+async function sendTransaction() {
+    if (!walletLoaded) {
+        showAlert(translate('no_wallet'), 'warning');
+        return;
+    }
+
+    const to = document.getElementById('recipientAddress').value.trim();
+    const amount = parseFloat(document.getElementById('sendAmount').value);
+
+    if (!to || !to.startsWith('oct')) {
+        showAlert(translate('invalid_address'), 'error');
+        return;
+    }
+
+    if (!amount || amount <= 0) {
+        showAlert(translate('invalid_amount'), 'error');
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ to, amount })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            showAlert(translate('transaction_sent') + ` (${data.tx_hash})`, 'success');
+            
+            // Clear form
+            document.getElementById('recipientAddress').value = '';
+            document.getElementById('sendAmount').value = '';
+            
+            // Refresh wallet
+            setTimeout(refreshWallet, 2000);
+        } else {
+            showAlert(data.detail || translate('transaction_failed'), 'error');
+        }
+    } catch (error) {
+        showAlert(translate('transaction_failed') + ': ' + error.message, 'error');
+    }
+}
+
+async function loadAddresses() {
+    try {
+        const response = await fetch('/api/load_wallet_addresses');
+        const data = await response.json();
+
+        if (response.ok) {
+            addresses = data.addresses;
+            updateAddressList();
+            showAlert(`${translate('load_addresses')} (${data.count})`, 'success');
+        } else {
+            showAlert(data.detail || 'Failed to load addresses', 'error');
+        }
+    } catch (error) {
+        showAlert('Failed to load addresses: ' + error.message, 'error');
+    }
+}
+
+async function addAddress() {
+    const newAddress = document.getElementById('newAddress').value.trim();
+    
+    if (!newAddress || !newAddress.startsWith('oct')) {
+        showAlert(translate('invalid_address'), 'error');
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/add_address', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ address: newAddress })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            showAlert(translate('address_added'), 'success');
+            document.getElementById('newAddress').value = '';
+            await loadAddresses(); // Reload addresses
+        } else {
+            if (data.detail && data.detail.includes('already exists')) {
+                showAlert(translate('address_exists'), 'warning');
+            } else {
+                showAlert(data.detail || 'Failed to add address', 'error');
+            }
+        }
+    } catch (error) {
+        showAlert('Failed to add address: ' + error.message, 'error');
+    }
+}
+
+async function removeAddress(address) {
+    if (!confirm(`Remove address: ${address}?`)) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/remove_address/${encodeURIComponent(address)}`, {
+            method: 'DELETE'
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            showAlert('Address removed successfully', 'success');
+            await loadAddresses(); // Reload addresses
+        } else {
+            showAlert(data.detail || 'Failed to remove address', 'error');
+        }
+    } catch (error) {
+        showAlert('Failed to remove address: ' + error.message, 'error');
+    }
+}
+
+async function startAutoSend() {
+    if (!walletLoaded) {
+        showAlert(translate('no_wallet'), 'warning');
+        return;
+    }
+
+    if (addresses.length === 0) {
+        showAlert('No addresses loaded. Please load addresses first.', 'warning');
+        return;
+    }
+
+    const amount = parseFloat(document.getElementById('autoSendAmount').value);
+    const delay = parseFloat(document.getElementById('batchDelay').value);
+
+    if (!amount || amount <= 0) {
+        showAlert(translate('invalid_amount'), 'error');
+        return;
+    }
+
+    const totalAmount = amount * addresses.length;
+    
+    if (!confirm(`Send ${amount} OCT to ${addresses.length} addresses?\nTotal: ${totalAmount} OCT`)) {
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/auto_send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                amount, 
+                batch_delay: delay,
+                max_concurrent: 1 
+            })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            showAlert(translate('auto_send_started'), 'info');
+            
+            // Show progress indicator
+            document.getElementById('autoSendProgress').classList.remove('hidden');
+            
+            // Start monitoring progress (simplified)
+            setTimeout(() => {
+                refreshWallet();
+                document.getElementById('autoSendProgress').classList.add('hidden');
+            }, data.estimated_time ? parseFloat(data.estimated_time) * 1000 + 5000 : 30000);
+            
+        } else {
+            if (data.detail && data.detail.includes('Insufficient balance')) {
+                showAlert(translate('insufficient_balance'), 'error');
+            } else {
+                showAlert(data.detail || 'Auto send failed', 'error');
+            }
+        }
+    } catch (error) {
+        showAlert('Auto send failed: ' + error.message, 'error');
+    }
+}
+
+function updateAddressList() {
+    const addressList = document.getElementById('addressList');
+    const addressCount = document.getElementById('addressCount');
+    
+    addressCount.textContent = addresses.length;
+    
+    if (addresses.length === 0) {
+        addressList.innerHTML = `
+            <div style="text-align: center; color: #666; padding: 20px;">
+                ${translate('no_addresses')}
+            </div>
+        `;
+        return;
+    }
+
+    addressList.innerHTML = addresses.map((addr, index) => `
+        <div class="address-item">
+            <span class="address-text">${addr}</span>
+            <button class="btn btn-danger" onclick="removeAddress('${addr}')" style="padding: 5px 10px; font-size: 12px;">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+    `).join('');
+}
+
+function updateTransactionHistory(transactions) {
+    const historyContainer = document.getElementById('transactionHistory');
+    
+    if (!transactions || transactions.length === 0) {
+        historyContainer.innerHTML = `
+            <div style="text-align: center; color: #666; padding: 20px;">
+                No transactions found
+            </div>
+        `;
+        return;
+    }
+
+    historyContainer.innerHTML = transactions.map(tx => `
+        <div class="transaction-item">
+            <div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span class="transaction-type ${tx.type}">${tx.type}</span>
+                    <strong>${tx.amt} OCT</strong>
+                </div>
+                <div style="font-size: 12px; color: #666; margin-top: 5px;">
+                    ${tx.type === 'out' ? 'To: ' : 'From: '}${tx.to}
+                </div>
+                <div style="font-size: 11px; color: #999;">
+                    ${tx.time} | Hash: ${tx.hash.substring(0, 16)}...
+                </div>
+            </div>
+            <div style="text-align: right;">
+                <i class="fas fa-${tx.ok ? 'check-circle' : 'times-circle'}" 
+                   style="color: ${tx.ok ? '#4CAF50' : '#f44336'};"></i>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Initialize application
+document.addEventListener('DOMContentLoaded', function() {
+    initializeLanguage();
+    loadAddresses(); // Auto-load addresses on startup
+    
+    // Auto-refresh wallet every 30 seconds if loaded
+    setInterval(() => {
+        if (walletLoaded) {
+            refreshWallet();
+        }
+    }, 30000);
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    // Ctrl/Cmd + Enter to send transaction
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        if (document.getElementById('sendSection').style.display !== 'none') {
+            sendTransaction();
+        }
+    }
+    
+    // Escape to close alerts
+    if (e.key === 'Escape') {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => alert.remove());
+    }
+});
+

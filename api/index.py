@@ -7,19 +7,21 @@ import random
 import aiohttp
 import asyncio
 import logging
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 import nacl.signing
 from datetime import datetime, timedelta
 from concurrent.futures import ThreadPoolExecutor
 from pydantic import BaseModel
+from typing import List, Optional, Dict, Any
+import os
 
 # Cấu hình logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-app = FastAPI()
+app = FastAPI(title="Octra Wallet", version="2.0.0")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Configuration
@@ -29,8 +31,9 @@ priv, addr, rpc = None, None, None
 sk, pub = None, None
 cb, cn, lu, lh = None, None, 0, 0
 h = []
-executor = ThreadPoolExecutor(max_workers=1)
+executor = ThreadPoolExecutor(max_workers=2)
 
+# Pydantic Models
 class TransactionRequest(BaseModel):
     to: str
     amount: float
@@ -40,7 +43,26 @@ class LoadWalletRequest(BaseModel):
 
 class AutoSendRequest(BaseModel):
     amount: float = 0.00001
-    batch_delay: float = 0.1
+    batch_delay: float = 1.0
+    max_concurrent: int = 1
+
+class AddAddressRequest(BaseModel):
+    address: str
+
+class WalletResponse(BaseModel):
+    address: str
+    balance: str
+    nonce: Any
+    public_key: str
+    pending_txs: int
+    transactions: List[Dict]
+
+# Cache cho API responses
+api_cache = {}
+cache_ttl = 30  # seconds
+
+def get_cache_key(key: str) -> str:
+    return f"{key}_{int(time.time() // cache_ttl)}"
 
 def base58_encode(data):
     """Encode bytes to base58 (excluding 0, O, I, l)."""
@@ -53,113 +75,134 @@ def base58_encode(data):
     result = result.rjust(44, alphabet[0])
     return result
 
-def validate_private_key(base64_key):
+def validate_private_key(base64_key: str) -> bool:
     """Validate private key format and length."""
     try:
         decoded = base64.b64decode(base64_key, validate=True)
         return len(decoded) == 32
-    except:
+    except Exception:
         return False
 
-def load_wallet(base64_key=None):
+def validate_address(address: str) -> bool:
+    """Validate OCT address format."""
+    return bool(b58.match(address))
+
+def load_wallet(base64_key: Optional[str] = None) -> bool:
     """Load wallet from base64 private key with improved error handling."""
     global priv, addr, rpc, sk, pub
     
     try:
         if not base64_key:
             raise ValueError("No private key provided")
-            
-        # Validate private key first
+
         if not validate_private_key(base64_key):
             raise ValueError("Invalid private key format or length")
-            
+
         decoded_key = base64.b64decode(base64_key, validate=True)
-        
         priv = base64_key
         sk = nacl.signing.SigningKey(decoded_key)
         pub = base64.b64encode(sk.verify_key.encode()).decode()
         pubkey_hash = hashlib.sha256(sk.verify_key.encode()).digest()
         addr = "oct" + base58_encode(pubkey_hash)[:45]
         rpc = "https://octra.network"
-        
-        if not b58.match(addr):
+
+        if not validate_address(addr):
             logger.warning(f"Generated address {addr} does not match expected format")
-            
+
         logger.info(f"Wallet loaded successfully: {addr}")
         return True
-        
+
     except Exception as e:
         logger.error(f"Wallet load error: {str(e)}")
         return False
 
-async def req(m, p, d=None, t=10):
-    """HTTP request with improved error handling."""
-    async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=t)) as session:
+async def req(method: str, path: str, data: Optional[Dict] = None, timeout: int = 10) -> tuple:
+    """HTTP request with improved error handling and caching."""
+    cache_key = get_cache_key(f"{method}_{path}_{str(data)}")
+    
+    # Check cache for GET requests
+    if method == 'GET' and cache_key in api_cache:
+        return api_cache[cache_key]
+    
+    async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=timeout)) as session:
         try:
-            url = f"{rpc}{p}"
-            async with getattr(session, m.lower())(url, json=d if m == 'POST' else None) as resp:
+            url = f"{rpc}{path}"
+            async with getattr(session, method.lower())(url, json=data if method == 'POST' else None) as resp:
                 text = await resp.text()
                 try:
                     j = json.loads(text) if text else None
-                except:
+                except json.JSONDecodeError:
                     j = None
-                return resp.status, text, j
+                
+                result = (resp.status, text, j)
+                
+                # Cache successful GET requests
+                if method == 'GET' and resp.status == 200:
+                    api_cache[cache_key] = result
+                
+                return result
+
         except asyncio.TimeoutError:
-            logger.error(f"Request timeout for {p}")
+            logger.error(f"Request timeout for {path}")
             return 0, "timeout", None
         except Exception as e:
-            logger.error(f"Request error for {p}: {str(e)}")
+            logger.error(f"Request error for {path}: {str(e)}")
             return 0, str(e), None
 
-async def st():
-    """Get status with improved nonce handling and retry logic."""
+async def get_status() -> tuple:
+    """Get wallet status with improved error handling."""
     global cb, cn, lu
+    
     now = time.time()
     
     # Cache for 30 seconds
     if cb is not None and (now - lu) < 30:
         return cn, cb
-    
+
     # Retry logic for failed requests
     for attempt in range(3):
         try:
-            logger.info(f"Attempting to get status for {addr} (attempt {attempt + 1})")
+            logger.info(f"Getting status for {addr} (attempt {attempt + 1})")
             
+            # Parallel requests
             results = await asyncio.gather(
                 req('GET', f'/balance/{addr}'),
                 req('GET', '/staging', 5),
                 return_exceptions=True
             )
-            
-            s, t, j = results[0] if not isinstance(results[0], Exception) else (0, str(results[0]), None)
-            s2, _, j2 = results[1] if not isinstance(results[1], Exception) else (0, None, None)
-            
+
+            balance_result = results[0] if not isinstance(results[0], Exception) else (0, str(results[0]), None)
+            staging_result = results[1] if not isinstance(results[1], Exception) else (0, None, None)
+
+            s, t, j = balance_result
+            s2, _, j2 = staging_result
+
             logger.info(f"Balance API response: status={s}, data={j}")
-            
+
             if s == 200 and j:
                 cn = int(j.get('nonce', 0))
                 cb = float(j.get('balance', 0))
                 lu = now
-                
+
                 # Check staging transactions for higher nonce
                 if s2 == 200 and j2:
-                    our = [tx for tx in j2.get('staged_transactions', []) if tx.get('from') == addr]
-                    if our:
-                        max_staged_nonce = max(int(tx.get('nonce', 0)) for tx in our)
+                    our_txs = [tx for tx in j2.get('staged_transactions', []) if tx.get('from') == addr]
+                    if our_txs:
+                        max_staged_nonce = max(int(tx.get('nonce', 0)) for tx in our_txs)
                         cn = max(cn, max_staged_nonce)
                         logger.info(f"Updated nonce from staging: {cn}")
-                
+
                 logger.info(f"Status updated: balance={cb}, nonce={cn}")
                 return cn, cb
-                
+
             elif s == 404:
-                # New wallet - initialize with default values
+                # New wallet
                 cn, cb, lu = 0, 0.0, now
                 logger.info("New wallet detected, initialized with nonce=0, balance=0")
                 return cn, cb
-                
+
             elif s == 200 and t and not j:
-                # Try to parse plain text response
+                # Parse text response
                 try:
                     parts = t.strip().split()
                     if len(parts) >= 2:
@@ -168,267 +211,202 @@ async def st():
                         lu = now
                         logger.info(f"Parsed text response: balance={cb}, nonce={cn}")
                         return cn, cb
-                except:
+                except Exception:
                     pass
-            
-            # If we reach here, the request failed
-            logger.warning(f"Failed to get status (attempt {attempt + 1}): status={s}, response={t}")
-            
-            if attempt < 2:  # Don't sleep on last attempt
+
+            logger.warning(f"Failed to get status (attempt {attempt + 1}): status={s}")
+            if attempt < 2:
                 await asyncio.sleep(1)
-                
+
         except Exception as e:
             logger.error(f"Status request error (attempt {attempt + 1}): {str(e)}")
             if attempt < 2:
                 await asyncio.sleep(1)
-    
-    # All attempts failed
+
     logger.error("All attempts to get status failed")
     return None, None
 
-async def gh():
-    """Get transaction history."""
+async def get_history():
+    """Get transaction history with improved caching."""
     global h, lh
-    now = time.time()
     
+    now = time.time()
     if now - lh < 60 and h:
         return
-    
-    s, t, j = await req('GET', f'/address/{addr}?limit=20')
-    if s != 200 or (not j and not t):
-        return
-    
-    if j and 'recent_transactions' in j:
-        tx_hashes = [ref["hash"] for ref in j.get('recent_transactions', [])]
-        tx_results = await asyncio.gather(*[req('GET', f'/tx/{hash}', 5) for hash in tx_hashes], return_exceptions=True)
+
+    try:
+        s, t, j = await req('GET', f'/address/{addr}?limit=20')
         
-        existing_hashes = {tx['hash'] for tx in h}
-        nh = []
-        
-        for i, (ref, result) in enumerate(zip(j.get('recent_transactions', []), tx_results)):
-            if isinstance(result, Exception):
-                continue
+        if s != 200 or (not j and not t):
+            return
+
+        if j and 'recent_transactions' in j:
+            tx_hashes = [ref["hash"] for ref in j.get('recent_transactions', [])]
             
-            s2, _, j2 = result
-            if s2 == 200 and j2 and 'parsed_tx' in j2:
-                p = j2['parsed_tx']
-                tx_hash = ref['hash']
-                
-                if tx_hash in existing_hashes:
+            # Batch fetch transaction details
+            tx_results = await asyncio.gather(
+                *[req('GET', f'/tx/{hash}', None, 5) for hash in tx_hashes], 
+                return_exceptions=True
+            )
+
+            existing_hashes = {tx['hash'] for tx in h}
+            new_transactions = []
+
+            for ref, result in zip(j.get('recent_transactions', []), tx_results):
+                if isinstance(result, Exception):
                     continue
-                
-                ii = p.get('to') == addr
-                ar = p.get('amount_raw', p.get('amount', '0'))
-                a = float(ar) if '.' in str(ar) else int(ar) / μ
-                
-                nh.append({
-                    'time': datetime.fromtimestamp(p.get('timestamp', 0)).strftime('%Y-%m-%d %H:%M:%S'),
-                    'hash': tx_hash,
-                    'amt': a,
-                    'to': p.get('to') if not ii else p.get('from'),
-                    'type': 'in' if ii else 'out',
-                    'ok': True,
-                    'nonce': p.get('nonce', 0),
-                    'epoch': ref.get('epoch', 0)
-                })
-        
-        # Keep only recent transactions (last hour)
-        oh = datetime.now() - timedelta(hours=1)
-        h[:] = sorted(nh + [tx for tx in h if datetime.strptime(tx.get('time', datetime.now().strftime('%Y-%m-%d %H:%M:%S')), '%Y-%m-%d %H:%M:%S') > oh], 
-                     key=lambda x: datetime.strptime(x['time'], '%Y-%m-%d %H:%M:%S'), reverse=True)[:50]
+
+                s2, _, j2 = result
+                if s2 == 200 and j2 and 'parsed_tx' in j2:
+                    p = j2['parsed_tx']
+                    tx_hash = ref['hash']
+                    
+                    if tx_hash in existing_hashes:
+                        continue
+
+                    is_incoming = p.get('to') == addr
+                    amount_raw = p.get('amount_raw', p.get('amount', '0'))
+                    amount = float(amount_raw) if '.' in str(amount_raw) else int(amount_raw) / μ
+
+                    new_transactions.append({
+                        'time': datetime.fromtimestamp(p.get('timestamp', 0)).strftime('%Y-%m-%d %H:%M:%S'),
+                        'hash': tx_hash,
+                        'amt': amount,
+                        'to': p.get('to') if not is_incoming else p.get('from'),
+                        'type': 'in' if is_incoming else 'out',
+                        'ok': True,
+                        'nonce': p.get('nonce', 0),
+                        'epoch': ref.get('epoch', 0)
+                    })
+
+            # Keep only recent transactions (last hour)
+            one_hour_ago = datetime.now() - timedelta(hours=1)
+            h[:] = sorted(
+                new_transactions + [
+                    tx for tx in h 
+                    if datetime.strptime(tx.get('time', datetime.now().strftime('%Y-%m-%d %H:%M:%S')), '%Y-%m-%d %H:%M:%S') > one_hour_ago
+                ],
+                key=lambda x: datetime.strptime(x['time'], '%Y-%m-%d %H:%M:%S'), 
+                reverse=True
+            )[:50]
+
+        elif s == 404 or (s == 200 and t and 'no transactions' in t.lower()):
+            h.clear()
+
         lh = now
-        
-    elif s == 404 or (s == 200 and t and 'no transactions' in t.lower()):
-        h.clear()
-        lh = now
 
-def mk(to, a, n):
-    """Create transaction."""
-    tx = {
-        "from": addr,
-        "to_": to,
-        "amount": str(int(a * μ)),
-        "nonce": int(n),
-        "ou": "1" if a < 1000 else "3",
-        "timestamp": time.time() + random.random() * 0.01
-    }
-    
-    bl = json.dumps(tx, separators=(",", ":"))
-    sig = base64.b64encode(sk.sign(bl.encode()).signature).decode()
-    tx.update(signature=sig, public_key=pub)
-    
-    return tx, hashlib.sha256(bl.encode()).hexdigest()
-
-async def snd(tx):
-    """Send transaction."""
-    t0 = time.time()
-    s, t, j = await req('POST', '/send-tx', tx)
-    dt = time.time() - t0
-    
-    if s == 200:
-        if j and j.get('status') == 'accepted':
-            return True, j.get('tx_hash', ''), dt, j
-        elif t.lower().startswith('ok'):
-            return True, t.split()[-1], dt, None
-    
-    return False, json.dumps(j) if j else t, dt, j
-
-@app.on_event("startup")
-async def startup_event():
-    global priv, addr, rpc, sk, pub, cb, cn, lu, lh, h
-    priv, addr, rpc, sk, pub = None, None, None, None, None
-    cb, cn, lu, lh = None, None, 0, 0
-    h = []
-    logger.info("Application started")
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    executor.shutdown(wait=False)
-    logger.info("Application shutdown")
-
-@app.get("/", response_class=HTMLResponse)
-async def serve_index():
-    try:
-        with open("static/index.html") as f:
-            return HTMLResponse(content=f.read())
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to serve index: {str(e)}")
+        logger.error(f"Error getting history: {str(e)}")
 
-@app.get("/api/wallet")
-async def get_wallet():
+def create_transaction(to: str, amount: float, nonce: int) -> tuple:
+    """Create transaction with improved error handling."""
     try:
-        if not addr:
-            raise HTTPException(status_code=400, detail="No wallet loaded")
-        
-        n, b = await st()
-        await gh()
-        
-        s, _, j = await req('GET', '/staging', 2)
-        sc = len([tx for tx in j.get('staged_transactions', []) if tx.get('from') == addr]) if j else 0
-        
-        return {
-            "address": addr,
-            "balance": f"{b:.6f} oct" if b is not None else "N/A",
-            "nonce": n if n is not None else "N/A",
-            "public_key": pub,
-            "pending_txs": sc,
-            "transactions": sorted(h, key=lambda x: datetime.strptime(x['time'], '%Y-%m-%d %H:%M:%S'), reverse=True)
+        tx = {
+            "from": addr,
+            "to_": to,
+            "amount": str(int(amount * μ)),
+            "nonce": int(nonce),
+            "ou": "1" if amount < 1000 else "3",
+            "timestamp": time.time() + random.random() * 0.01
         }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to get wallet: {str(e)}")
 
-@app.post("/api/send")
-async def send_transaction(tx: TransactionRequest):
-    try:
-        if not addr:
-            raise HTTPException(status_code=400, detail="No wallet loaded")
-            
-        if not b58.match(tx.to):
-            raise HTTPException(status_code=400, detail="Invalid address")
+        tx_bytes = json.dumps(tx, separators=(",", ":"))
+        signature = base64.b64encode(sk.sign(tx_bytes.encode()).signature).decode()
+        tx.update(signature=signature, public_key=pub)
         
-        if not re.match(r"^\d+(\.\d+)?$", str(tx.amount)) or tx.amount <= 0:
-            raise HTTPException(status_code=400, detail="Invalid amount")
-        
-        n, b = await st()
-        if n is None:
-            raise HTTPException(status_code=500, detail="Failed to get nonce")
-        
-        if not b or b < tx.amount:
-            raise HTTPException(status_code=400, detail=f"Insufficient balance ({b:.6f} < {tx.amount})")
-        
-        t, _ = mk(tx.to, tx.amount, n + 1)
-        ok, hs, dt, r = await snd(t)
-        
-        if ok:
-            h.append({
-                'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                'hash': hs,
-                'amt': tx.amount,
-                'to': tx.to,
-                'type': 'out',
-                'ok': True
-            })
-            
-            global lu
-            lu = 0  # Reset cache
-            
-            return {
-                "status": "success",
-                "tx_hash": hs,
-                "time": f"{dt:.2f}s",
-                "pool_size": r.get('pool_info', {}).get('total_pool_size', 0) if r else 0
-            }
-        
-        raise HTTPException(status_code=400, detail=f"Transaction failed: {hs}")
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Send transaction failed: {str(e)}")
+        tx_hash = hashlib.sha256(tx_bytes.encode()).hexdigest()
+        return tx, tx_hash
 
-@app.get("/api/load_wallet_addresses")
-async def load_wallet_addresses():
-    """Load all addresses from wallet.json"""
+    except Exception as e:
+        logger.error(f"Error creating transaction: {str(e)}")
+        raise
+
+async def send_transaction(tx: Dict) -> tuple:
+    """Send transaction with improved error handling."""
+    start_time = time.time()
+    
     try:
+        s, t, j = await req('POST', '/send-tx', tx)
+        duration = time.time() - start_time
+
+        if s == 200:
+            if j and j.get('status') == 'accepted':
+                return True, j.get('tx_hash', ''), duration, j
+            elif t.lower().startswith('ok'):
+                return True, t.split()[-1], duration, None
+
+        return False, json.dumps(j) if j else t, duration, j
+
+    except Exception as e:
+        logger.error(f"Error sending transaction: {str(e)}")
+        return False, str(e), time.time() - start_time, None
+
+def load_wallet_addresses() -> List[str]:
+    """Load addresses from wallet.json with validation."""
+    try:
+        if not os.path.exists("wallet.json"):
+            return []
+        
         with open("wallet.json", "r") as f:
             addresses = json.load(f)
-        return {"addresses": addresses, "count": len(addresses)}
-    except FileNotFoundError:
-        raise HTTPException(status_code=404, detail="wallet.json not found")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to load wallet.json: {str(e)}")
-
-@app.post("/api/auto_send")
-async def auto_send_to_all(auto_send: AutoSendRequest):
-    """Automatically send OCT to all addresses in wallet.json with improved error handling."""
-    try:
-        if not addr:
-            raise HTTPException(status_code=400, detail="Wallet chưa được load")
-        
-        # Load addresses from wallet.json
-        try:
-            with open("wallet.json", "r") as f:
-                addresses = json.load(f)
-        except FileNotFoundError:
-            raise HTTPException(status_code=404, detail="wallet.json not found")
         
         # Validate addresses
-        valid_addresses = [addr_item for addr_item in addresses if b58.match(addr_item)]
-        if not valid_addresses:
-            raise HTTPException(status_code=400, detail="No valid addresses found in wallet.json")
+        valid_addresses = [addr for addr in addresses if validate_address(addr)]
         
-        # Calculate total amount needed
-        total_amount = auto_send.amount * len(valid_addresses)
+        if len(valid_addresses) != len(addresses):
+            logger.warning(f"Found {len(addresses) - len(valid_addresses)} invalid addresses")
         
-        # Get current status with retry logic
-        n, b = await st()
-        if n is None:
-            # Try to initialize new wallet
-            logger.warning("Failed to get nonce, attempting to initialize new wallet")
-            n, b = 0, 0.0
+        return valid_addresses
+
+    except Exception as e:
+        logger.error(f"Error loading wallet addresses: {str(e)}")
+        return []
+
+def save_wallet_addresses(addresses: List[str]) -> bool:
+    """Save addresses to wallet.json."""
+    try:
+        with open("wallet.json", "w") as f:
+            json.dump(addresses, f, indent=2)
+        return True
+    except Exception as e:
+        logger.error(f"Error saving wallet addresses: {str(e)}")
+        return False
+
+# Background task for sequential sending
+async def sequential_auto_send(addresses: List[str], amount: float, delay: float):
+    """Send transactions sequentially to avoid network congestion."""
+    global lu
+    
+    results = []
+    successful_txs = 0
+    
+    try:
+        # Get current nonce
+        current_nonce, balance = await get_status()
+        if current_nonce is None:
+            current_nonce = 0
         
-        # Check balance
-        if not b or b < total_amount:
-            raise HTTPException(status_code=400, detail=f"Insufficient balance ({b:.6f} < {total_amount})")
+        total_amount = amount * len(addresses)
+        if balance < total_amount:
+            logger.error(f"Insufficient balance: {balance} < {total_amount}")
+            return
         
-        logger.info(f"Starting auto send to {len(valid_addresses)} addresses, total amount: {total_amount}")
+        logger.info(f"Starting sequential auto send to {len(addresses)} addresses")
         
-        results = []
-        current_nonce = n
-        successful_txs = 0
-        
-        for i, to_addr in enumerate(valid_addresses):
+        for i, to_addr in enumerate(addresses):
             try:
                 current_nonce += 1
-                logger.info(f"Sending {auto_send.amount} OCT to {to_addr} (nonce: {current_nonce})")
+                logger.info(f"Sending {amount} OCT to {to_addr} (nonce: {current_nonce}) - {i+1}/{len(addresses)}")
                 
-                t, _ = mk(to_addr, auto_send.amount, current_nonce)
-                ok, hs, dt, r = await snd(t)
+                tx, tx_hash = create_transaction(to_addr, amount, current_nonce)
+                success, result, duration, response = await send_transaction(tx)
                 
-                if ok:
+                if success:
                     successful_txs += 1
                     h.append({
                         'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                        'hash': hs,
-                        'amt': auto_send.amount,
+                        'hash': result,
+                        'amt': amount,
                         'to': to_addr,
                         'type': 'out',
                         'ok': True
@@ -437,25 +415,25 @@ async def auto_send_to_all(auto_send: AutoSendRequest):
                     results.append({
                         'index': i,
                         'status': 'success',
-                        'tx_hash': hs,
+                        'tx_hash': result,
                         'to': to_addr,
-                        'amount': auto_send.amount,
-                        'time': f"{dt:.2f}s"
+                        'amount': amount,
+                        'time': f"{duration:.2f}s"
                     })
-                    logger.info(f"Successfully sent to {to_addr}: {hs}")
+                    logger.info(f"✓ Successfully sent to {to_addr}: {result}")
                 else:
                     results.append({
                         'index': i,
                         'status': 'failed',
-                        'error': hs,
+                        'error': result,
                         'to': to_addr,
-                        'amount': auto_send.amount
+                        'amount': amount
                     })
-                    logger.error(f"Failed to send to {to_addr}: {hs}")
+                    logger.error(f"✗ Failed to send to {to_addr}: {result}")
                 
                 # Add delay between transactions
-                if i < len(valid_addresses) - 1 and auto_send.batch_delay > 0:
-                    await asyncio.sleep(auto_send.batch_delay)
+                if i < len(addresses) - 1 and delay > 0:
+                    await asyncio.sleep(delay)
                     
             except Exception as e:
                 results.append({
@@ -463,45 +441,230 @@ async def auto_send_to_all(auto_send: AutoSendRequest):
                     'status': 'error',
                     'error': str(e),
                     'to': to_addr,
-                    'amount': auto_send.amount
+                    'amount': amount
                 })
                 logger.error(f"Error sending to {to_addr}: {str(e)}")
         
-        # Reset cache to force refresh
-        global lu
+        # Reset cache
         lu = 0
+        logger.info(f"Sequential auto send completed: {successful_txs}/{len(addresses)} successful")
         
-        logger.info(f"Auto send completed: {successful_txs}/{len(valid_addresses)} successful")
+    except Exception as e:
+        logger.error(f"Sequential auto send failed: {str(e)}")
+
+# API Endpoints
+@app.on_event("startup")
+async def startup_event():
+    """Initialize application."""
+    global priv, addr, rpc, sk, pub, cb, cn, lu, lh, h
+    priv, addr, rpc, sk, pub = None, None, None, None, None
+    cb, cn, lu, lh = None, None, 0, 0
+    h = []
+    logger.info("Octra Wallet Application started")
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Cleanup on shutdown."""
+    executor.shutdown(wait=False)
+    logger.info("Application shutdown")
+
+@app.get("/", response_class=HTMLResponse)
+async def serve_index():
+    """Serve main HTML page."""
+    try:
+        with open("static/index.html", "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to serve index: {str(e)}")
+
+@app.get("/api/wallet", response_model=WalletResponse)
+async def get_wallet():
+    """Get wallet information."""
+    try:
+        if not addr:
+            raise HTTPException(status_code=400, detail="No wallet loaded")
+
+        nonce, balance = await get_status()
+        await get_history()
         
+        # Get pending transactions count
+        s, _, j = await req('GET', '/staging', 2)
+        pending_count = len([tx for tx in j.get('staged_transactions', []) if tx.get('from') == addr]) if j else 0
+
+        return WalletResponse(
+            address=addr,
+            balance=f"{balance:.6f} oct" if balance is not None else "N/A",
+            nonce=nonce if nonce is not None else "N/A",
+            public_key=pub,
+            pending_txs=pending_count,
+            transactions=sorted(h, key=lambda x: datetime.strptime(x['time'], '%Y-%m-%d %H:%M:%S'), reverse=True)
+        )
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get wallet: {str(e)}")
+
+@app.post("/api/send")
+async def send_single_transaction(tx: TransactionRequest):
+    """Send a single transaction."""
+    try:
+        if not addr:
+            raise HTTPException(status_code=400, detail="No wallet loaded")
+
+        if not validate_address(tx.to):
+            raise HTTPException(status_code=400, detail="Invalid address format")
+
+        if not re.match(r"^\d+(\.\d+)?$", str(tx.amount)) or tx.amount <= 0:
+            raise HTTPException(status_code=400, detail="Invalid amount")
+
+        nonce, balance = await get_status()
+        if nonce is None:
+            raise HTTPException(status_code=500, detail="Failed to get nonce")
+
+        if not balance or balance < tx.amount:
+            raise HTTPException(status_code=400, detail=f"Insufficient balance ({balance:.6f} < {tx.amount})")
+
+        transaction, tx_hash = create_transaction(tx.to, tx.amount, nonce + 1)
+        success, result, duration, response = await send_transaction(transaction)
+
+        if success:
+            h.append({
+                'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                'hash': result,
+                'amt': tx.amount,
+                'to': tx.to,
+                'type': 'out',
+                'ok': True
+            })
+
+            global lu
+            lu = 0  # Reset cache
+
+            return {
+                "status": "success",
+                "tx_hash": result,
+                "time": f"{duration:.2f}s",
+                "pool_size": response.get('pool_info', {}).get('total_pool_size', 0) if response else 0
+            }
+
+        raise HTTPException(status_code=400, detail=f"Transaction failed: {result}")
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Send transaction failed: {str(e)}")
+
+@app.get("/api/load_wallet_addresses")
+async def get_wallet_addresses():
+    """Load all addresses from wallet.json."""
+    try:
+        addresses = load_wallet_addresses()
+        return {"addresses": addresses, "count": len(addresses)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to load wallet addresses: {str(e)}")
+
+@app.post("/api/add_address")
+async def add_wallet_address(request: AddAddressRequest):
+    """Add a new address to wallet.json."""
+    try:
+        if not validate_address(request.address):
+            raise HTTPException(status_code=400, detail="Invalid address format")
+
+        addresses = load_wallet_addresses()
+        
+        if request.address in addresses:
+            raise HTTPException(status_code=400, detail="Address already exists")
+
+        addresses.append(request.address)
+        
+        if save_wallet_addresses(addresses):
+            return {
+                "status": "success",
+                "message": "Address added successfully",
+                "total_addresses": len(addresses)
+            }
+        else:
+            raise HTTPException(status_code=500, detail="Failed to save address")
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to add address: {str(e)}")
+
+@app.delete("/api/remove_address/{address}")
+async def remove_wallet_address(address: str):
+    """Remove an address from wallet.json."""
+    try:
+        addresses = load_wallet_addresses()
+        
+        if address not in addresses:
+            raise HTTPException(status_code=404, detail="Address not found")
+
+        addresses.remove(address)
+        
+        if save_wallet_addresses(addresses):
+            return {
+                "status": "success",
+                "message": "Address removed successfully",
+                "total_addresses": len(addresses)
+            }
+        else:
+            raise HTTPException(status_code=500, detail="Failed to save addresses")
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to remove address: {str(e)}")
+
+@app.post("/api/auto_send")
+async def auto_send_sequential(auto_send: AutoSendRequest, background_tasks: BackgroundTasks):
+    """Send OCT sequentially to all addresses in wallet.json."""
+    try:
+        if not addr:
+            raise HTTPException(status_code=400, detail="Wallet not loaded")
+
+        addresses = load_wallet_addresses()
+        if not addresses:
+            raise HTTPException(status_code=400, detail="No addresses found in wallet.json")
+
+        # Calculate total amount needed
+        total_amount = auto_send.amount * len(addresses)
+
+        # Get current status
+        nonce, balance = await get_status()
+        if nonce is None:
+            nonce, balance = 0, 0.0
+
+        # Check balance
+        if not balance or balance < total_amount:
+            raise HTTPException(status_code=400, detail=f"Insufficient balance ({balance:.6f} < {total_amount})")
+
+        # Start background task for sequential sending
+        background_tasks.add_task(sequential_auto_send, addresses, auto_send.amount, auto_send.batch_delay)
+
         return {
-            'status': 'completed',
-            'total_addresses': len(valid_addresses),
-            'successful_transactions': successful_txs,
-            'failed_transactions': len(valid_addresses) - successful_txs,
+            'status': 'started',
+            'message': 'Sequential auto send started in background',
+            'total_addresses': len(addresses),
             'total_amount': total_amount,
-            'results': results
+            'estimated_time': f"{len(addresses) * auto_send.batch_delay:.1f} seconds"
         }
-        
+
     except Exception as e:
         logger.error(f"Auto send failed: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Auto send failed: {str(e)}")
 
 @app.post("/api/load_wallet")
-async def load_base64_wallet(data: LoadWalletRequest):
+async def load_wallet_endpoint(data: LoadWalletRequest):
+    """Load wallet from base64 private key."""
     try:
         if not load_wallet(base64_key=data.private_key):
             raise HTTPException(status_code=400, detail="Invalid base64 private key")
-        
+
         # Test connection after loading wallet
-        n, b = await st()
-        if n is None:
+        nonce, balance = await get_status()
+        if nonce is None:
             logger.warning("Wallet loaded but failed to get initial status")
-        
+
         return {
-            "status": "wallet loaded", 
+            "status": "wallet loaded",
             "address": addr,
-            "balance": f"{b:.6f} oct" if b is not None else "N/A",
-            "nonce": n if n is not None else "N/A"
+            "balance": f"{balance:.6f} oct" if balance is not None else "N/A",
+            "nonce": nonce if nonce is not None else "N/A"
         }
+
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Load wallet failed: {str(e)}")
