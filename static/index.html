@@ -3,121 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔐 Octra Wallet</title>
+    <title>Octra Wallet</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
+        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            color: #333;
+            padding: 20px;
         }
-
+        
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
         }
-
+        
         .header {
-            text-align: center;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
             color: white;
-            margin-bottom: 30px;
+            padding: 30px;
+            text-align: center;
         }
-
+        
         .header h1 {
             font-size: 2.5em;
             margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
-
+        
         .header p {
             font-size: 1.2em;
             opacity: 0.9;
         }
-
-        .language-selector {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 25px;
-            padding: 10px;
+        
+        .content {
+            padding: 30px;
         }
-
-        .language-selector button {
-            background: none;
-            border: none;
-            color: white;
-            padding: 8px 15px;
-            margin: 0 5px;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .language-selector button.active {
-            background: rgba(255,255,255,0.3);
-        }
-
-        .language-selector button:hover {
-            background: rgba(255,255,255,0.2);
-        }
-
-        .card {
-            background: white;
-            border-radius: 15px;
+        
+        .section {
+            margin-bottom: 30px;
             padding: 25px;
-            margin-bottom: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            background: #fafafa;
         }
-
-        .card:hover {
-            transform: translateY(-5px);
-        }
-
-        .card h2 {
-            color: #5a67d8;
+        
+        .section h2 {
+            color: #333;
             margin-bottom: 20px;
             font-size: 1.5em;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            border-bottom: 2px solid #4facfe;
+            padding-bottom: 10px;
         }
-
-        .form-group {
+        
+        .input-group {
             margin-bottom: 20px;
         }
-
-        .form-group label {
+        
+        .input-group label {
             display: block;
             margin-bottom: 8px;
             font-weight: 600;
-            color: #4a5568;
+            color: #555;
         }
-
-        .form-group input, .form-group select {
+        
+        .input-group input, .input-group select {
             width: 100%;
             padding: 12px;
-            border: 2px solid #e2e8f0;
+            border: 2px solid #ddd;
             border-radius: 8px;
             font-size: 16px;
-            transition: border-color 0.3s ease;
+            transition: border-color 0.3s;
         }
-
-        .form-group input:focus, .form-group select:focus {
+        
+        .input-group input:focus, .input-group select:focus {
             outline: none;
-            border-color: #5a67d8;
+            border-color: #4facfe;
         }
-
+        
         .btn {
-            background: linear-gradient(135deg, #5a67d8, #667eea);
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
             color: white;
             border: none;
             padding: 12px 25px;
@@ -125,516 +99,380 @@
             cursor: pointer;
             font-size: 16px;
             font-weight: 600;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-right: 10px;
+            margin-bottom: 10px;
         }
-
+        
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(90, 103, 216, 0.4);
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
         }
-
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
+        
+        .btn:active {
+            transform: translateY(0);
         }
-
-        .btn-secondary {
-            background: linear-gradient(135deg, #718096, #4a5568);
-        }
-
+        
         .btn-danger {
-            background: linear-gradient(135deg, #e53e3e, #c53030);
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
         }
-
-        .btn-success {
-            background: linear-gradient(135deg, #38a169, #2f855a);
+        
+        .btn-danger:hover {
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
         }
-
+        
         .wallet-info {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
             margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-
-        .info-item {
-            background: #f7fafc;
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 4px solid #5a67d8;
-        }
-
-        .info-item strong {
-            color: #2d3748;
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        .info-item span {
-            color: #4a5568;
-            font-family: monospace;
-            word-break: break-all;
-        }
-
-        .transaction-form {
-            display: grid;
-            grid-template-columns: 1fr 150px 100px;
-            gap: 10px;
-            align-items: end;
+        
+        .wallet-info h3 {
+            color: #333;
             margin-bottom: 15px;
         }
-
-        .transaction-list {
-            max-height: 300px;
+        
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .info-item:last-child {
+            border-bottom: none;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: #666;
+        }
+        
+        .info-value {
+            color: #333;
+            word-break: break-all;
+        }
+        
+        .transaction-history {
+            max-height: 400px;
             overflow-y: auto;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #ddd;
             border-radius: 8px;
-            padding: 10px;
-            margin-bottom: 20px;
         }
-
+        
         .transaction-item {
-            display: grid;
-            grid-template-columns: 1fr 150px 80px;
-            gap: 10px;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
             align-items: center;
-            padding: 10px;
-            border-bottom: 1px solid #e2e8f0;
         }
-
+        
         .transaction-item:last-child {
             border-bottom: none;
         }
-
-        .history-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
+        
+        .transaction-item.in {
+            background: #f0f9ff;
+            border-left: 4px solid #10b981;
         }
-
-        .history-table th,
-        .history-table td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #e2e8f0;
+        
+        .transaction-item.out {
+            background: #fef2f2;
+            border-left: 4px solid #ef4444;
         }
-
-        .history-table th {
-            background: #f7fafc;
+        
+        .transaction-details {
+            flex: 1;
+        }
+        
+        .transaction-amount {
             font-weight: 600;
-            color: #2d3748;
+            font-size: 1.1em;
         }
-
-        .history-table tr:hover {
-            background: #f7fafc;
+        
+        .transaction-amount.in {
+            color: #10b981;
         }
-
-        .status-badge {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 600;
+        
+        .transaction-amount.out {
+            color: #ef4444;
         }
-
-        .status-success {
-            background: #c6f6d5;
-            color: #22543d;
+        
+        .transaction-address {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
         }
-
-        .status-failed {
-            background: #fed7d7;
-            color: #742a2a;
+        
+        .transaction-time {
+            color: #999;
+            font-size: 0.8em;
         }
-
-        .status-in {
-            background: #bee3f8;
-            color: #2a4365;
-        }
-
-        .status-out {
-            background: #fbb6ce;
-            color: #702459;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 20px;
-            color: #718096;
-        }
-
-        .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #5a67d8;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 10px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        .alert {
+        
+        .status-message {
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 20px;
-            font-weight: 500;
+            font-weight: 600;
         }
-
-        .alert-success {
-            background: #c6f6d5;
-            color: #22543d;
-            border: 1px solid #9ae6b4;
+        
+        .status-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
         }
-
-        .alert-error {
-            background: #fed7d7;
-            color: #742a2a;
-            border: 1px solid #fc8181;
+        
+        .status-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
         }
-
-        .alert-info {
-            background: #bee3f8;
-            color: #2a4365;
-            border: 1px solid #90cdf4;
+        
+        .status-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #3b82f6;
         }
-
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        .auto-send-section {
-            background: #f0fff4;
-            border: 2px solid #68d391;
-            border-radius: 10px;
+        
+        .loading {
+            text-align: center;
             padding: 20px;
+            color: #666;
+        }
+        
+        .auto-send-info {
+            background: #f0f9ff;
+            padding: 15px;
+            border-radius: 8px;
             margin-bottom: 20px;
+            border-left: 4px solid #3b82f6;
         }
-
-        .auto-send-section h3 {
-            color: #22543d;
-            margin-bottom: 15px;
+        
+        .error-message {
+            color: #ef4444;
+            font-size: 0.9em;
+            margin-top: 5px;
         }
-
-        .progress-bar {
-            width: 100%;
-            height: 20px;
-            background: #e2e8f0;
-            border-radius: 10px;
-            overflow: hidden;
-            margin: 10px 0;
+        
+        .success-message {
+            color: #10b981;
+            font-size: 0.9em;
+            margin-top: 5px;
         }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(135deg, #38a169, #2f855a);
-            transition: width 0.3s ease;
-        }
-
+        
         @media (max-width: 768px) {
-            .grid-2 {
-                grid-template-columns: 1fr;
+            .container {
+                margin: 10px;
+                border-radius: 10px;
             }
             
-            .transaction-form {
-                grid-template-columns: 1fr;
+            .header {
+                padding: 20px;
             }
             
-            .wallet-info {
-                grid-template-columns: 1fr;
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .section {
+                padding: 20px;
+            }
+            
+            .info-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .info-value {
+                margin-top: 5px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="language-selector">
-        <button onclick="setLanguage('vi')" class="active" id="lang-vi">Tiếng Việt</button>
-        <button onclick="setLanguage('en')" id="lang-en">English</button>
-    </div>
-
     <div class="container">
         <div class="header">
-            <h1 data-translate="app_title">🔐 Octra Wallet</h1>
-            <p data-translate="app_subtitle">Ví điện tử an toàn và dễ sử dụng cho mạng Octra</p>
+            <h1>🔐 Octra Wallet</h1>
+            <p>Ví điện tử an toàn và dễ sử dụng cho mạng Octra</p>
         </div>
-
-        <!-- Login Section -->
-        <div class="card" id="loginSection">
-            <h2 data-translate="login_title">🔑 Đăng nhập vào ví</h2>
-            <div class="form-group">
-                <label for="privateKey" data-translate="private_key_label">Private Key (Base64):</label>
-                <input type="password" id="privateKey" placeholder="Nhập private key của bạn...">
-            </div>
-            <button class="btn" onclick="loadWallet()" data-translate="login_button">Đăng nhập</button>
-        </div>
-
-        <!-- Wallet Section -->
-        <div class="card hidden" id="walletSection">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h2 data-translate="wallet_info_title">💼 Thông tin ví</h2>
-                <div>
-                    <button class="btn btn-secondary" onclick="refreshWallet()" data-translate="refresh_button">🔄 Làm mới</button>
-                    <button class="btn btn-danger" onclick="logout()" data-translate="logout_button">🚪 Đăng xuất</button>
+        
+        <div class="content">
+            <!-- Load Wallet Section -->
+            <div class="section">
+                <h2>📱 Load Wallet</h2>
+                <div class="input-group">
+                    <label for="privateKey">Private Key (Base64):</label>
+                    <input type="password" id="privateKey" placeholder="Nhập private key base64 của bạn">
+                    <div id="keyValidation" class="error-message"></div>
                 </div>
+                <button class="btn" onclick="loadWallet()">🔑 Load Wallet</button>
+                <div id="loadStatus"></div>
             </div>
             
-            <div class="wallet-info">
-                <div class="info-item">
-                    <strong data-translate="address_label">Địa chỉ:</strong>
-                    <span id="walletAddress">-</span>
-                </div>
-                <div class="info-item">
-                    <strong data-translate="balance_label">Số dư:</strong>
-                    <span id="walletBalance">0.000000 OCT</span>
-                </div>
-                <div class="info-item">
-                    <strong data-translate="nonce_label">Nonce:</strong>
-                    <span id="walletNonce">0</span>
-                </div>
-                <div class="info-item">
-                    <strong data-translate="pending_txs_label">Giao dịch chờ:</strong>
-                    <span id="pendingTxs">0</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Auto Send Section -->
-        <div class="card hidden" id="autoSendSection">
-            <div class="auto-send-section">
-                <h3 data-translate="auto_send_title">🚀 Gửi tự động từ wallet.json</h3>
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label for="autoAmount" data-translate="auto_amount_label">Số lượng OCT mỗi địa chỉ:</label>
-                        <input type="number" id="autoAmount" value="0.00001" step="0.00001" min="0.00001">
+            <!-- Wallet Info Section -->
+            <div class="section" id="walletSection" style="display: none;">
+                <h2>💼 Thông tin Wallet</h2>
+                <div class="wallet-info">
+                    <div class="info-item">
+                        <span class="info-label">Địa chỉ:</span>
+                        <span class="info-value" id="walletAddress">-</span>
                     </div>
-                    <div class="form-group">
-                        <label for="autoDelay" data-translate="auto_delay_label">Độ trễ (giây):</label>
-                        <input type="number" id="autoDelay" value="0.1" step="0.1" min="0">
+                    <div class="info-item">
+                        <span class="info-label">Số dư:</span>
+                        <span class="info-value" id="walletBalance">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Nonce:</span>
+                        <span class="info-value" id="walletNonce">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Giao dịch chờ:</span>
+                        <span class="info-value" id="pendingTxs">-</span>
                     </div>
                 </div>
-                <div style="margin-bottom: 15px;">
-                    <button class="btn" onclick="loadWalletAddresses()" data-translate="load_addresses_button">📂 Tải danh sách địa chỉ</button>
-                    <button class="btn btn-success" onclick="autoSendToAll()" id="autoSendBtn" data-translate="auto_send_button">🚀 Gửi tự động</button>
+                <button class="btn" onclick="refreshWallet()">🔄 Refresh</button>
+            </div>
+            
+            <!-- Send Transaction Section -->
+            <div class="section" id="sendSection" style="display: none;">
+                <h2>💸 Gửi giao dịch</h2>
+                <div class="input-group">
+                    <label for="sendTo">Địa chỉ nhận:</label>
+                    <input type="text" id="sendTo" placeholder="oct...">
                 </div>
-                <div id="walletAddressesInfo" class="hidden">
-                    <p data-translate="addresses_loaded">Đã tải <span id="addressCount">0</span> địa chỉ từ wallet.json</p>
+                <div class="input-group">
+                    <label for="sendAmount">Số lượng OCT:</label>
+                    <input type="number" id="sendAmount" step="0.000001" placeholder="0.000001">
                 </div>
-                <div id="autoSendProgress" class="hidden">
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                <button class="btn" onclick="sendTransaction()">📤 Gửi</button>
+                <div id="sendStatus"></div>
+            </div>
+            
+            <!-- Auto Send Section -->
+            <div class="section" id="autoSendSection" style="display: none;">
+                <h2>🚀 Auto Send from wallet.json</h2>
+                <div class="auto-send-info">
+                    <p><strong>Đã tải <span id="addressCount">0</span> địa chỉ từ wallet.json</strong></p>
+                    <button class="btn" onclick="loadWalletAddresses()">📂 Load Addresses</button>
+                </div>
+                
+                <div class="input-group">
+                    <label for="autoAmount">Số lượng OCT gửi cho mỗi địa chỉ:</label>
+                    <input type="number" id="autoAmount" step="0.000001" value="0.00001" placeholder="0.00001">
+                </div>
+                <div class="input-group">
+                    <label for="autoDelay">Delay giữa các giao dịch (giây):</label>
+                    <input type="number" id="autoDelay" step="0.1" value="0.1" placeholder="0.1">
+                </div>
+                
+                <button class="btn" onclick="autoSendToAll()">🎯 Auto Send to All</button>
+                <div id="autoSendStatus"></div>
+                
+                <div id="autoSendResults" style="display: none;">
+                    <h3>📊 Kết quả Auto Send</h3>
+                    <div id="autoSendProgress">
+                        <p><span id="successCount">0</span>/<span id="totalCount">0</span></p>
                     </div>
-                    <p id="progressText">0/0</p>
+                    <div id="autoSendDetails"></div>
                 </div>
             </div>
-        </div>
-
-        <!-- Single Transaction Section -->
-        <div class="card hidden" id="singleTxSection">
-            <h2 data-translate="single_tx_title">💸 Gửi giao dịch đơn</h2>
-            <div class="form-group">
-                <label for="toAddress" data-translate="to_address_label">Địa chỉ nhận:</label>
-                <input type="text" id="toAddress" placeholder="oct...">
-            </div>
-            <div class="form-group">
-                <label for="amount" data-translate="amount_label">Số lượng OCT:</label>
-                <input type="number" id="amount" step="0.000001" min="0.000001">
-            </div>
-            <button class="btn" onclick="sendTransaction()" data-translate="send_button">💸 Gửi giao dịch</button>
-        </div>
-
-        <!-- Multi Transaction Section -->
-        <div class="card hidden" id="multiTxSection">
-            <h2 data-translate="multi_tx_title">📦 Gửi nhiều giao dịch</h2>
-            <div class="form-group">
-                <label for="batchDelay" data-translate="batch_delay_label">Độ trễ giữa các giao dịch (giây):</label>
-                <input type="number" id="batchDelay" value="0.1" step="0.1" min="0">
-            </div>
             
-            <div class="transaction-form">
-                <input type="text" id="newTxAddress" placeholder="oct...">
-                <input type="number" id="newTxAmount" step="0.000001" min="0.000001" placeholder="0.000001">
-                <button class="btn" onclick="addTransaction()" data-translate="add_tx_button">➕ Thêm</button>
-            </div>
-            
-            <div class="transaction-list" id="transactionList">
-                <p data-translate="no_transactions">Chưa có giao dịch nào được thêm</p>
-            </div>
-            
-            <div style="display: flex; gap: 10px;">
-                <button class="btn btn-success" onclick="sendMultiTransactions()" id="sendMultiBtn" data-translate="send_all_button">📦 Gửi tất cả</button>
-                <button class="btn btn-secondary" onclick="clearTransactions()" data-translate="clear_button">🗑️ Xóa tất cả</button>
-            </div>
-        </div>
-
-        <!-- Transaction History Section -->
-        <div class="card hidden" id="historySection">
-            <h2 data-translate="history_title">📋 Lịch sử giao dịch</h2>
-            <div id="transactionHistory">
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <p data-translate="loading_history">Đang tải lịch sử giao dịch...</p>
+            <!-- Transaction History Section -->
+            <div class="section" id="historySection" style="display: none;">
+                <h2>📜 Lịch sử giao dịch</h2>
+                <div class="transaction-history" id="transactionHistory">
+                    <div class="loading">Đang tải lịch sử giao dịch...</div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        let currentLanguage = 'vi';
-        let walletAddresses = [];
-        let transactions = [];
-        let autoSendInProgress = false;
+        let walletLoaded = false;
+        let addressCount = 0;
 
-        const translations = {
-            vi: {
-                app_title: "🔐 Octra Wallet",
-                app_subtitle: "Ví điện tử an toàn và dễ sử dụng cho mạng Octra",
-                login_title: "🔑 Đăng nhập vào ví",
-                private_key_label: "Private Key (Base64):",
-                login_button: "Đăng nhập",
-                wallet_info_title: "💼 Thông tin ví",
-                refresh_button: "🔄 Làm mới",
-                logout_button: "🚪 Đăng xuất",
-                address_label: "Địa chỉ:",
-                balance_label: "Số dư:",
-                nonce_label: "Nonce:",
-                pending_txs_label: "Giao dịch chờ:",
-                auto_send_title: "🚀 Gửi tự động từ wallet.json",
-                auto_amount_label: "Số lượng OCT mỗi địa chỉ:",
-                auto_delay_label: "Độ trễ (giây):",
-                load_addresses_button: "📂 Tải danh sách địa chỉ",
-                auto_send_button: "🚀 Gửi tự động",
-                addresses_loaded: "Đã tải",
-                single_tx_title: "💸 Gửi giao dịch đơn",
-                to_address_label: "Địa chỉ nhận:",
-                amount_label: "Số lượng OCT:",
-                send_button: "💸 Gửi giao dịch",
-                multi_tx_title: "📦 Gửi nhiều giao dịch",
-                batch_delay_label: "Độ trễ giữa các giao dịch (giây):",
-                add_tx_button: "➕ Thêm",
-                no_transactions: "Chưa có giao dịch nào được thêm",
-                send_all_button: "📦 Gửi tất cả",
-                clear_button: "🗑️ Xóa tất cả",
-                history_title: "📋 Lịch sử giao dịch",
-                loading_history: "Đang tải lịch sử giao dịch...",
-                time: "Thời gian",
-                hash: "Hash",
-                type: "Loại",
-                address: "Địa chỉ",
-                amount: "Số lượng",
-                status: "Trạng thái",
-                incoming: "Nhận",
-                outgoing: "Gửi",
-                success: "Thành công",
-                failed: "Thất bại"
-            },
-            en: {
-                app_title: "🔐 Octra Wallet",
-                app_subtitle: "Secure and easy-to-use wallet for Octra network",
-                login_title: "🔑 Login to Wallet",
-                private_key_label: "Private Key (Base64):",
-                login_button: "Login",
-                wallet_info_title: "💼 Wallet Information",
-                refresh_button: "🔄 Refresh",
-                logout_button: "🚪 Logout",
-                address_label: "Address:",
-                balance_label: "Balance:",
-                nonce_label: "Nonce:",
-                pending_txs_label: "Pending Transactions:",
-                auto_send_title: "🚀 Auto Send from wallet.json",
-                auto_amount_label: "OCT amount per address:",
-                auto_delay_label: "Delay (seconds):",
-                load_addresses_button: "📂 Load Address List",
-                auto_send_button: "🚀 Auto Send",
-                addresses_loaded: "Loaded",
-                single_tx_title: "💸 Send Single Transaction",
-                to_address_label: "Recipient Address:",
-                amount_label: "OCT Amount:",
-                send_button: "💸 Send Transaction",
-                multi_tx_title: "📦 Send Multiple Transactions",
-                batch_delay_label: "Delay between transactions (seconds):",
-                add_tx_button: "➕ Add",
-                no_transactions: "No transactions added yet",
-                send_all_button: "📦 Send All",
-                clear_button: "🗑️ Clear All",
-                history_title: "📋 Transaction History",
-                loading_history: "Loading transaction history...",
-                time: "Time",
-                hash: "Hash",
-                type: "Type",
-                address: "Address",
-                amount: "Amount",
-                status: "Status",
-                incoming: "Incoming",
-                outgoing: "Outgoing",
-                success: "Success",
-                failed: "Failed"
+        // Validate private key format
+        function validatePrivateKey(key) {
+            try {
+                // Check if it's valid base64
+                const decoded = atob(key);
+                return decoded.length === 32;
+            } catch (e) {
+                return false;
             }
-        };
-
-        function setLanguage(lang) {
-            currentLanguage = lang;
-            document.querySelectorAll('.language-selector button').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            document.getElementById(`lang-${lang}`).classList.add('active');
-            
-            document.querySelectorAll('[data-translate]').forEach(element => {
-                const key = element.getAttribute('data-translate');
-                if (translations[lang][key]) {
-                    element.textContent = translations[lang][key];
-                }
-            });
         }
 
+        // Load wallet
         async function loadWallet() {
             const privateKey = document.getElementById('privateKey').value.trim();
+            const keyValidation = document.getElementById('keyValidation');
+            const loadStatus = document.getElementById('loadStatus');
+            
+            // Clear previous messages
+            keyValidation.innerHTML = '';
+            loadStatus.innerHTML = '';
+            
             if (!privateKey) {
-                alert('Please enter your private key');
+                keyValidation.innerHTML = 'Vui lòng nhập private key';
                 return;
             }
-
+            
+            // Validate private key format
+            if (!validatePrivateKey(privateKey)) {
+                keyValidation.innerHTML = 'Private key không hợp lệ (phải là base64, 32 bytes)';
+                return;
+            }
+            
+            keyValidation.innerHTML = '<span class="success-message">✓ Private key hợp lệ</span>';
+            
             try {
+                loadStatus.innerHTML = '<div class="status-info">🔄 Đang load wallet...</div>';
+                
                 const response = await fetch('/api/load_wallet', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ private_key: privateKey })
+                    body: JSON.stringify({
+                        private_key: privateKey
+                    })
                 });
-
-                const data = await response.json();
+                
+                const result = await response.json();
+                
                 if (response.ok) {
-                    document.getElementById('loginSection').classList.add('hidden');
-                    document.getElementById('walletSection').classList.remove('hidden');
-                    document.getElementById('autoSendSection').classList.remove('hidden');
-                    document.getElementById('singleTxSection').classList.remove('hidden');
-                    document.getElementById('multiTxSection').classList.remove('hidden');
-                    document.getElementById('historySection').classList.remove('hidden');
+                    walletLoaded = true;
+                    loadStatus.innerHTML = `<div class="status-success">✅ Wallet đã được load thành công!<br>Địa chỉ: ${result.address}</div>`;
                     
+                    // Show wallet sections
+                    document.getElementById('walletSection').style.display = 'block';
+                    document.getElementById('sendSection').style.display = 'block';
+                    document.getElementById('autoSendSection').style.display = 'block';
+                    document.getElementById('historySection').style.display = 'block';
+                    
+                    // Load wallet info
                     await refreshWallet();
-                    showAlert('Wallet loaded successfully!', 'success');
+                    await loadWalletAddresses();
                 } else {
-                    showAlert(data.detail || 'Failed to load wallet', 'error');
+                    loadStatus.innerHTML = `<div class="status-error">❌ Lỗi: ${result.detail}</div>`;
                 }
             } catch (error) {
-                showAlert('Error loading wallet: ' + error.message, 'error');
+                loadStatus.innerHTML = `<div class="status-error">❌ Lỗi kết nối: ${error.message}</div>`;
             }
         }
 
+        // Refresh wallet info
         async function refreshWallet() {
+            if (!walletLoaded) return;
+            
             try {
                 const response = await fetch('/api/wallet');
                 const data = await response.json();
@@ -645,58 +483,137 @@
                     document.getElementById('walletNonce').textContent = data.nonce;
                     document.getElementById('pendingTxs').textContent = data.pending_txs;
                     
+                    // Update transaction history
                     updateTransactionHistory(data.transactions);
                 } else {
-                    showAlert(data.detail || 'Failed to refresh wallet', 'error');
+                    console.error('Failed to refresh wallet:', data.detail);
                 }
             } catch (error) {
-                showAlert('Error refreshing wallet: ' + error.message, 'error');
+                console.error('Error refreshing wallet:', error);
             }
         }
 
+        // Update transaction history
+        function updateTransactionHistory(transactions) {
+            const historyDiv = document.getElementById('transactionHistory');
+            
+            if (!transactions || transactions.length === 0) {
+                historyDiv.innerHTML = '<div class="loading">Chưa có giao dịch nào</div>';
+                return;
+            }
+            
+            let html = '';
+            transactions.forEach(tx => {
+                const typeClass = tx.type === 'in' ? 'in' : 'out';
+                const typeSymbol = tx.type === 'in' ? '+' : '-';
+                const typeText = tx.type === 'in' ? 'Nhận từ' : 'Gửi tới';
+                
+                html += `
+                    <div class="transaction-item ${typeClass}">
+                        <div class="transaction-details">
+                            <div class="transaction-amount ${typeClass}">
+                                ${typeSymbol}${tx.amt} OCT
+                            </div>
+                            <div class="transaction-address">
+                                ${typeText}: ${tx.to}
+                            </div>
+                            <div class="transaction-time">${tx.time}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            historyDiv.innerHTML = html;
+        }
+
+        // Send transaction
+        async function sendTransaction() {
+            const to = document.getElementById('sendTo').value.trim();
+            const amount = parseFloat(document.getElementById('sendAmount').value);
+            const sendStatus = document.getElementById('sendStatus');
+            
+            sendStatus.innerHTML = '';
+            
+            if (!to || !amount || amount <= 0) {
+                sendStatus.innerHTML = '<div class="status-error">❌ Vui lòng nhập đầy đủ thông tin</div>';
+                return;
+            }
+            
+            try {
+                sendStatus.innerHTML = '<div class="status-info">🔄 Đang gửi giao dịch...</div>';
+                
+                const response = await fetch('/api/send', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        to: to,
+                        amount: amount
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    sendStatus.innerHTML = `<div class="status-success">✅ Giao dịch thành công!<br>Hash: ${result.tx_hash}<br>Thời gian: ${result.time}</div>`;
+                    
+                    // Clear form
+                    document.getElementById('sendTo').value = '';
+                    document.getElementById('sendAmount').value = '';
+                    
+                    // Refresh wallet
+                    setTimeout(refreshWallet, 1000);
+                } else {
+                    sendStatus.innerHTML = `<div class="status-error">❌ Lỗi: ${result.detail}</div>`;
+                }
+            } catch (error) {
+                sendStatus.innerHTML = `<div class="status-error">❌ Lỗi kết nối: ${error.message}</div>`;
+            }
+        }
+
+        // Load wallet addresses
         async function loadWalletAddresses() {
             try {
                 const response = await fetch('/api/load_wallet_addresses');
                 const data = await response.json();
                 
                 if (response.ok) {
-                    walletAddresses = data.addresses;
-                    document.getElementById('addressCount').textContent = data.count;
-                    document.getElementById('walletAddressesInfo').classList.remove('hidden');
-                    showAlert(`Loaded ${data.count} addresses from wallet.json`, 'success');
+                    addressCount = data.count;
+                    document.getElementById('addressCount').textContent = addressCount;
                 } else {
-                    showAlert(data.detail || 'Failed to load wallet addresses', 'error');
+                    console.error('Failed to load addresses:', data.detail);
+                    document.getElementById('addressCount').textContent = '0';
                 }
             } catch (error) {
-                showAlert('Error loading wallet addresses: ' + error.message, 'error');
+                console.error('Error loading addresses:', error);
+                document.getElementById('addressCount').textContent = '0';
             }
         }
 
+        // Auto send to all addresses
         async function autoSendToAll() {
-            if (autoSendInProgress) return;
-            
-            if (walletAddresses.length === 0) {
-                showAlert('Please load wallet addresses first', 'error');
-                return;
-            }
-
             const amount = parseFloat(document.getElementById('autoAmount').value);
             const delay = parseFloat(document.getElementById('autoDelay').value);
-
+            const autoSendStatus = document.getElementById('autoSendStatus');
+            const autoSendResults = document.getElementById('autoSendResults');
+            
+            autoSendStatus.innerHTML = '';
+            autoSendResults.style.display = 'none';
+            
             if (!amount || amount <= 0) {
-                showAlert('Please enter a valid amount', 'error');
+                autoSendStatus.innerHTML = '<div class="status-error">❌ Vui lòng nhập số lượng OCT hợp lệ</div>';
                 return;
             }
-
-            if (!confirm(`Send ${amount} OCT to ${walletAddresses.length} addresses?`)) {
+            
+            if (addressCount === 0) {
+                autoSendStatus.innerHTML = '<div class="status-error">❌ Chưa có địa chỉ nào được load từ wallet.json</div>';
                 return;
             }
-
-            autoSendInProgress = true;
-            document.getElementById('autoSendBtn').disabled = true;
-            document.getElementById('autoSendProgress').classList.remove('hidden');
-
+            
             try {
+                autoSendStatus.innerHTML = '<div class="status-info">🚀 Đang thực hiện Auto Send...</div>';
+                
                 const response = await fetch('/api/auto_send', {
                     method: 'POST',
                     headers: {
@@ -707,223 +624,55 @@
                         batch_delay: delay
                     })
                 });
-
-                const data = await response.json();
+                
+                const result = await response.json();
                 
                 if (response.ok) {
-                    document.getElementById('progressFill').style.width = '100%';
-                    document.getElementById('progressText').textContent = 
-                        `${data.successful_transactions}/${data.total_addresses} completed`;
+                    autoSendStatus.innerHTML = `<div class="status-success">✅ Auto Send hoàn thành!<br>Thành công: ${result.successful_transactions}/${result.total_addresses}<br>Tổng số OCT đã gửi: ${result.total_amount}</div>`;
                     
-                    showAlert(`Auto send completed! ${data.successful_transactions}/${data.total_addresses} successful`, 'success');
-                    await refreshWallet();
+                    // Show results
+                    document.getElementById('successCount').textContent = result.successful_transactions;
+                    document.getElementById('totalCount').textContent = result.total_addresses;
+                    
+                    let detailsHtml = '';
+                    result.results.forEach(r => {
+                        const statusClass = r.status === 'success' ? 'status-success' : 'status-error';
+                        const statusIcon = r.status === 'success' ? '✅' : '❌';
+                        
+                        detailsHtml += `
+                            <div class="${statusClass}" style="margin-bottom: 10px; padding: 10px;">
+                                ${statusIcon} ${r.to}: ${r.amount} OCT
+                                ${r.status === 'success' ? `(${r.tx_hash})` : `(${r.error})`}
+                            </div>
+                        `;
+                    });
+                    
+                    document.getElementById('autoSendDetails').innerHTML = detailsHtml;
+                    autoSendResults.style.display = 'block';
+                    
+                    // Refresh wallet
+                    setTimeout(refreshWallet, 2000);
                 } else {
-                    showAlert(data.detail || 'Auto send failed', 'error');
+                    autoSendStatus.innerHTML = `<div class="status-error">❌ Lỗi: ${result.detail}</div>`;
                 }
             } catch (error) {
-                showAlert('Error during auto send: ' + error.message, 'error');
-            } finally {
-                autoSendInProgress = false;
-                document.getElementById('autoSendBtn').disabled = false;
-                setTimeout(() => {
-                    document.getElementById('autoSendProgress').classList.add('hidden');
-                }, 3000);
+                autoSendStatus.innerHTML = `<div class="status-error">❌ Lỗi kết nối: ${error.message}</div>`;
             }
         }
 
-        async function sendTransaction() {
-            const toAddress = document.getElementById('toAddress').value.trim();
-            const amount = parseFloat(document.getElementById('amount').value);
-
-            if (!toAddress || !amount || amount <= 0) {
-                showAlert('Please enter valid address and amount', 'error');
-                return;
+        // Auto refresh wallet every 30 seconds
+        setInterval(() => {
+            if (walletLoaded) {
+                refreshWallet();
             }
+        }, 30000);
 
-            try {
-                const response = await fetch('/api/send', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        to: toAddress,
-                        amount: amount
-                    })
-                });
-
-                const data = await response.json();
-                
-                if (response.ok) {
-                    showAlert(`Transaction sent successfully! Hash: ${data.tx_hash}`, 'success');
-                    document.getElementById('toAddress').value = '';
-                    document.getElementById('amount').value = '';
-                    await refreshWallet();
-                } else {
-                    showAlert(data.detail || 'Transaction failed', 'error');
-                }
-            } catch (error) {
-                showAlert('Error sending transaction: ' + error.message, 'error');
+        // Enter key support
+        document.getElementById('privateKey').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                loadWallet();
             }
-        }
-
-        function addTransaction() {
-            const address = document.getElementById('newTxAddress').value.trim();
-            const amount = parseFloat(document.getElementById('newTxAmount').value);
-
-            if (!address || !amount || amount <= 0) {
-                showAlert('Please enter valid address and amount', 'error');
-                return;
-            }
-
-            transactions.push({ to: address, amount: amount });
-            document.getElementById('newTxAddress').value = '';
-            document.getElementById('newTxAmount').value = '';
-            
-            updateTransactionList();
-        }
-
-        function updateTransactionList() {
-            const listElement = document.getElementById('transactionList');
-            
-            if (transactions.length === 0) {
-                listElement.innerHTML = '<p data-translate="no_transactions">No transactions added yet</p>';
-                return;
-            }
-
-            let html = '';
-            transactions.forEach((tx, index) => {
-                html += `
-                    <div class="transaction-item">
-                        <span>${tx.to}</span>
-                        <span>${tx.amount} OCT</span>
-                        <button class="btn btn-danger" onclick="removeTransaction(${index})">❌</button>
-                    </div>
-                `;
-            });
-            
-            listElement.innerHTML = html;
-        }
-
-        function removeTransaction(index) {
-            transactions.splice(index, 1);
-            updateTransactionList();
-        }
-
-        function clearTransactions() {
-            transactions = [];
-            updateTransactionList();
-        }
-
-        async function sendMultiTransactions() {
-            if (transactions.length === 0) {
-                showAlert('Please add some transactions first', 'error');
-                return;
-            }
-
-            const delay = parseFloat(document.getElementById('batchDelay').value);
-
-            try {
-                document.getElementById('sendMultiBtn').disabled = true;
-                
-                const response = await fetch('/api/send_multi', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        transactions: transactions,
-                        batch_delay: delay
-                    })
-                });
-
-                const data = await response.json();
-                
-                if (response.ok) {
-                    showAlert(`Multi-transaction completed! ${data.successful_transactions}/${data.total_transactions} successful`, 'success');
-                    clearTransactions();
-                    await refreshWallet();
-                } else {
-                    showAlert(data.detail || 'Multi-transaction failed', 'error');
-                }
-            } catch (error) {
-                showAlert('Error sending multi-transaction: ' + error.message, 'error');
-            } finally {
-                document.getElementById('sendMultiBtn').disabled = false;
-            }
-        }
-
-        function updateTransactionHistory(txHistory) {
-            const historyElement = document.getElementById('transactionHistory');
-            
-            if (!txHistory || txHistory.length === 0) {
-                historyElement.innerHTML = '<p>No transaction history</p>';
-                return;
-            }
-
-            let html = `
-                <table class="history-table">
-                    <thead>
-                        <tr>
-                            <th data-translate="time">${translations[currentLanguage].time}</th>
-                            <th data-translate="hash">${translations[currentLanguage].hash}</th>
-                            <th data-translate="type">${translations[currentLanguage].type}</th>
-                            <th data-translate="address">${translations[currentLanguage].address}</th>
-                            <th data-translate="amount">${translations[currentLanguage].amount}</th>
-                            <th data-translate="status">${translations[currentLanguage].status}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
-
-            txHistory.forEach(tx => {
-                const typeText = tx.type === 'in' ? translations[currentLanguage].incoming : translations[currentLanguage].outgoing;
-                const statusText = tx.ok ? translations[currentLanguage].success : translations[currentLanguage].failed;
-                
-                html += `
-                    <tr>
-                        <td>${tx.time}</td>
-                        <td style="font-family: monospace; font-size: 12px;">${tx.hash.substring(0, 16)}...</td>
-                        <td><span class="status-badge status-${tx.type}">${typeText}</span></td>
-                        <td style="font-family: monospace; font-size: 12px;">${tx.to.substring(0, 16)}...</td>
-                        <td>${tx.amt} OCT</td>
-                        <td><span class="status-badge status-${tx.ok ? 'success' : 'failed'}">${statusText}</span></td>
-                    </tr>
-                `;
-            });
-
-            html += '</tbody></table>';
-            historyElement.innerHTML = html;
-        }
-
-        function logout() {
-            document.getElementById('loginSection').classList.remove('hidden');
-            document.getElementById('walletSection').classList.add('hidden');
-            document.getElementById('autoSendSection').classList.add('hidden');
-            document.getElementById('singleTxSection').classList.add('hidden');
-            document.getElementById('multiTxSection').classList.add('hidden');
-            document.getElementById('historySection').classList.add('hidden');
-            
-            document.getElementById('privateKey').value = '';
-            transactions = [];
-            walletAddresses = [];
-            updateTransactionList();
-        }
-
-        function showAlert(message, type) {
-            const alertDiv = document.createElement('div');
-            alertDiv.className = `alert alert-${type}`;
-            alertDiv.textContent = message;
-            
-            document.body.insertBefore(alertDiv, document.body.firstChild);
-            
-            setTimeout(() => {
-                alertDiv.remove();
-            }, 5000);
-        }
-
-        // Initialize
-        setLanguage('vi');
+        });
     </script>
 </body>
 </html>
