@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Octra Wallet</title>
+    <title>Octra Wallet Pro - Ví Tiền Điện Tử Chuyên Nghiệp</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -30,476 +31,732 @@
             color: white;
         }
 
-        .language-selector {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            display: flex;
-            gap: 10px;
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
 
-        .lang-btn {
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            padding: 8px 12px;
-            border-radius: 20px;
-            color: white;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s ease;
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
         }
 
-        .lang-btn:hover, .lang-btn.active {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
-        }
-
-        .card {
+        .wallet-card {
             background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 30px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .wallet-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .info-item {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
             border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
             transition: transform 0.3s ease;
         }
 
-        .card:hover {
+        .info-item:hover {
             transform: translateY(-5px);
         }
 
-        .card h2 {
+        .info-item i {
+            font-size: 2rem;
             color: #667eea;
-            margin-bottom: 20px;
-            font-size: 1.5em;
-            border-bottom: 2px solid #f0f0f0;
-            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+
+        .info-item h3 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .info-item p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 5px;
+            margin-bottom: 30px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
         }
 
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             font-weight: 600;
-            color: #555;
+            color: #333;
         }
 
-        .form-group input, .form-group select {
+        .form-group input, .form-group textarea {
             width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 14px;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1rem;
             transition: border-color 0.3s ease;
         }
 
-        .form-group input:focus, .form-group select:focus {
+        .form-group input:focus, .form-group textarea:focus {
             outline: none;
             border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
         .btn {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            padding: 12px 25px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1rem;
             font-weight: 600;
+            cursor: pointer;
             transition: all 0.3s ease;
-            margin-right: 10px;
-            margin-bottom: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
         }
 
         .btn-secondary {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
         }
 
         .btn-danger {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
         }
 
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .info-item {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 4px solid #667eea;
-        }
-
-        .info-item label {
-            font-weight: 600;
-            color: #667eea;
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        .info-item span {
-            font-family: 'Courier New', monospace;
-            word-break: break-all;
-            font-size: 13px;
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
         }
 
         .address-list {
-            max-height: 300px;
+            max-height: 400px;
             overflow-y: auto;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 10px;
-            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
         }
 
         .address-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px;
-            margin-bottom: 5px;
-            background: white;
-            border-radius: 5px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .address-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .address-text {
             font-family: 'Courier New', monospace;
-            font-size: 12px;
+            font-size: 0.9rem;
+            color: #495057;
+            flex: 1;
+            margin-right: 15px;
+        }
+
+        .transaction-list {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .transaction-item:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+        }
+
+        .transaction-info {
+            flex: 1;
+        }
+
+        .transaction-hash {
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+
+        .transaction-amount {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .transaction-in {
+            color: #28a745;
+        }
+
+        .transaction-out {
+            color: #dc3545;
+        }
+
+        .transaction-time {
+            font-size: 0.9rem;
+            color: #6c757d;
         }
 
         .progress-bar {
             width: 100%;
             height: 20px;
-            background: #e0e0e0;
+            background: #e9ecef;
             border-radius: 10px;
             overflow: hidden;
-            margin: 10px 0;
+            margin: 20px 0;
         }
 
         .progress-fill {
             height: 100%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            width: 0%;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
             transition: width 0.3s ease;
         }
 
-        .tx-history {
-            max-height: 400px;
-            overflow-y: auto;
+        .status-message {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-weight: 600;
         }
 
-        .tx-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px;
-            margin-bottom: 8px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            border-left: 4px solid #28a745;
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
         }
 
-        .tx-item.out {
-            border-left-color: #dc3545;
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
         }
 
-        .tx-item.pending {
-            border-left-color: #ffc107;
-            opacity: 0.7;
+        .status-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
         }
 
-        .hidden {
-            display: none;
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
         }
 
         @media (max-width: 768px) {
             .container {
                 padding: 10px;
             }
-            
-            .info-grid {
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .wallet-card {
+                padding: 20px;
+            }
+
+            .grid-2, .grid-3 {
                 grid-template-columns: 1fr;
             }
-            
-            .language-selector {
-                position: relative;
-                top: 0;
-                right: 0;
-                justify-content: center;
-                margin-bottom: 20px;
+
+            .tabs {
+                flex-direction: column;
             }
+
+            .address-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .transaction-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+
+        .wallet-not-loaded {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+
+        .wallet-not-loaded i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: #dee2e6;
+        }
+
+        .copy-btn {
+            background: transparent;
+            border: 1px solid #667eea;
+            color: #667eea;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .auto-send-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
         }
     </style>
 </head>
 <body>
-    <div class="language-selector">
-        <button class="lang-btn active" onclick="switchLanguage('vi')">🇻🇳 Tiếng Việt</button>
-        <button class="lang-btn" onclick="switchLanguage('en')">🇬🇧 English</button>
-    </div>
-
     <div class="container">
         <div class="header">
-            <h1 data-vi="Octra Wallet" data-en="Octra Wallet">Octra Wallet</h1>
-            <p data-vi="Ví an toàn và thân thiện cho mạng Octra" data-en="Secure and user-friendly wallet for Octra network">Ví an toàn và thân thiện cho mạng Octra</p>
+            <h1><i class="fas fa-wallet"></i> Octra Wallet Pro</h1>
+            <p>Ví tiền điện tử chuyên nghiệp và an toàn cho mạng Octra</p>
         </div>
 
-        <!-- Load Wallet Section -->
-        <div class="card">
-            <h2 data-vi="Tải Ví" data-en="Load Wallet">Tải Ví</h2>
-            <div class="form-group">
-                <label data-vi="Khóa Riêng (Base64):" data-en="Private Key (Base64):">Khóa Riêng (Base64):</label>
-                <input type="password" id="privateKey" placeholder="Nhập khóa riêng base64 của bạn">
-            </div>
-            <button class="btn" onclick="loadWallet()" data-vi="Tải Ví" data-en="Load Wallet">Tải Ví</button>
-        </div>
-
-        <!-- Wallet Information Section -->
-        <div class="card">
-            <h2 data-vi="Thông Tin Ví" data-en="Wallet Information">Thông Tin Ví</h2>
-            <div class="info-grid">
-                <div class="info-item">
-                    <label data-vi="Địa chỉ:" data-en="Address:">Địa chỉ:</label>
-                    <span id="walletAddress">-</span>
+        <div class="wallet-card">
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('wallet')">
+                    <i class="fas fa-wallet"></i> Ví của tôi
                 </div>
-                <div class="info-item">
-                    <label data-vi="Số dư:" data-en="Balance:">Số dư:</label>
-                    <span id="walletBalance">-</span>
+                <div class="tab" onclick="switchTab('send')">
+                    <i class="fas fa-paper-plane"></i> Gửi tiền
                 </div>
-                <div class="info-item">
-                    <label data-vi="Nonce:" data-en="Nonce:">Nonce:</label>
-                    <span id="walletNonce">-</span>
+                <div class="tab" onclick="switchTab('addresses')">
+                    <i class="fas fa-address-book"></i> Danh sách địa chỉ
                 </div>
-                <div class="info-item">
-                    <label data-vi="Giao dịch chờ:" data-en="Pending Transactions:">Giao dịch chờ:</label>
-                    <span id="pendingTxs">-</span>
+                <div class="tab" onclick="switchTab('auto-send')">
+                    <i class="fas fa-rocket"></i> Gửi tự động
+                </div>
+                <div class="tab" onclick="switchTab('settings')">
+                    <i class="fas fa-cog"></i> Cài đặt
                 </div>
             </div>
-            <button class="btn btn-secondary" onclick="refreshWallet()" data-vi="Làm mới" data-en="Refresh">Làm mới</button>
-        </div>
 
-        <!-- Send Transaction Section -->
-        <div class="card">
-            <h2 data-vi="Gửi Giao Dịch" data-en="Send Transaction">Gửi Giao Dịch</h2>
-            <div class="form-group">
-                <label data-vi="Địa chỉ người nhận:" data-en="Recipient Address:">Địa chỉ người nhận:</label>
-                <input type="text" id="recipientAddress" placeholder="oct...">
-            </div>
-            <div class="form-group">
-                <label data-vi="Số lượng (OCT):" data-en="Amount (OCT):">Số lượng (OCT):</label>
-                <input type="number" id="sendAmount" step="0.000001" placeholder="0.000001">
-            </div>
-            <button class="btn" onclick="sendTransaction()" data-vi="Gửi" data-en="Send">Gửi</button>
-        </div>
+            <!-- Tab Ví của tôi -->
+            <div id="wallet" class="tab-content active">
+                <div id="wallet-not-loaded" class="wallet-not-loaded">
+                    <i class="fas fa-wallet"></i>
+                    <h3>Chưa tải ví</h3>
+                    <p>Vui lòng tải ví từ private key trong tab Cài đặt</p>
+                </div>
 
-        <!-- Address Management Section -->
-        <div class="card">
-            <h2 data-vi="Quản Lý Địa Chỉ" data-en="Address Management">Quản Lý Địa Chỉ</h2>
-            <div class="form-group">
-                <label data-vi="Địa chỉ mới:" data-en="New Address:">Địa chỉ mới:</label>
-                <input type="text" id="newAddress" placeholder="oct...">
-            </div>
-            <button class="btn" onclick="addAddress()" data-vi="Thêm Địa Chỉ" data-en="Add Address">Thêm Địa Chỉ</button>
-            <button class="btn btn-secondary" onclick="loadAddresses()" data-vi="Tải Địa Chỉ" data-en="Load Addresses">Tải Địa Chỉ</button>
-            
-            <div class="address-list" id="addressList">
-                <p data-vi="Chưa tải địa chỉ nào" data-en="No addresses loaded">Chưa tải địa chỉ nào</p>
-            </div>
-            <p data-vi="Tổng số địa chỉ:" data-en="Total addresses:">Tổng số địa chỉ: <span id="totalAddresses">0</span></p>
-        </div>
+                <div id="wallet-loaded" style="display: none;">
+                    <div class="wallet-info">
+                        <div class="info-item">
+                            <i class="fas fa-coins"></i>
+                            <h3>Số dư</h3>
+                            <p id="balance">0.000000 OCT</p>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-hashtag"></i>
+                            <h3>Nonce</h3>
+                            <p id="nonce">0</p>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-clock"></i>
+                            <h3>Giao dịch chờ</h3>
+                            <p id="pending-txs">0</p>
+                        </div>
+                    </div>
 
-        <!-- Auto Send Section -->
-        <div class="card">
-            <h2 data-vi="Gửi Tự Động (Tuần Tự)" data-en="Auto Send (Sequential)">Gửi Tự Động (Tuần Tự)</h2>
-            <p data-vi="Giao dịch sẽ được gửi từng cái một để tránh tắc nghẽn mạng" data-en="Transactions will be sent one by one to prevent network congestion">Giao dịch sẽ được gửi từng cái một để tránh tắc nghẽn mạng</p>
-            
-            <div class="form-group">
-                <label data-vi="Số lượng mỗi địa chỉ (OCT):" data-en="Amount per address (OCT):">Số lượng mỗi địa chỉ (OCT):</label>
-                <input type="number" id="autoSendAmount" step="0.000001" value="0.00001">
-            </div>
-            <div class="form-group">
-                <label data-vi="Độ trễ giữa các giao dịch (giây):" data-en="Delay between transactions (seconds):">Độ trễ giữa các giao dịch (giây):</label>
-                <input type="number" id="batchDelay" step="0.1" value="1.0">
-            </div>
-            <button class="btn" onclick="startAutoSend()" data-vi="Bắt Đầu Gửi Tự Động" data-en="Start Auto Send">Bắt Đầu Gửi Tự Động</button>
-            
-            <div class="progress-bar">
-                <div class="progress-fill" id="progressFill"></div>
-            </div>
-            <p data-vi="Tiến độ:" data-en="Progress:">Tiến độ: <span id="progressText">0/0</span></p>
-        </div>
+                    <div class="form-group">
+                        <label>Địa chỉ ví:</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="wallet-address" readonly>
+                            <button class="copy-btn" onclick="copyToClipboard('wallet-address')">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
 
-        <!-- Transaction History Section -->
-        <div class="card">
-            <h2 data-vi="Lịch Sử Giao Dịch" data-en="Transaction History">Lịch Sử Giao Dịch</h2>
-            <div class="tx-history" id="transactionHistory">
-                <p data-vi="Đang tải lịch sử giao dịch..." data-en="Loading transaction history...">Đang tải lịch sử giao dịch...</p>
+                    <h3 style="margin-bottom: 20px;"><i class="fas fa-history"></i> Lịch sử giao dịch</h3>
+                    <div id="transaction-list" class="transaction-list">
+                        <div class="status-info">
+                            <i class="fas fa-info-circle"></i> Đang tải lịch sử giao dịch...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Gửi tiền -->
+            <div id="send" class="tab-content">
+                <div id="send-form">
+                    <div class="form-group">
+                        <label><i class="fas fa-map-marker-alt"></i> Địa chỉ nhận:</label>
+                        <input type="text" id="send-to" placeholder="oct...">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-coins"></i> Số lượng OCT:</label>
+                        <input type="number" id="send-amount" step="0.000001" min="0.000001" placeholder="0.000001">
+                    </div>
+                    <button class="btn" onclick="sendTransaction()">
+                        <i class="fas fa-paper-plane"></i> Gửi giao dịch
+                    </button>
+                </div>
+                <div id="send-status"></div>
+            </div>
+
+            <!-- Tab Danh sách địa chỉ -->
+            <div id="addresses" class="tab-content">
+                <div class="grid-2" style="margin-bottom: 20px;">
+                    <div class="form-group">
+                        <label><i class="fas fa-plus"></i> Thêm địa chỉ mới:</label>
+                        <input type="text" id="new-address" placeholder="oct...">
+                    </div>
+                    <div style="display: flex; align-items: end;">
+                        <button class="btn" onclick="addAddress()">
+                            <i class="fas fa-plus"></i> Thêm
+                        </button>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <strong>Tổng số địa chỉ: <span id="address-count">0</span></strong>
+                </div>
+
+                <div id="address-list" class="address-list">
+                    <div class="status-info">
+                        <i class="fas fa-info-circle"></i> Chưa có địa chỉ nào
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Gửi tự động -->
+            <div id="auto-send" class="tab-content">
+                <div class="auto-send-controls">
+                    <div class="form-group">
+                        <label><i class="fas fa-coins"></i> Số lượng mỗi lần gửi:</label>
+                        <input type="number" id="auto-amount" step="0.000001" min="0.000001" value="0.000001">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-clock"></i> Độ trễ giữa các giao dịch (giây):</label>
+                        <input type="number" id="batch-delay" step="0.1" min="0.1" value="1.0">
+                    </div>
+                </div>
+
+                <div class="status-info" style="margin-bottom: 20px;">
+                    <i class="fas fa-info-circle"></i> Giao dịch sẽ được gửi từng cái một để tránh tắc nghẽn mạng
+                </div>
+
+                <button class="btn" onclick="startAutoSend()">
+                    <i class="fas fa-rocket"></i> Bắt đầu gửi tự động
+                </button>
+
+                <div id="auto-send-progress" style="display: none;">
+                    <h4>Tiến độ gửi tự động:</h4>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                    </div>
+                    <p id="progress-text">Tiến độ: 0/0</p>
+                </div>
+
+                <div id="auto-send-status"></div>
+            </div>
+
+            <!-- Tab Cài đặt -->
+            <div id="settings" class="tab-content">
+                <div class="form-group">
+                    <label><i class="fas fa-key"></i> Private Key (Base64):</label>
+                    <textarea id="private-key" rows="4" placeholder="Nhập private key dạng base64..."></textarea>
+                </div>
+                <button class="btn" onclick="loadWallet()">
+                    <i class="fas fa-download"></i> Tải ví
+                </button>
+                <div id="load-status"></div>
+
+                <hr style="margin: 30px 0; border: 1px solid #e9ecef;">
+
+                <div class="form-group">
+                    <label><i class="fas fa-sync"></i> Cập nhật dữ liệu:</label>
+                    <div class="grid-3">
+                        <button class="btn btn-secondary" onclick="refreshWallet()">
+                            <i class="fas fa-sync"></i> Làm mới ví
+                        </button>
+                        <button class="btn btn-secondary" onclick="refreshAddresses()">
+                            <i class="fas fa-list"></i> Làm mới địa chỉ
+                        </button>
+                        <button class="btn btn-secondary" onclick="clearCache()">
+                            <i class="fas fa-trash"></i> Xóa cache
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        let currentLanguage = 'vi';
+        let walletLoaded = false;
+        let autoSendRunning = false;
 
-        // Language switching function
-        function switchLanguage(lang) {
-            currentLanguage = lang;
-            const elements = document.querySelectorAll('[data-vi][data-en]');
+        // Chuyển đổi tab
+        function switchTab(tabName) {
+            // Ẩn tất cả tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
             
-            elements.forEach(element => {
-                if (lang === 'vi') {
-                    element.textContent = element.getAttribute('data-vi');
-                } else {
-                    element.textContent = element.getAttribute('data-en');
-                }
+            // Bỏ active từ tất cả tab
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
             });
-
-            // Update active language button
-            document.querySelectorAll('.lang-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            document.querySelector(`[onclick="switchLanguage('${lang}')"]`).classList.add('active');
-
-            // Update placeholders
-            updatePlaceholders(lang);
+            
+            // Hiện tab được chọn
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+            
+            // Tự động refresh dữ liệu khi chuyển tab
+            if (tabName === 'wallet' && walletLoaded) {
+                refreshWallet();
+            } else if (tabName === 'addresses') {
+                refreshAddresses();
+            }
         }
 
-        function updatePlaceholders(lang) {
-            const placeholders = {
-                vi: {
-                    privateKey: 'Nhập khóa riêng base64 của bạn',
-                    recipientAddress: 'oct...',
-                    sendAmount: '0.000001',
-                    newAddress: 'oct...'
-                },
-                en: {
-                    privateKey: 'Enter your base64 private key',
-                    recipientAddress: 'oct...',
-                    sendAmount: '0.000001',
-                    newAddress: 'oct...'
-                }
-            };
-
-            document.getElementById('privateKey').placeholder = placeholders[lang].privateKey;
-            document.getElementById('recipientAddress').placeholder = placeholders[lang].recipientAddress;
-            document.getElementById('sendAmount').placeholder = placeholders[lang].sendAmount;
-            document.getElementById('newAddress').placeholder = placeholders[lang].newAddress;
-        }
-
-        // Load wallet function
+        // Tải ví
         async function loadWallet() {
-            const privateKey = document.getElementById('privateKey').value;
+            const privateKey = document.getElementById('private-key').value.trim();
+            const statusDiv = document.getElementById('load-status');
+            
             if (!privateKey) {
-                alert(currentLanguage === 'vi' ? 'Vui lòng nhập khóa riêng' : 'Please enter a private key');
+                showStatus(statusDiv, 'Vui lòng nhập private key', 'error');
                 return;
             }
             
             try {
+                showStatus(statusDiv, 'Đang tải ví...', 'info');
+                
                 const response = await fetch('/api/load_wallet', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        private_key: privateKey
-                    })
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({private_key: privateKey})
                 });
                 
                 const data = await response.json();
                 
                 if (response.ok) {
-                    alert(currentLanguage === 'vi' ? 'Tải ví thành công!' : 'Wallet loaded successfully!');
+                    walletLoaded = true;
+                    showStatus(statusDiv, `Ví đã được tải thành công! Địa chỉ: ${data.address}`, 'success');
+                    document.getElementById('wallet-address').value = data.address;
+                    document.getElementById('balance').textContent = data.balance;
+                    document.getElementById('nonce').textContent = data.nonce;
+                    
+                    // Hiện thông tin ví
+                    document.getElementById('wallet-not-loaded').style.display = 'none';
+                    document.getElementById('wallet-loaded').style.display = 'block';
+                    
+                    // Chuyển về tab ví
+                    switchTab('wallet');
+                    
+                    // Tự động refresh
                     refreshWallet();
                 } else {
-                    alert((currentLanguage === 'vi' ? 'Lỗi: ' : 'Error: ') + data.detail);
+                    showStatus(statusDiv, `Lỗi: ${data.detail}`, 'error');
                 }
             } catch (error) {
-                alert((currentLanguage === 'vi' ? 'Lỗi tải ví: ' : 'Error loading wallet: ') + error.message);
+                showStatus(statusDiv, `Lỗi kết nối: ${error.message}`, 'error');
             }
         }
 
-        // Load addresses function
-        async function loadAddresses() {
+        // Làm mới thông tin ví
+        async function refreshWallet() {
+            if (!walletLoaded) return;
+            
             try {
-                const response = await fetch('/api/load_wallet_addresses');
+                const response = await fetch('/api/wallet');
                 const data = await response.json();
                 
                 if (response.ok) {
-                    const addressList = document.getElementById('addressList');
-                    const totalCount = document.getElementById('totalAddresses');
+                    document.getElementById('balance').textContent = data.balance;
+                    document.getElementById('nonce').textContent = data.nonce;
+                    document.getElementById('pending-txs').textContent = data.pending_txs;
                     
-                    if (data.addresses.length === 0) {
-                        addressList.innerHTML = `<p>${currentLanguage === 'vi' ? 'Chưa có địa chỉ nào' : 'No addresses found'}</p>`;
+                    // Cập nhật lịch sử giao dịch
+                    const transactionList = document.getElementById('transaction-list');
+                    if (data.transactions && data.transactions.length > 0) {
+                        transactionList.innerHTML = data.transactions.map(tx => `
+                            <div class="transaction-item">
+                                <div class="transaction-info">
+                                    <div class="transaction-hash">${tx.hash}</div>
+                                    <div class="transaction-amount ${tx.type === 'in' ? 'transaction-in' : 'transaction-out'}">
+                                        ${tx.type === 'in' ? '+' : '-'}${tx.amt} OCT
+                                    </div>
+                                    <div>Đến: ${tx.to}</div>
+                                </div>
+                                <div class="transaction-time">${tx.time}</div>
+                            </div>
+                        `).join('');
                     } else {
-                        addressList.innerHTML = '';
-                        data.addresses.forEach((address, index) => {
-                            const div = document.createElement('div');
-                            div.className = 'address-item';
-                            div.innerHTML = `
-                                <span>${address}</span>
-                                <button class="btn btn-danger" onclick="removeAddress('${address}')" style="padding: 5px 10px; font-size: 12px;">
-                                    ${currentLanguage === 'vi' ? 'Xóa' : 'Remove'}
-                                </button>
-                            `;
-                            addressList.appendChild(div);
-                        });
+                        transactionList.innerHTML = '<div class="status-info"><i class="fas fa-info-circle"></i> Chưa có giao dịch nào</div>';
                     }
-                    
-                    totalCount.textContent = data.count;
-                } else {
-                    alert((currentLanguage === 'vi' ? 'Lỗi tải địa chỉ: ' : 'Error loading addresses: ') + data.detail);
                 }
             } catch (error) {
-                alert((currentLanguage === 'vi' ? 'Lỗi tải địa chỉ: ' : 'Error loading addresses: ') + error.message);
+                console.error('Lỗi refresh ví:', error);
             }
         }
 
-        // Add address function
-        async function addAddress() {
-            const address = document.getElementById('newAddress').value;
-            if (!address) {
-                alert(currentLanguage === 'vi' ? 'Vui lòng nhập địa chỉ' : 'Please enter an address');
+        // Gửi giao dịch
+        async function sendTransaction() {
+            const to = document.getElementById('send-to').value.trim();
+            const amount = parseFloat(document.getElementById('send-amount').value);
+            const statusDiv = document.getElementById('send-status');
+            
+            if (!to || !amount) {
+                showStatus(statusDiv, 'Vui lòng nhập đầy đủ thông tin', 'error');
                 return;
             }
+            
+            try {
+                showStatus(statusDiv, 'Đang gửi giao dịch...', 'info');
+                
+                const response = await fetch('/api/send', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({to: to, amount: amount})
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showStatus(statusDiv, `Giao dịch thành công! Hash: ${data.tx_hash}`, 'success');
+                    document.getElementById('send-to').value = '';
+                    document.getElementById('send-amount').value = '';
+                    refreshWallet();
+                } else {
+                    showStatus(statusDiv, `Lỗi: ${data.detail}`, 'error');
+                }
+            } catch (error) {
+                showStatus(statusDiv, `Lỗi kết nối: ${error.message}`, 'error');
+            }
+        }
 
+        // Thêm địa chỉ
+        async function addAddress() {
+            const address = document.getElementById('new-address').value.trim();
+            
+            if (!address) {
+                alert('Vui lòng nhập địa chỉ');
+                return;
+            }
+            
             try {
                 const response = await fetch('/api/add_address', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        address: address
-                    })
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({address: address})
                 });
                 
                 const data = await response.json();
                 
                 if (response.ok) {
-                    alert(currentLanguage === 'vi' ? 'Thêm địa chỉ thành công!' : 'Address added successfully!');
-                    document.getElementById('newAddress').value = '';
-                    loadAddresses();
+                    document.getElementById('new-address').value = '';
+                    refreshAddresses();
+                    alert('Thêm địa chỉ thành công!');
                 } else {
-                    alert((currentLanguage === 'vi' ? 'Lỗi: ' : 'Error: ') + data.detail);
+                    alert(`Lỗi: ${data.detail}`);
                 }
             } catch (error) {
-                alert((currentLanguage === 'vi' ? 'Lỗi thêm địa chỉ: ' : 'Error adding address: ') + error.message);
+                alert(`Lỗi kết nối: ${error.message}`);
             }
         }
 
-        // Remove address function
+        // Xóa địa chỉ
         async function removeAddress(address) {
-            if (!confirm(currentLanguage === 'vi' ? 'Bạn có chắc muốn xóa địa chỉ này?' : 'Are you sure you want to remove this address?')) {
-                return;
-            }
-
+            if (!confirm(`Bạn có chắc muốn xóa địa chỉ: ${address}?`)) return;
+            
             try {
                 const response = await fetch(`/api/remove_address/${encodeURIComponent(address)}`, {
                     method: 'DELETE'
@@ -508,144 +765,158 @@
                 const data = await response.json();
                 
                 if (response.ok) {
-                    alert(currentLanguage === 'vi' ? 'Xóa địa chỉ thành công!' : 'Address removed successfully!');
-                    loadAddresses();
+                    refreshAddresses();
+                    alert('Xóa địa chỉ thành công!');
                 } else {
-                    alert((currentLanguage === 'vi' ? 'Lỗi: ' : 'Error: ') + data.detail);
+                    alert(`Lỗi: ${data.detail}`);
                 }
             } catch (error) {
-                alert((currentLanguage === 'vi' ? 'Lỗi xóa địa chỉ: ' : 'Error removing address: ') + error.message);
+                alert(`Lỗi kết nối: ${error.message}`);
             }
         }
 
-        // Refresh wallet function
-        async function refreshWallet() {
+        // Làm mới danh sách địa chỉ
+        async function refreshAddresses() {
             try {
-                const response = await fetch('/api/wallet');
+                const response = await fetch('/api/load_wallet_addresses');
                 const data = await response.json();
                 
                 if (response.ok) {
-                    document.getElementById('walletAddress').textContent = data.address;
-                    document.getElementById('walletBalance').textContent = data.balance;
-                    document.getElementById('walletNonce').textContent = data.nonce;
-                    document.getElementById('pendingTxs').textContent = data.pending_txs;
+                    document.getElementById('address-count').textContent = data.count;
                     
-                    // Update transaction history
-                    updateTransactionHistory(data.transactions);
-                } else {
-                    console.error('Error refreshing wallet:', data.detail);
+                    const addressList = document.getElementById('address-list');
+                    if (data.addresses && data.addresses.length > 0) {
+                        addressList.innerHTML = data.addresses.map(addr => `
+                            <div class="address-item">
+                                <div class="address-text">${addr}</div>
+                                <div>
+                                    <button class="copy-btn" onclick="copyText('${addr}')">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                    <button class="btn btn-danger" style="margin-left: 10px; padding: 8px 12px;" onclick="removeAddress('${addr}')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('');
+                    } else {
+                        addressList.innerHTML = '<div class="status-info"><i class="fas fa-info-circle"></i> Chưa có địa chỉ nào</div>';
+                    }
                 }
             } catch (error) {
-                console.error('Error refreshing wallet:', error);
+                console.error('Lỗi refresh địa chỉ:', error);
             }
         }
 
-        // Send transaction function
-        async function sendTransaction() {
-            const to = document.getElementById('recipientAddress').value;
-            const amount = parseFloat(document.getElementById('sendAmount').value);
-            
-            if (!to || !amount) {
-                alert(currentLanguage === 'vi' ? 'Vui lòng nhập đầy đủ thông tin' : 'Please fill in all fields');
+        // Bắt đầu gửi tự động
+        async function startAutoSend() {
+            if (autoSendRunning) {
+                alert('Gửi tự động đang chạy!');
                 return;
             }
-
-            try {
-                const response = await fetch('/api/send', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        to: to,
-                        amount: amount
-                    })
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok) {
-                    alert(currentLanguage === 'vi' ? 'Gửi giao dịch thành công!' : 'Transaction sent successfully!');
-                    document.getElementById('recipientAddress').value = '';
-                    document.getElementById('sendAmount').value = '';
-                    refreshWallet();
-                } else {
-                    alert((currentLanguage === 'vi' ? 'Lỗi: ' : 'Error: ') + data.detail);
-                }
-            } catch (error) {
-                alert((currentLanguage === 'vi' ? 'Lỗi gửi giao dịch: ' : 'Error sending transaction: ') + error.message);
-            }
-        }
-
-        // Start auto send function
-        async function startAutoSend() {
-            const amount = parseFloat(document.getElementById('autoSendAmount').value);
-            const delay = parseFloat(document.getElementById('batchDelay').value);
+            
+            const amount = parseFloat(document.getElementById('auto-amount').value);
+            const delay = parseFloat(document.getElementById('batch-delay').value);
+            const statusDiv = document.getElementById('auto-send-status');
             
             if (!amount || amount <= 0) {
-                alert(currentLanguage === 'vi' ? 'Vui lòng nhập số lượng hợp lệ' : 'Please enter a valid amount');
+                showStatus(statusDiv, 'Vui lòng nhập số lượng hợp lệ', 'error');
                 return;
             }
-
+            
             try {
+                autoSendRunning = true;
+                showStatus(statusDiv, 'Đang bắt đầu gửi tự động...', 'info');
+                
                 const response = await fetch('/api/auto_send', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
                         amount: amount,
-                        batch_delay: delay
+                        batch_delay: delay,
+                        max_concurrent: 1
                     })
                 });
                 
                 const data = await response.json();
                 
                 if (response.ok) {
-                    alert(currentLanguage === 'vi' ? 'Bắt đầu gửi tự động!' : 'Auto send started!');
-                    // You can add progress tracking here if needed
+                    showStatus(statusDiv, `Gửi tự động đã bắt đầu! Tổng ${data.total_addresses} địa chỉ, ước tính ${data.estimated_time}`, 'success');
+                    
+                    // Hiện thanh tiến độ
+                    document.getElementById('auto-send-progress').style.display = 'block';
+                    
+                    // Giả lập tiến độ (trong thực tế cần WebSocket hoặc polling)
+                    simulateProgress(data.total_addresses, delay);
                 } else {
-                    alert((currentLanguage === 'vi' ? 'Lỗi: ' : 'Error: ') + data.detail);
+                    showStatus(statusDiv, `Lỗi: ${data.detail}`, 'error');
+                    autoSendRunning = false;
                 }
             } catch (error) {
-                alert((currentLanguage === 'vi' ? 'Lỗi gửi tự động: ' : 'Error starting auto send: ') + error.message);
+                showStatus(statusDiv, `Lỗi kết nối: ${error.message}`, 'error');
+                autoSendRunning = false;
             }
         }
 
-        // Update transaction history
-        function updateTransactionHistory(transactions) {
-            const historyDiv = document.getElementById('transactionHistory');
-            
-            if (!transactions || transactions.length === 0) {
-                historyDiv.innerHTML = `<p>${currentLanguage === 'vi' ? 'Chưa có giao dịch nào' : 'No transactions found'}</p>`;
-                return;
-            }
+        // Giả lập tiến độ gửi tự động
+        function simulateProgress(total, delay) {
+            let current = 0;
+            const interval = setInterval(() => {
+                current++;
+                const progress = (current / total) * 100;
+                
+                document.getElementById('progress-fill').style.width = `${progress}%`;
+                document.getElementById('progress-text').textContent = `Tiến độ: ${current}/${total}`;
+                
+                if (current >= total) {
+                    clearInterval(interval);
+                    autoSendRunning = false;
+                    showStatus(document.getElementById('auto-send-status'), 'Gửi tự động hoàn thành!', 'success');
+                    refreshWallet();
+                }
+            }, delay * 1000);
+        }
 
-            historyDiv.innerHTML = '';
-            transactions.forEach(tx => {
-                const div = document.createElement('div');
-                div.className = `tx-item ${tx.type}`;
-                div.innerHTML = `
-                    <div>
-                        <strong>${tx.type === 'in' ? (currentLanguage === 'vi' ? 'Nhận' : 'Received') : (currentLanguage === 'vi' ? 'Gửi' : 'Sent')}</strong>
-                        <br>
-                        <small>${tx.time}</small>
-                    </div>
-                    <div>
-                        <strong>${tx.amt} OCT</strong>
-                        <br>
-                        <small>${tx.to}</small>
-                    </div>
-                `;
-                historyDiv.appendChild(div);
+        // Copy text
+        function copyText(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Đã copy vào clipboard!');
             });
         }
 
-        // Initialize the page
+        // Copy từ input
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            element.select();
+            document.execCommand('copy');
+            alert('Đã copy vào clipboard!');
+        }
+
+        // Hiện thông báo trạng thái
+        function showStatus(element, message, type) {
+            element.innerHTML = `<div class="status-${type}"><i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i> ${message}</div>`;
+        }
+
+        // Xóa cache
+        function clearCache() {
+            if (confirm('Bạn có chắc muốn xóa cache?')) {
+                // Xóa localStorage nếu có
+                localStorage.clear();
+                alert('Cache đã được xóa!');
+                location.reload();
+            }
+        }
+
+        // Khởi tạo
         document.addEventListener('DOMContentLoaded', function() {
-            switchLanguage('vi');
-            // Auto-refresh wallet info every 30 seconds
-            setInterval(refreshWallet, 30000);
+            refreshAddresses();
+            
+            // Auto refresh mỗi 30 giây
+            setInterval(() => {
+                if (walletLoaded) {
+                    refreshWallet();
+                }
+            }, 60000);
         });
     </script>
 </body>
