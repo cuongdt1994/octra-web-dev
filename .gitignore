@@ -51,7 +51,6 @@ Thumbs.db
 logs/
 
 # Wallet files
-wallet.json
 *.wallet
 private_keys/
 
