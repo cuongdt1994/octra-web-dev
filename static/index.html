@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔐 Octra Wallet - Ví Điện Tử An Toàn</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        .btn-success {
+            background: #28a745;
+        }
+
+        .wallet-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .info-item strong {
+            color: #667eea;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .info-item span {
+            word-break: break-all;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+
+        .transaction-history {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #e9ecef;
+            transition: background-color 0.3s ease;
+        }
+
+        .transaction-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .transaction-item:last-child {
+            border-bottom: none;
+        }
+
+        .tx-type {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .tx-in {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .tx-out {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #f5c6cb;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #c3e6cb;
+        }
+
+        .multi-tx-container {
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .multi-tx-item {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .multi-tx-item input {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        .remove-tx {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .wallet-info {
+                grid-template-columns: 1fr;
+            }
+            
+            .transaction-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 Octra Wallet</h1>
+            <p>Ví điện tử an toàn và dễ sử dụng cho mạng Octra</p>
+        </div>
+
+        <!-- Login Section -->
+        <div id="loginSection" class="card">
+            <h2>🔑 Đăng nhập vào ví</h2>
+            <div class="form-group">
+                <label for="privateKey">Private Key (Base64):</label>
+                <input type="password" id="privateKey" placeholder="Nhập private key của bạn...">
+            </div>
+            <button class="btn" onclick="loadWallet()">Đăng nhập</button>
+        </div>
+
+        <!-- Wallet Dashboard -->
+        <div id="walletSection" class="hidden">
+            <!-- Wallet Info -->
+            <div class="card">
+                <h2>💼 Thông tin ví</h2>
+                <div class="wallet-info">
+                    <div class="info-item">
+                        <strong>Địa chỉ:</strong>
+                        <span id="walletAddress">-</span>
+                    </div>
+                    <div class="info-item">
+                        <strong>Số dư:</strong>
+                        <span id="walletBalance">0.000000 OCT</span>
+                    </div>
+                    <div class="info-item">
+                        <strong>Nonce:</strong>
+                        <span id="walletNonce">0</span>
+                    </div>
+                    <div class="info-item">
+                        <strong>Giao dịch chờ:</strong>
+                        <span id="pendingTxs">0</span>
+                    </div>
+                </div>
+                <button class="btn btn-secondary" onclick="refreshWallet()">🔄 Làm mới</button>
+                <button class="btn btn-danger" onclick="logout()">🚪 Đăng xuất</button>
+            </div>
+
+            <!-- Single Transaction -->
+            <div class="card">
+                <h2>💸 Gửi giao dịch đơn</h2>
+                <div class="form-group">
+                    <label for="toAddress">Địa chỉ nhận:</label>
+                    <input type="text" id="toAddress" placeholder="oct...">
+                </div>
+                <div class="form-group">
+                    <label for="amount">Số lượng OCT:</label>
+                    <input type="number" id="amount" step="0.000001" min="0" placeholder="0.000000">
+                </div>
+                <button class="btn" onclick="sendTransaction()">💸 Gửi giao dịch</button>
+            </div>
+
+            <!-- Multi Transaction -->
+            <div class="card">
+                <h2>📦 Gửi nhiều giao dịch</h2>
+                <div class="form-group">
+                    <label for="batchDelay">Độ trễ giữa các giao dịch (giây):</label>
+                    <input type="number" id="batchDelay" step="0.1" min="0" value="0.1">
+                </div>
+                
+                <div class="multi-tx-container" id="multiTxContainer">
+                    <div class="multi-tx-item">
+                        <input type="text" placeholder="Địa chỉ nhận (oct...)" class="multi-to">
+                        <input type="number" placeholder="Số lượng" step="0.000001" min="0" class="multi-amount">
+                        <button class="remove-tx" onclick="removeMultiTx(this)">❌</button>
+                    </div>
+                </div>
+                
+                <button class="btn btn-secondary" onclick="addMultiTx()">➕ Thêm giao dịch</button>
+                <button class="btn" onclick="sendMultiTransaction()">📦 Gửi tất cả</button>
+                
+                <div id="multiTxProgress" class="hidden">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <p id="progressText">Đang xử lý...</p>
+                </div>
+            </div>
+
+            <!-- Transaction History -->
+            <div class="card">
+                <h2>📋 Lịch sử giao dịch</h2>
+                <div id="transactionHistory" class="transaction-history">
+                    <div class="loading">Đang tải lịch sử giao dịch...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        <div id="messageContainer"></div>
+    </div>
+
+    <script>
+        let walletLoaded = false;
+        let refreshInterval;
+
+        // API Functions
+        async function apiCall(endpoint, method = 'GET', data = null) {
+            try {
+                const options = {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                };
+                
+                if (data) {
+                    options.body = JSON.stringify(data);
+                }
+                
+                const response = await fetch(`/api${endpoint}`, options);
+                const result = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(result.detail || 'API Error');
+                }
+                
+                return result;
+            } catch (error) {
+                console.error('API Error:', error);
+                throw error;
+            }
+        }
+
+        // Message Functions
+        function showMessage(message, type = 'info') {
+            const messageContainer = document.getElementById('messageContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = type === 'error' ? 'error' : 'success';
+            messageDiv.textContent = message;
+            
+            messageContainer.appendChild(messageDiv);
+            
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 5000);
+        }
+
+        // Wallet Functions
+        async function loadWallet() {
+            const privateKey = document.getElementById('privateKey').value.trim();
+            
+            if (!privateKey) {
+                showMessage('Vui lòng nhập private key', 'error');
+                return;
+            }
+            
+            try {
+                const result = await apiCall('/load_wallet', 'POST', {
+                    private_key: privateKey
+                });
+                
+                walletLoaded = true;
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('walletSection').classList.remove('hidden');
+                
+                showMessage('Đăng nhập thành công!', 'success');
+                await refreshWallet();
+                
+                // Auto refresh every 30 seconds
+                refreshInterval = setInterval(refreshWallet, 30000);
+                
+            } catch (error) {
+                showMessage(`Lỗi đăng nhập: ${error.message}`, 'error');
+            }
+        }
+
+        async function refreshWallet() {
+            if (!walletLoaded) return;
+            
+            try {
+                const walletData = await apiCall('/wallet');
+                
+                document.getElementById('walletAddress').textContent = walletData.address;
+                document.getElementById('walletBalance').textContent = walletData.balance;
+                document.getElementById('walletNonce').textContent = walletData.nonce;
+                document.getElementById('pendingTxs').textContent = walletData.pending_txs;
+                
+                // Update transaction history
+                updateTransactionHistory(walletData.transactions);
+                
+            } catch (error) {
+                showMessage(`Lỗi làm mới ví: ${error.message}`, 'error');
+            }
+        }
+
+        function updateTransactionHistory(transactions) {
+            const historyContainer = document.getElementById('transactionHistory');
+            
+            if (!transactions || transactions.length === 0) {
+                historyContainer.innerHTML = '<div class="loading">Chưa có giao dịch nào</div>';
+                return;
+            }
+            
+            historyContainer.innerHTML = transactions.map(tx => `
+                <div class="transaction-item">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
+                            <span class="tx-type tx-${tx.type}">${tx.type === 'in' ? 'Nhận' : 'Gửi'}</span>
+                            <strong>${tx.amt} OCT</strong>
+                        </div>
+                        <div style="font-size: 12px; color: #666;">
+                            ${tx.type === 'in' ? 'Từ' : 'Đến'}: ${tx.to}
+                        </div>
+                        <div style="font-size: 12px; color: #666;">
+                            Hash: ${tx.hash}
+                        </div>
+                    </div>
+                    <div style="text-align: right; font-size: 12px; color: #666;">
+                        ${tx.time}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function sendTransaction() {
+            const toAddress = document.getElementById('toAddress').value.trim();
+            const amount = parseFloat(document.getElementById('amount').value);
+            
+            if (!toAddress || !amount || amount <= 0) {
+                showMessage('Vui lòng nhập đầy đủ thông tin giao dịch', 'error');
+                return;
+            }
+            
+            try {
+                const result = await apiCall('/send', 'POST', {
+                    to: toAddress,
+                    amount: amount
+                });
+                
+                showMessage(`Giao dịch thành công! Hash: ${result.tx_hash}`, 'success');
+                
+                // Clear form
+                document.getElementById('toAddress').value = '';
+                document.getElementById('amount').value = '';
+                
+                // Refresh wallet
+                setTimeout(refreshWallet, 2000);
+                
+            } catch (error) {
+                showMessage(`Lỗi giao dịch: ${error.message}`, 'error');
+            }
+        }
+
+        // Multi Transaction Functions
+        function addMultiTx() {
+            const container = document.getElementById('multiTxContainer');
+            const newTx = document.createElement('div');
+            newTx.className = 'multi-tx-item';
+            newTx.innerHTML = `
+                <input type="text" placeholder="Địa chỉ nhận (oct...)" class="multi-to">
+                <input type="number" placeholder="Số lượng" step="0.000001" min="0" class="multi-amount">
+                <button class="remove-tx" onclick="removeMultiTx(this)">❌</button>
+            `;
+            container.appendChild(newTx);
+        }
+
+        function removeMultiTx(button) {
+            const container = document.getElementById('multiTxContainer');
+            if (container.children.length > 1) {
+                button.parentElement.remove();
+            } else {
+                showMessage('Phải có ít nhất một giao dịch', 'error');
+            }
+        }
+
+        async function sendMultiTransaction() {
+            const container = document.getElementById('multiTxContainer');
+            const txItems = container.querySelectorAll('.multi-tx-item');
+            const batchDelay = parseFloat(document.getElementById('batchDelay').value) || 0.1;
+            
+            const transactions = [];
+            
+            for (let item of txItems) {
+                const to = item.querySelector('.multi-to').value.trim();
+                const amount = parseFloat(item.querySelector('.multi-amount').value);
+                
+                if (!to || !amount || amount <= 0) {
+                    showMessage('Vui lòng nhập đầy đủ thông tin cho tất cả giao dịch', 'error');
+                    return;
+                }
+                
+                transactions.push({ to, amount });
+            }
+            
+            if (transactions.length === 0) {
+                showMessage('Không có giao dịch nào để gửi', 'error');
+                return;
+            }
+            
+            try {
+                // Show progress
+                const progressContainer = document.getElementById('multiTxProgress');
+                const progressFill = document.getElementById('progressFill');
+                const progressText = document.getElementById('progressText');
+                
+                progressContainer.classList.remove('hidden');
+                progressFill.style.width = '0%';
+                progressText.textContent = 'Đang chuẩn bị giao dịch...';
+                
+                const result = await apiCall('/send_multi', 'POST', {
+                    transactions: transactions,
+                    batch_delay: batchDelay
+                });
+                
+                // Update progress
+                progressFill.style.width = '100%';
+                progressText.textContent = `Hoàn thành: ${result.successful_transactions}/${result.total_transactions} giao dịch thành công`;
+                
+                showMessage(`Gửi nhiều giao dịch hoàn tất! ${result.successful_transactions}/${result.total_transactions} thành công`, 'success');
+                
+                // Show detailed results
+                if (result.results) {
+                    console.log('Chi tiết kết quả:', result.results);
+                }
+                
+                // Hide progress after 3 seconds
+                setTimeout(() => {
+                    progressContainer.classList.add('hidden');
+                }, 3000);
+                
+                // Refresh wallet
+                setTimeout(refreshWallet, 2000);
+                
+            } catch (error) {
+                document.getElementById('multiTxProgress').classList.add('hidden');
+                showMessage(`Lỗi gửi nhiều giao dịch: ${error.message}`, 'error');
+            }
+        }
+
+        function logout() {
+            walletLoaded = false;
+            
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+            
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('walletSection').classList.add('hidden');
+            document.getElementById('privateKey').value = '';
+            
+            showMessage('Đã đăng xuất thành công', 'success');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add enter key support for login
+            document.getElementById('privateKey').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    loadWallet();
+                }
+            });
+            
+            // Add enter key support for single transaction
+            document.getElementById('amount').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendTransaction();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
