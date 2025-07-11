@@ -4,3 +4,4 @@ cryptography==41.0.4
 mnemonic==0.20
 base58==2.1.1
 requests==2.31.0
+Werkzeug==2.3.7

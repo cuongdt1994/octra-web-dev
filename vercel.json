@@ -3,7 +3,10 @@
   "builds": [
     {
       "src": "app.py",
-      "use": "@vercel/python"
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "15mb"
+      }
     }
   ],
   "routes": [
@@ -13,6 +16,11 @@
     }
   ],
   "env": {
-    "SECRET_KEY": "KHONG-CO-GI-KHONG-THE"
+    "SECRET_KEY": "@secret_key"
+  },
+  "functions": {
+    "app.py": {
+      "maxDuration": 30
+    }
   }
 }
