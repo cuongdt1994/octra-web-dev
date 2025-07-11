@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Octra Wallet - Web Interface</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-wallet"></i> Octra Wallet</h1>
+            <p>Web-based Octra Wallet Management Tool</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Wallet Selection Section -->
+            <div class="section" id="wallet-selection">
+                <h2>Wallet Management</h2>
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="showCreateWallet()">
+                        <i class="fas fa-plus"></i> Create New Wallet
+                    </button>
+                    <button class="btn btn-secondary" onclick="showImportWallet()">
+                        <i class="fas fa-download"></i> Import Wallet
+                    </button>
+                    <button class="btn btn-info" onclick="loadWallets()">
+                        <i class="fas fa-refresh"></i> Refresh Wallets
+                    </button>
+                </div>
+                
+                <div id="wallets-list" class="wallets-container">
+                    <!-- Wallets will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Create Wallet Modal -->
+            <div id="create-wallet-modal" class="modal">
+                <div class="modal-content">
+                    <span class="close" onclick="closeModal('create-wallet-modal')">&times;</span>
+                    <h3>Create New Wallet</h3>
+                    <form id="create-wallet-form">
+                        <div class="form-group">
+                            <label for="wallet-name">Wallet Name:</label>
+                            <input type="text" id="wallet-name" placeholder="Enter wallet name (optional)">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Create Wallet</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Import Wallet Modal -->
+            <div id="import-wallet-modal" class="modal">
+                <div class="modal-content">
+                    <span class="close" onclick="closeModal('import-wallet-modal')">&times;</span>
+                    <h3>Import Wallet</h3>
+                    <form id="import-wallet-form">
+                        <div class="form-group">
+                            <label for="private-key">Private Key (Base64):</label>
+                            <textarea id="private-key" placeholder="Enter your private key" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="import-wallet-name">Wallet Name:</label>
+                            <input type="text" id="import-wallet-name" placeholder="Enter wallet name">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Import Wallet</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Wallet Dashboard -->
+            <div class="section" id="wallet-dashboard" style="display: none;">
+                <div class="wallet-header">
+                    <h2 id="current-wallet-name">Wallet Dashboard</h2>
+                    <button class="btn btn-secondary" onclick="backToWalletSelection()">
+                        <i class="fas fa-arrow-left"></i> Back to Wallets
+                    </button>
+                </div>
+
+                <div class="wallet-info">
+                    <div class="info-card">
+                        <h3>Wallet Information</h3>
+                        <p><strong>Address:</strong> <span id="wallet-address"></span></p>
+                        <p><strong>Public Balance:</strong> <span id="public-balance">0</span> OCT</p>
+                        <p><strong>Encrypted Balance:</strong> <span id="encrypted-balance">0</span> OCT</p>
+                        <p><strong>Nonce:</strong> <span id="wallet-nonce">0</span></p>
+                    </div>
+                </div>
+
+                <div class="actions-grid">
+                    <div class="action-card">
+                        <h3><i class="fas fa-paper-plane"></i> Send Transaction</h3>
+                        <form id="send-tx-form">
+                            <div class="form-group">
+                                <label for="to-address">To Address:</label>
+                                <input type="text" id="to-address" placeholder="oct..." required>
+                            </div>
+                            <div class="form-group">
+                                <label for="amount">Amount (OCT):</label>
+                                <input type="number" id="amount" step="0.000001" placeholder="0.0" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Send Transaction</button>
+                        </form>
+                    </div>
+
+                    <div class="action-card">
+                        <h3><i class="fas fa-lock"></i> Encrypt Balance</h3>
+                        <form id="encrypt-form">
+                            <div class="form-group">
+                                <label for="encrypt-amount">Amount to Encrypt:</label>
+                                <input type="number" id="encrypt-amount" step="0.000001" placeholder="0.0" required>
+                            </div>
+                            <button type="submit" class="btn btn-warning">Encrypt Balance</button>
+                        </form>
+                    </div>
+
+                    <div class="action-card">
+                        <h3><i class="fas fa-unlock"></i> Decrypt Balance</h3>
+                        <form id="decrypt-form">
+                            <div class="form-group">
+                                <label for="decrypt-amount">Amount to Decrypt:</label>
+                                <input type="number" id="decrypt-amount" step="0.000001" placeholder="0.0" required>
+                            </div>
+                            <button type="submit" class="btn btn-success">Decrypt Balance</button>
+                        </form>
+                    </div>
+
+                    <div class="action-card">
+                        <h3><i class="fas fa-download"></i> Export Wallet</h3>
+                        <p>Export your wallet information securely.</p>
+                        <button class="btn btn-info" onclick="exportWallet()">Export Wallet Data</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notification Area -->
+        <div id="notification" class="notification"></div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
